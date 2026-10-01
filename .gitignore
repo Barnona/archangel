@@ -1,0 +1,10 @@
+node_modules/
+.gradle/
+android/build/
+android/app/build/
+android/.gradle/
+ios/Pods/
+*.log
+.DS_Store
+backend/data/requests.json
+.env

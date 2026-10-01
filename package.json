@@ -1,0 +1,10 @@
+{
+  "name": "archangel",
+  "private": true,
+  "version": "0.1.0",
+  "description": "ARCHANGEL - the intelligence layer for Fire TV",
+  "workspaces": ["shared", "backend"],
+  "scripts": {
+    "api": "npm --workspace backend run start"
+  }
+}

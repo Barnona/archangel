@@ -1,0 +1,54 @@
+[
+  {
+    "id": "sample-stream-a",
+    "name": "Sample Streaming App A",
+    "category": "Streaming",
+    "description": "PLACEHOLDER entry. Replace with a real app you have verified.",
+    "platforms": { "fireOs": true, "vega": false },
+    "monetization": ["subscription"],
+    "adLevel": "unknown",
+    "alternatives": ["sample-stream-b"],
+    "source": "placeholder",
+    "lastVerified": null,
+    "verified": false
+  },
+  {
+    "id": "sample-stream-b",
+    "name": "Sample Streaming App B",
+    "category": "Streaming",
+    "description": "PLACEHOLDER entry. Replace with a real app you have verified.",
+    "platforms": { "fireOs": true, "vega": false },
+    "monetization": ["free", "ad-supported"],
+    "adLevel": "unknown",
+    "alternatives": ["sample-stream-a"],
+    "source": "placeholder",
+    "lastVerified": null,
+    "verified": false
+  },
+  {
+    "id": "sample-music-a",
+    "name": "Sample Music App A",
+    "category": "Music",
+    "description": "PLACEHOLDER entry. Replace with a real app you have verified.",
+    "platforms": { "fireOs": true, "vega": false },
+    "monetization": ["freemium"],
+    "adLevel": "unknown",
+    "alternatives": [],
+    "source": "placeholder",
+    "lastVerified": null,
+    "verified": false
+  },
+  {
+    "id": "sample-game-a",
+    "name": "Sample Game App A",
+    "category": "Games",
+    "description": "PLACEHOLDER entry. Replace with a real app you have verified.",
+    "platforms": { "fireOs": true, "vega": false },
+    "monetization": ["one-time"],
+    "adLevel": "none",
+    "alternatives": [],
+    "source": "placeholder",
+    "lastVerified": null,
+    "verified": false
+  }
+]

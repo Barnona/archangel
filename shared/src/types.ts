@@ -18,9 +18,10 @@ export interface AppProfile {
   platforms: { fireOs: boolean; vega: boolean };
   monetization: MonetizationModel[];
   adLevel: AdLevel;
-  alternatives: string[]; // ids of other AppProfile entries
-  source: string;         // where this info came from (be honest in the UI)
-  lastVerified: string | null; // ISO date, null if never verified
+  alternatives: string[];
+  source: string;
+  availabilityNote?: string;
+  lastVerified: string | null;
   verified: boolean;
 }
 
@@ -28,7 +29,7 @@ export interface AppRequest {
   id: string;
   appName: string;
   note?: string;
-  createdAt: string; // ISO date
+  createdAt: string;
 }
 
 export interface DemandEntry {

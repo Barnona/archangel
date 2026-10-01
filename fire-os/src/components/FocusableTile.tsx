@@ -2,12 +2,7 @@ import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { colors } from '../theme/theme';
 
-type Props = {
-  title: string;
-  subtitle?: string;
-  onPress: () => void;
-  preferredFocus?: boolean;
-};
+type Props = { title: string; subtitle?: string; onPress: () => void; preferredFocus?: boolean };
 
 export default function FocusableTile({ title, subtitle, onPress, preferredFocus }: Props) {
   const [focused, setFocused] = useState(false);
@@ -27,23 +22,8 @@ export default function FocusableTile({ title, subtitle, onPress, preferredFocus
 }
 
 const styles = StyleSheet.create({
-  tile: {
-    width: 350,
-    height: 170,
-    marginRight: 20,
-    marginBottom: 20,
-    padding: 24,
-    borderRadius: 18,
-    backgroundColor: colors.panel,
-    borderWidth: 3,
-    borderColor: 'transparent',
-    justifyContent: 'center',
-  },
-  tileFocused: {
-    borderColor: colors.scarlet,
-    backgroundColor: colors.panel2,
-    transform: [{ scale: 1.035 }],
-  },
+  tile: { width: 350, height: 170, marginRight: 20, marginBottom: 20, padding: 24, borderRadius: 14, backgroundColor: colors.panel, borderWidth: 2, borderColor: colors.line, justifyContent: 'center' },
+  tileFocused: { borderColor: colors.red, backgroundColor: colors.panel2, transform: [{ scale: 1.025 }] },
   title: { color: colors.text, fontSize: 30, fontWeight: '800' },
   subtitle: { color: colors.muted, fontSize: 18, marginTop: 8 },
 });

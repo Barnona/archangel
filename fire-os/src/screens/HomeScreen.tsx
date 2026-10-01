@@ -26,10 +26,10 @@ export default function HomeScreen({ navigate }: Props) {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg, paddingHorizontal: 64, paddingTop: 44 },
-  eyebrow: { color: colors.violetSoft, fontSize: 14, fontWeight: '700', letterSpacing: 2 },
+  eyebrow: { color: colors.red, fontSize: 14, fontWeight: '700', letterSpacing: 2 },
   brand: { color: colors.text, fontSize: 54, fontWeight: '900', letterSpacing: 5, marginTop: 5 },
   tagline: { color: colors.muted, fontSize: 22, marginTop: 4, marginBottom: 18 },
   rule: { height: 2, backgroundColor: colors.line, marginBottom: 28, width: '90%' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', maxWidth: 760 },
-  footer: { position: 'absolute', bottom: 28, color: '#686375', fontSize: 12, letterSpacing: 2 },
+  footer: { position: 'absolute', bottom: 28, color: colors.muted, fontSize: 12, letterSpacing: 2 },
 });

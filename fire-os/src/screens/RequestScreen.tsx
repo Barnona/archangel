@@ -3,32 +3,13 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, 
 import type { DemandEntry } from '../../../shared/src/types';
 import { api } from '../lib/api';
 import { colors } from '../theme/theme';
-
-export default function RequestScreen() {
-  const [appName, setAppName] = useState('');
-  const [note, setNote] = useState('');
-  const [demand, setDemand] = useState<DemandEntry[]>([]);
-  const [status, setStatus] = useState('');
-  const [loading, setLoading] = useState(false);
-  const loadDemand = () => api.demand().then(setDemand).catch(() => setDemand([]));
-  useEffect(() => { loadDemand(); }, []);
-  const submit = async () => {
-    if (appName.trim().length < 2) { setStatus('Enter an app name first.'); return; }
-    setLoading(true); setStatus('');
-    try { await api.createRequest(appName.trim(), note.trim()); setAppName(''); setNote(''); setStatus('Request recorded.'); await loadDemand(); }
-    catch (e) { setStatus(e instanceof Error ? e.message : 'Could not submit request.'); }
-    finally { setLoading(false); }
-  };
-  return <ScrollView style={styles.root} contentContainerStyle={styles.content}>
-    <Text style={styles.kicker}>APP REQUEST NETWORK</Text><Text style={styles.title}>What is missing?</Text><Text style={styles.sub}>Turn viewer demand into a signal developers can act on.</Text>
-    <TextInput value={appName} onChangeText={setAppName} placeholder="App name" placeholderTextColor="#6F6A7B" style={styles.input} />
-    <TextInput value={note} onChangeText={setNote} placeholder="Why do you want it? (optional)" placeholderTextColor="#6F6A7B" style={[styles.input, styles.note]} multiline />
-    <Pressable onPress={submit} style={({ focused }) => [styles.button, focused && styles.buttonFocused]}>{loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>REQUEST APP</Text>}</Pressable>
-    {status ? <Text style={styles.status}>{status}</Text> : null}
-    <Text style={styles.section}>COMMUNITY DEMAND</Text>
-    {demand.slice(0, 8).map((item, i) => <View key={`${item.appName}-${i}`} style={styles.demand}><Text style={styles.demandName}>{item.appName}</Text><Text style={styles.count}>{item.count}</Text><Text style={styles.requests}>requests</Text></View>)}
-    {demand.length === 0 ? <Text style={styles.empty}>No requests yet. Be the first signal.</Text> : null}
-  </ScrollView>;
+export default function RequestScreen(){
+ const [appName,setAppName]=useState('');const[note,setNote]=useState('');const[demand,setDemand]=useState<DemandEntry[]>([]);const[status,setStatus]=useState('');const[loading,setLoading]=useState(false);
+ const loadDemand=()=>api.demand().then(setDemand).catch(()=>setDemand([]));useEffect(()=>{loadDemand();},[]);
+ const submit=async()=>{if(appName.trim().length<2){setStatus('Enter an app name first.');return;}setLoading(true);setStatus('');try{await api.createRequest(appName.trim(),note.trim());setAppName('');setNote('');setStatus('Request recorded.');await loadDemand();}catch(e){setStatus(e instanceof Error?e.message:'Could not submit request.');}finally{setLoading(false);}};
+ return <ScrollView style={styles.root} contentContainerStyle={styles.content}><Text style={styles.kicker}>APP REQUEST NETWORK</Text><Text style={styles.title}>What is missing?</Text><Text style={styles.sub}>Turn viewer demand into a signal developers can act on.</Text>
+ <TextInput value={appName} onChangeText={setAppName} placeholder="App name" placeholderTextColor="#888888" style={styles.input}/><TextInput value={note} onChangeText={setNote} placeholder="Why do you want it? (optional)" placeholderTextColor="#888888" style={[styles.input,styles.note]} multiline/>
+ <Pressable onPress={submit} style={({focused})=>[styles.button,focused&&styles.buttonFocused]}>{loading?<ActivityIndicator color="#fff"/>:<Text style={styles.buttonText}>REQUEST APP</Text>}</Pressable>{status?<Text style={styles.status}>{status}</Text>:null}
+ <Text style={styles.section}>COMMUNITY DEMAND</Text>{demand.slice(0,8).map((item,i)=><View key={`${item.appName}-${i}`} style={styles.demand}><Text style={styles.demandName}>{item.appName}</Text><Text style={styles.count}>{item.count}</Text><Text style={styles.requests}>requests</Text></View>)}{demand.length===0?<Text style={styles.empty}>No requests yet. Be the first signal.</Text>:null}</ScrollView>;
 }
-const styles = StyleSheet.create({ root:{flex:1,backgroundColor:colors.bg},content:{padding:48,paddingHorizontal:64,paddingBottom:70},kicker:{color:colors.violetSoft,fontSize:13,letterSpacing:2,fontWeight:'700'},title:{color:colors.text,fontSize:42,fontWeight:'900',marginTop:6},sub:{color:colors.muted,fontSize:19,marginBottom:25},input:{width:700,height:58,borderRadius:12,backgroundColor:colors.panel,borderWidth:2,borderColor:colors.line,color:colors.text,fontSize:20,paddingHorizontal:18,marginBottom:12},note:{height:90,paddingTop:15,textAlignVertical:'top'},button:{alignSelf:'flex-start',backgroundColor:colors.violet,paddingHorizontal:28,paddingVertical:15,borderRadius:10,minWidth:190,alignItems:'center'},buttonFocused:{backgroundColor:colors.scarlet},buttonText:{color:'#fff',fontSize:15,fontWeight:'900',letterSpacing:1},status:{color:colors.success,fontSize:16,marginTop:14},section:{color:colors.violetSoft,fontSize:13,letterSpacing:2,fontWeight:'700',marginTop:34,marginBottom:12},demand:{width:700,backgroundColor:colors.panel,padding:16,borderRadius:12,marginBottom:9,flexDirection:'row',alignItems:'center'},demandName:{color:colors.text,fontSize:19,fontWeight:'800',flex:1},count:{color:colors.scarlet,fontSize:22,fontWeight:'900'},requests:{color:colors.muted,fontSize:13,marginLeft:7},empty:{color:colors.muted,fontSize:17}
-});
+const styles=StyleSheet.create({root:{flex:1,backgroundColor:colors.bg},content:{padding:48,paddingHorizontal:64,paddingBottom:70},kicker:{color:colors.red,fontSize:13,letterSpacing:2,fontWeight:'700'},title:{color:colors.text,fontSize:42,fontWeight:'900',marginTop:6},sub:{color:colors.muted,fontSize:19,marginBottom:25},input:{width:700,height:58,borderRadius:10,backgroundColor:colors.panel,borderWidth:2,borderColor:colors.line,color:colors.text,fontSize:20,paddingHorizontal:18,marginBottom:12},note:{height:90,paddingTop:15,textAlignVertical:'top'},button:{alignSelf:'flex-start',backgroundColor:colors.red,paddingHorizontal:28,paddingVertical:15,borderRadius:8,minWidth:190,alignItems:'center'},buttonFocused:{backgroundColor:colors.text},buttonText:{color:'#fff',fontSize:15,fontWeight:'900',letterSpacing:1},status:{color:colors.success,fontSize:16,marginTop:14},section:{color:colors.red,fontSize:13,letterSpacing:2,fontWeight:'700',marginTop:34,marginBottom:12},demand:{width:700,backgroundColor:colors.panel,borderWidth:1,borderColor:colors.line,padding:16,borderRadius:10,marginBottom:9,flexDirection:'row',alignItems:'center'},demandName:{color:colors.text,fontSize:19,fontWeight:'800',flex:1},count:{color:colors.red,fontSize:22,fontWeight:'900'},requests:{color:colors.muted,fontSize:13,marginLeft:7},empty:{color:colors.muted,fontSize:17}});

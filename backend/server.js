@@ -6,7 +6,8 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const PORT = process.env.PORT || 4000;
+const PORT = Number(process.env.PORT || 4000);
+const HOST = process.env.HOST || '0.0.0.0';
 const CATALOG_PATH = path.join(__dirname, '..', 'shared', 'src', 'catalog.seed.json');
 const REQUESTS_PATH = path.join(__dirname, 'data', 'requests.json');
 
@@ -76,4 +77,7 @@ app.get('/requests/demand', (_req, res) => {
   res.json(demand);
 });
 
-app.listen(PORT, () => console.log(`ARCHANGEL API listening on http://localhost:${PORT}`));
+app.listen(PORT, HOST, () => {
+  console.log(`ARCHANGEL API listening on http://${HOST}:${PORT}`);
+  console.log('LAN clients can reach this service using the Windows PC LAN IP.');
+});

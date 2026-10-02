@@ -9,29 +9,61 @@ function compactApp(app) {
   return { id: app.id, name: app.name, category: app.category, description: app.description, platforms: app.platforms, monetization: app.monetization, adLevel: app.adLevel, alternatives: app.alternatives, verified: app.verified, lastVerified: app.lastVerified };
 }
 
+function normalizeName(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\\s+/g, ' ')
+    .trim();
+}
+
+function findDirectAppMatch(catalog, userRequest) {
+  const normalizedQuery = normalizeName(userRequest);
+  if (!normalizedQuery) return null;
+
+  const fireOsApps = catalog.filter(app => app.platforms?.fireOs);
+  for (const app of fireOsApps) {
+    const normalizedName = normalizeName(app.name);
+    if (normalizedQuery === normalizedName || normalizedQuery.includes(normalizedName)) {
+      return app;
+    }
+  }
+  return null;
+}
+
 function searchCatalog(catalog, userRequest) {
   const query = String(userRequest || '').trim().toLowerCase();
   const terms = query.split(/[^a-z0-9+]+/).filter(Boolean);
   return catalog.filter(app => app.platforms?.fireOs).map(app => {
     const haystack = [app.name, app.category, app.description, ...(app.alternatives || [])].join(' ').toLowerCase();
+    const normalizedName = normalizeName(app.name);
+    const normalizedQuery = normalizeName(query);
     let score = app.verified ? 5 : 0;
-    if (haystack.includes(query)) score += 40;
+    if (normalizedQuery === normalizedName) score += 100;
+    else if (normalizedQuery.includes(normalizedName)) score += 60;
+    else if (haystack.includes(query)) score += 40;
     for (const term of terms) if (term.length > 2 && haystack.includes(term)) score += 8;
     return { app: compactApp(app), score };
-  }).sort((a,b) => b.score-a.score).slice(0,8);
+  }).sort((a,b) => b.score-a.score).slice(0,10);
 }
 
-function buildPrompt(userRequest, results) {
+function buildPrompt(userRequest, results, directMatch) {
   return [
     'You are ARCHANGEL Concierge, an application discovery intelligence layer for Fire TV.',
     'The supplied catalog results are authoritative for application existence. Never invent an app, app ID, or Fire OS availability.',
     'Interpret the user request, then recommend only applications present in the supplied catalog results.',
-    'requestedApp is ONLY the specific app name the user explicitly appears to be asking for. If the user is describing a capability or content type (for example "some movies", "music", "live sports", "an app to watch movies", or "something for gaming"), set requestedApp to an empty string. Never turn a generic content/capability phrase into an app name.',
-    'exactMatch is ONLY for a direct request for a specific app that exists in the supplied catalog. For capability-based requests, exactMatch must be null and alternatives should satisfy the intent.',
+    'Classify the request as exactly one of: SPECIFIC_APP, CAPABILITY, CONTENT, MISSING_APP, AMBIGUOUS.',
+    'requestedApp is ONLY a named application the user explicitly appears to be asking for. Never convert a generic content or capability phrase into an app name.',
+    'Examples that MUST leave requestedApp empty: "some movies", "music", "live sports", "an app to watch movies", "something for gaming".',
+    'If the user names an app that is not in the catalog, set intentType to MISSING_APP and requestedApp to that app name.',
+    'If the user asks for a cataloged app, set intentType to SPECIFIC_APP and exactMatch to that app ID.',
+    'If the request is about what to watch/do rather than a named app, use CONTENT or CAPABILITY and keep exactMatch null.',
     'Return ONLY valid JSON using this exact shape:',
-    '{"requestedApp":string,"understoodIntent":string,"exactMatch":string|null,"alternatives":[{"appId":string,"reason":string,"confidence":number}],"message":string}',
+    '{"intentType":"SPECIFIC_APP|CAPABILITY|CONTENT|MISSING_APP|AMBIGUOUS","requestedApp":string,"understoodIntent":string,"exactMatch":string|null,"alternatives":[{"appId":string,"reason":string,"confidence":number}],"message":string}',
     'exactMatch must be an app ID from the catalog results or null.',
     'confidence must be between 0 and 1. Keep the message concise.',
+    directMatch ? `DIRECT CATALOG MATCH: ${directMatch.id} (${directMatch.name})` : 'DIRECT CATALOG MATCH: none',
     '', `USER REQUEST:\n${userRequest}`, '',
     `CATALOG RESULTS:\n${JSON.stringify(results)}`
   ].join('\n');
@@ -73,6 +105,7 @@ function parseResult(raw, modelId) {
 
   if (!parsed || typeof parsed !== 'object') throw new Error('Model returned an invalid JSON object.');
   if (!Array.isArray(parsed.alternatives)) parsed.alternatives = [];
+  if (!['SPECIFIC_APP', 'CAPABILITY', 'CONTENT', 'MISSING_APP', 'AMBIGUOUS'].includes(parsed.intentType)) parsed.intentType = 'AMBIGUOUS';
   if (typeof parsed.requestedApp !== 'string') parsed.requestedApp = '';
   if (typeof parsed.understoodIntent !== 'string') parsed.understoodIntent = '';
   if (parsed.exactMatch !== null && typeof parsed.exactMatch !== 'string') parsed.exactMatch = null;
@@ -115,6 +148,10 @@ function validateAgainstCatalog(result, catalog) {
     result.requestedApp = '';
   }
 
+  if (!result.requestedApp) {
+    result.intentType = result.intentType === 'SPECIFIC_APP' ? 'AMBIGUOUS' : result.intentType;
+  }
+
   result.alternatives = result.alternatives
     .filter(item => byId.has(item.appId))
     .filter((item, index, list) => list.findIndex(x => x.appId === item.appId) === index)
@@ -142,13 +179,31 @@ async function callModel(modelId, prompt) {
 }
 
 async function analyzeWithGemini({ catalog, userRequest }) {
-  const prompt = buildPrompt(userRequest, searchCatalog(catalog, userRequest));
+  const directMatch = findDirectAppMatch(catalog, userRequest);
+  const prompt = buildPrompt(userRequest, searchCatalog(catalog, userRequest), directMatch);
   try {
-    return validateAgainstCatalog(await callModel(GEMINI_MODELS.primary, prompt), catalog);
+    const result = validateAgainstCatalog(await callModel(GEMINI_MODELS.primary, prompt), catalog);
+    if (directMatch) {
+      result.intentType = 'SPECIFIC_APP';
+      result.requestedApp = directMatch.name;
+      result.exactMatch = directMatch.id;
+    } else if (result.requestedApp && result.intentType !== 'SPECIFIC_APP') {
+      result.intentType = 'MISSING_APP';
+      result.exactMatch = null;
+    }
+    return result;
   } catch (primaryError) {
     console.warn(`Gemini primary failed (${GEMINI_MODELS.primary}); using fallback: ${primaryError.message}`);
     try {
       const fallback = validateAgainstCatalog(await callModel(GEMINI_MODELS.fallback, prompt), catalog);
+      if (directMatch) {
+        fallback.intentType = 'SPECIFIC_APP';
+        fallback.requestedApp = directMatch.name;
+        fallback.exactMatch = directMatch.id;
+      } else if (fallback.requestedApp && fallback.intentType !== 'SPECIFIC_APP') {
+        fallback.intentType = 'MISSING_APP';
+        fallback.exactMatch = null;
+      }
       return { ...fallback, fallbackUsed: true, fallbackReason: primaryError.message };
     } catch (fallbackError) {
       throw new Error(`Gemini primary and fallback failed: ${primaryError.message}; ${fallbackError.message}`);

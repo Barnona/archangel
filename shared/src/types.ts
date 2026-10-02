@@ -25,6 +25,12 @@ export interface AppProfile {
   verified: boolean;
 }
 
+export interface DiscoveryResult {
+  app: AppProfile;
+  score: number;
+  reasons: string[];
+}
+
 export interface AppRequest {
   id: string;
   appName: string;

@@ -79,14 +79,17 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
         <Pressable onPress={load} style={({ focused }) => [styles.searchButton, focused && styles.focusButton]}>
           <Text style={styles.searchButtonText}>SEARCH</Text>
         </Pressable>
-        <Pressable onPress={askArchangel} style={({ focused }) => [styles.aiButton, focused && styles.focusButton]}>
-          <Text style={styles.searchButtonText}>{aiLoading ? 'THINKING...' : 'ASK ARCHANGEL'}</Text>
-        </Pressable>
         {(query || category) ? (
           <Pressable onPress={clearSearch} style={({ focused }) => [styles.clearButton, focused && styles.focusOutline]}>
             <Text style={styles.clearText}>CLEAR</Text>
           </Pressable>
         ) : null}
+      </View>
+
+      <View style={styles.aiRow}>
+        <Pressable onPress={askArchangel} style={({ focused }) => [styles.aiButton, focused && styles.focusButton]}>
+          <Text style={styles.searchButtonText}>{aiLoading ? 'THINKING...' : 'ASK ARCHANGEL'}</Text>
+        </Pressable>
       </View>
 
       {aiOpen ? (
@@ -181,50 +184,51 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
 
 const styles = StyleSheet.create({
   root:{flex:1,backgroundColor:colors.bg},
-  content:{padding:48,paddingHorizontal:64,paddingBottom:70},
-  kicker:{color:colors.red,fontSize:13,fontWeight:'700',letterSpacing:2},
-  title:{color:colors.text,fontSize:42,fontWeight:'900',marginTop:6},
-  sub:{color:colors.muted,fontSize:19,marginTop:5,marginBottom:20,maxWidth:900},
+  content:{padding:40,paddingHorizontal:56,paddingBottom:60},
+  kicker:{color:colors.red,fontSize:11,fontWeight:'700',letterSpacing:1.8},
+  title:{color:colors.text,fontSize:36,fontWeight:'900',marginTop:5},
+  sub:{color:colors.muted,fontSize:16,marginTop:4,marginBottom:16,maxWidth:850},
   searchRow:{flexDirection:'row',alignItems:'center'},
-  search:{width:590,height:58,borderRadius:10,backgroundColor:colors.panel,borderWidth:2,borderColor:colors.line,color:colors.text,fontSize:20,paddingHorizontal:18},
-  aiButton:{marginLeft:8,height:58,paddingHorizontal:22,borderRadius:10,backgroundColor:colors.text,alignItems:'center',justifyContent:'center'},
-  searchButton:{marginLeft:10,height:58,paddingHorizontal:24,borderRadius:10,backgroundColor:colors.red,alignItems:'center',justifyContent:'center'},
-  searchButtonText:{color:'#fff',fontSize:14,fontWeight:'900',letterSpacing:1},
-  clearButton:{marginLeft:8,height:58,paddingHorizontal:18,borderRadius:10,borderWidth:1,borderColor:colors.line,backgroundColor:colors.panel,alignItems:'center',justifyContent:'center'},
+  search:{width:500,height:50,borderRadius:9,backgroundColor:colors.panel,borderWidth:2,borderColor:colors.line,color:colors.text,fontSize:18,paddingHorizontal:16},
+  aiRow:{flexDirection:'row',alignItems:'center',marginTop:8,marginBottom:2},
+  aiButton:{height:48,paddingHorizontal:20,borderRadius:9,backgroundColor:colors.text,alignItems:'center',justifyContent:'center'},
+  searchButton:{marginLeft:8,height:50,paddingHorizontal:21,borderRadius:9,backgroundColor:colors.red,alignItems:'center',justifyContent:'center'},
+  searchButtonText:{color:'#fff',fontSize:12,fontWeight:'900',letterSpacing:1},
+  clearButton:{marginLeft:8,height:50,paddingHorizontal:16,borderRadius:9,borderWidth:1,borderColor:colors.line,backgroundColor:colors.panel,alignItems:'center',justifyContent:'center'},
   clearText:{color:colors.text,fontSize:13,fontWeight:'800',letterSpacing:1},
   focusButton:{backgroundColor:colors.text},
   focusOutline:{borderColor:colors.red,backgroundColor:colors.panel2},
-  aiBox:{width:820,backgroundColor:colors.panel2,borderRadius:12,borderWidth:2,borderColor:colors.red,padding:20,marginBottom:18},
+  aiBox:{width:760,backgroundColor:colors.panel2,borderRadius:10,borderWidth:2,borderColor:colors.red,padding:16,marginBottom:14},
   aiHeader:{flexDirection:'row',justifyContent:'space-between',alignItems:'center'},
-  aiLabel:{color:colors.red,fontSize:11,fontWeight:'900',letterSpacing:1.5},
-  aiTitle:{color:colors.text,fontSize:24,fontWeight:'900',marginTop:4},
-  aiIntent:{color:colors.text,fontSize:18,fontWeight:'700',marginTop:16},
-  aiMessage:{color:colors.muted,fontSize:16,lineHeight:23,marginTop:6,marginBottom:16},
+  aiLabel:{color:colors.red,fontSize:10,fontWeight:'900',letterSpacing:1.3},
+  aiTitle:{color:colors.text,fontSize:21,fontWeight:'900',marginTop:3},
+  aiIntent:{color:colors.text,fontSize:16,fontWeight:'700',marginTop:12},
+  aiMessage:{color:colors.muted,fontSize:14,lineHeight:20,marginTop:5,marginBottom:12},
   aiAlternatives:{marginTop:12},
   aiAlternative:{paddingTop:10,paddingBottom:10,borderTopWidth:1,borderTopColor:colors.line},
-  filters:{flexDirection:'row',marginVertical:18},
-  filter:{paddingHorizontal:18,paddingVertical:10,borderRadius:8,marginRight:10,backgroundColor:colors.panel,borderWidth:1,borderColor:colors.line},
+  filters:{flexDirection:'row',marginVertical:14},
+  filter:{paddingHorizontal:16,paddingVertical:8,borderRadius:7,marginRight:8,backgroundColor:colors.panel,borderWidth:1,borderColor:colors.line},
   filterActive:{backgroundColor:colors.red,borderColor:colors.red},
   filterFocused:{borderColor:colors.red},
-  filterText:{color:colors.text,fontSize:16,fontWeight:'700'},
+  filterText:{color:colors.text,fontSize:14,fontWeight:'700'},
   filterTextActive:{color:'#FFFFFF'},
-  resultBar:{width:820,flexDirection:'row',justifyContent:'space-between',alignItems:'center',marginBottom:12},
-  resultCount:{color:colors.text,fontSize:13,fontWeight:'900',letterSpacing:1},
-  snapshot:{color:'#777777',fontSize:11,letterSpacing:1},
-  loader:{marginTop:45},
-  card:{width:820,backgroundColor:colors.panel,borderRadius:12,borderWidth:2,borderColor:colors.line,padding:20,marginBottom:14},
+  resultBar:{width:760,flexDirection:'row',justifyContent:'space-between',alignItems:'center',marginBottom:10},
+  resultCount:{color:colors.text,fontSize:12,fontWeight:'900',letterSpacing:1},
+  snapshot:{color:'#777777',fontSize:10,letterSpacing:1},
+  loader:{marginTop:35},
+  card:{width:760,backgroundColor:colors.panel,borderRadius:10,borderWidth:2,borderColor:colors.line,padding:16,marginBottom:12},
   cardFocused:{borderColor:colors.red,backgroundColor:colors.panel2,transform:[{scale:1.015}]},
   cardTop:{flexDirection:'row',alignItems:'center',justifyContent:'space-between'},
   nameWrap:{flexDirection:'row',alignItems:'center',flex:1},
-  appName:{color:colors.text,fontSize:25,fontWeight:'800'},
-  verified:{color:colors.success,fontSize:10,fontWeight:'900',letterSpacing:1,marginLeft:12},
-  category:{color:colors.red,fontSize:15,fontWeight:'700'},
-  description:{color:colors.muted,fontSize:16,lineHeight:23,marginTop:8},
-  meta:{color:'#555555',fontSize:14,marginTop:12},
-  reasonBox:{marginTop:14,paddingTop:12,borderTopWidth:1,borderTopColor:colors.line},
-  reasonLabel:{color:colors.red,fontSize:10,fontWeight:'900',letterSpacing:1.5},
-  reason:{color:colors.text,fontSize:14,lineHeight:21,marginTop:4},
-  error:{color:'#B4232B',fontSize:17,marginTop:25,maxWidth:800},
+  appName:{color:colors.text,fontSize:21,fontWeight:'800'},
+  verified:{color:colors.success,fontSize:9,fontWeight:'900',letterSpacing:1,marginLeft:10},
+  category:{color:colors.red,fontSize:13,fontWeight:'700'},
+  description:{color:colors.muted,fontSize:14,lineHeight:20,marginTop:6},
+  meta:{color:'#555555',fontSize:12,marginTop:9},
+  reasonBox:{marginTop:11,paddingTop:10,borderTopWidth:1,borderTopColor:colors.line},
+  reasonLabel:{color:colors.red,fontSize:9,fontWeight:'900',letterSpacing:1.4},
+  reason:{color:colors.text,fontSize:12,lineHeight:18,marginTop:3},
+  error:{color:'#B4232B',fontSize:15,marginTop:18,maxWidth:760},
   emptyBox:{width:820,backgroundColor:colors.panel,padding:22,borderRadius:12,borderWidth:1,borderColor:colors.line},
   emptyTitle:{color:colors.text,fontSize:22,fontWeight:'800'},
   empty:{color:colors.muted,fontSize:17,lineHeight:25,marginTop:7},

@@ -101,8 +101,8 @@ app.get('/apps/:id', (req, res) => {
   const catalog = readJson(CATALOG_PATH, []);
   const found = catalog.find((a) => a.id === req.params.id);
   if (!found) return res.status(404).json({ error: 'not found' });
-  const alternatives = catalog.filter((a) => found.alternatives.includes(a.id));
-  res.json({ ...found, alternativeProfiles: alternatives });
+  const alternativeProfiles = rankAlternatives(catalog, found);
+  res.json({ ...found, alternativeProfiles });
 });
 
 app.post('/requests', (req, res) => {

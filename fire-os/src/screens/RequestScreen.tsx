@@ -3,9 +3,11 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, 
 import type { DemandEntry } from '../../../shared/src/types';
 import { api } from '../lib/api';
 import { colors } from '../theme/theme';
-export default function RequestScreen(){
- const [appName,setAppName]=useState('');const[note,setNote]=useState('');const[demand,setDemand]=useState<DemandEntry[]>([]);const[status,setStatus]=useState('');const[loading,setLoading]=useState(false);
+type Props = { initialName?: string };
+export default function RequestScreen({ initialName = '' }: Props){
+ const [appName,setAppName]=useState(initialName);const[note,setNote]=useState('');const[demand,setDemand]=useState<DemandEntry[]>([]);const[status,setStatus]=useState('');const[loading,setLoading]=useState(false);
  const loadDemand=()=>api.demand().then(setDemand).catch(()=>setDemand([]));useEffect(()=>{loadDemand();},[]);
+ useEffect(()=>{if(initialName) setAppName(initialName);},[initialName]);
  const submit=async()=>{if(appName.trim().length<2){setStatus('Enter an app name first.');return;}setLoading(true);setStatus('');try{await api.createRequest(appName.trim(),note.trim());setAppName('');setNote('');setStatus('Request recorded.');await loadDemand();}catch(e){setStatus(e instanceof Error?e.message:'Could not submit request.');}finally{setLoading(false);}};
  return <ScrollView style={styles.root} contentContainerStyle={styles.content}><Text style={styles.kicker}>APP REQUEST NETWORK</Text><Text style={styles.title}>What is missing?</Text><Text style={styles.sub}>Turn viewer demand into a signal developers can act on.</Text>
  <TextInput value={appName} onChangeText={setAppName} placeholder="App name" placeholderTextColor="#888888" style={styles.input}/><TextInput value={note} onChangeText={setNote} placeholder="Why do you want it? (optional)" placeholderTextColor="#888888" style={[styles.input,styles.note]} multiline/>

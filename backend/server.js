@@ -1,5 +1,4 @@
-// Minimal ARCHANGEL API: catalog, app requests, demand aggregation.
-// Storage is a JSON file - fine for a hackathon demo, swap for a real DB later.
+// ARCHANGEL API: catalog, discovery intelligence, app requests, demand aggregation.
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
@@ -23,6 +22,54 @@ const writeJson = (p, data) => {
   fs.writeFileSync(p, JSON.stringify(data, null, 2));
 };
 
+const tokenize = (value) => String(value || '').toLowerCase().split(/[^a-z0-9+]+/).filter(Boolean);
+
+function rankDiscovery(catalog, query, category) {
+  const q = String(query || '').trim().toLowerCase();
+  const tokens = tokenize(q);
+  const cat = String(category || '').trim().toLowerCase();
+
+  return catalog
+    .filter(a => !cat || a.category.toLowerCase() === cat)
+    .map(app => {
+      const name = app.name.toLowerCase();
+      const description = app.description.toLowerCase();
+      const haystack = `${name} ${description} ${app.category.toLowerCase()}`;
+      let score = 0;
+      const reasons = [];
+
+      if (!q) {
+        score += app.verified ? 25 : 0;
+        score += app.platforms.fireOs ? 20 : 0;
+        if (app.platforms.vega) score += 5;
+        reasons.push(app.platforms.fireOs ? 'Available on Fire OS' : 'Catalogued for another platform');
+        if (app.verified) reasons.push('Source checked');
+      } else {
+        if (name === q) { score += 100; reasons.push('Exact name match'); }
+        else if (name.includes(q)) { score += 75; reasons.push('Name matches your search'); }
+        if (tokens.length) {
+          const matched = tokens.filter(t => haystack.includes(t));
+          score += matched.length * 15;
+          if (matched.length) reasons.push(`Matches ${matched.length === 1 ? 'your search term' : 'your search terms'}`);
+        }
+        if (description.includes(q)) { score += 25; reasons.push('Description matches'); }
+        if (app.category.toLowerCase().includes(q)) { score += 20; reasons.push('Category matches'); }
+      }
+
+      if (app.platforms.fireOs) { score += 10; if (q) reasons.push('Fire OS compatible'); }
+      if (app.verified) { score += 8; if (q) reasons.push('Source checked'); }
+      if (cat) reasons.push(`Category: ${app.category}`);
+
+      return {
+        app,
+        score: Math.min(100, score),
+        reasons: [...new Set(reasons)].slice(0, 4),
+      };
+    })
+    .filter(r => !q || r.score > 0)
+    .sort((x, y) => y.score - x.score || x.app.name.localeCompare(y.app.name));
+}
+
 app.get('/health', (_req, res) => res.json({ ok: true }));
 
 app.get('/apps', (req, res) => {
@@ -34,6 +81,17 @@ app.get('/apps', (req, res) => {
     (!category || a.category.toLowerCase() === category)
   );
   res.json(result);
+});
+
+app.get('/apps/discover', (req, res) => {
+  const catalog = readJson(CATALOG_PATH, []);
+  const results = rankDiscovery(catalog, req.query.q, req.query.category);
+  res.json({
+    query: String(req.query.q || '').trim(),
+    category: String(req.query.category || '').trim(),
+    results,
+    generatedAt: new Date().toISOString(),
+  });
 });
 
 app.get('/apps/:id', (req, res) => {
@@ -52,12 +110,7 @@ app.post('/requests', (req, res) => {
   }
   if (note.length > 300) return res.status(400).json({ error: 'note too long' });
   const requests = readJson(REQUESTS_PATH, []);
-  const entry = {
-    id: crypto.randomUUID(),
-    appName,
-    note: note || undefined,
-    createdAt: new Date().toISOString(),
-  };
+  const entry = { id: crypto.randomUUID(), appName, note: note || undefined, createdAt: new Date().toISOString() };
   requests.push(entry);
   writeJson(REQUESTS_PATH, requests);
   res.status(201).json(entry);
@@ -73,8 +126,7 @@ app.get('/requests/demand', (_req, res) => {
     if (r.createdAt > cur.lastRequestedAt) cur.lastRequestedAt = r.createdAt;
     map.set(key, cur);
   }
-  const demand = [...map.values()].sort((a, b) => b.count - a.count);
-  res.json(demand);
+  res.json([...map.values()].sort((a, b) => b.count - a.count));
 });
 
 app.listen(PORT, HOST, () => {

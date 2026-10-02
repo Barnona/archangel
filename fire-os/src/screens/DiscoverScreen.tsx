@@ -4,10 +4,10 @@ import type { DiscoveryResult } from '../../../shared/src/types';
 import { api } from '../lib/api';
 import { colors } from '../theme/theme';
 
-type Props = { onOpen: (id: string) => void };
+type Props = { onOpen: (id: string) => void; onRequest?: (name: string) => void };
 const categories = ['All', 'Streaming', 'Music', 'Games', 'Utility'];
 
-export default function DiscoverScreen({ onOpen }: Props) {
+export default function DiscoverScreen({ onOpen, onRequest }: Props) {
   const [results, setResults] = useState<DiscoveryResult[]>([]);
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('');
@@ -109,7 +109,8 @@ export default function DiscoverScreen({ onOpen }: Props) {
       {!loading && !error && results.length === 0 ? (
         <View style={styles.emptyBox}>
           <Text style={styles.emptyTitle}>No intelligent match</Text>
-          <Text style={styles.empty}>Try another search or clear the filters. If the app is missing, use Request an App to send a developer-demand signal.</Text>
+          <Text style={styles.empty}>Try another search or clear the filters. If the app is missing, send a developer-demand signal.</Text>
+          {query ? <Pressable onPress={() => onRequest?.(query)} style={({focused}) => [styles.requestButton, focused && styles.focusButton]}><Text style={styles.requestButtonText}>REQUEST “{query.toUpperCase()}”</Text></Pressable> : null}
         </View>
       ) : null}
     </ScrollView>
@@ -155,5 +156,7 @@ const styles = StyleSheet.create({
   error:{color:'#B4232B',fontSize:17,marginTop:25,maxWidth:800},
   emptyBox:{width:820,backgroundColor:colors.panel,padding:22,borderRadius:12,borderWidth:1,borderColor:colors.line},
   emptyTitle:{color:colors.text,fontSize:22,fontWeight:'800'},
-  empty:{color:colors.muted,fontSize:17,lineHeight:25,marginTop:7}
+  empty:{color:colors.muted,fontSize:17,lineHeight:25,marginTop:7},
+  requestButton:{alignSelf:'flex-start',marginTop:16,backgroundColor:colors.red,paddingHorizontal:20,paddingVertical:13,borderRadius:8},
+  requestButtonText:{color:'#fff',fontSize:13,fontWeight:'900',letterSpacing:1}
 });

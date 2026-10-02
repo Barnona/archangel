@@ -11,7 +11,7 @@ export default function HomeScreen({ navigate }: Props) {
     <View style={styles.root}>
       <Text style={styles.eyebrow}>AUTONOMOUS TV INTELLIGENCE</Text>
       <Text style={styles.brand}>ARCHANGEL</Text>
-      <Text style={styles.tagline}>The intelligence layer for Fire TV</Text>
+      <Text style={styles.tagline}>The Intelligent Layer for Fire TV</Text>
       <View style={styles.rule} />
       <View style={styles.grid}>
         <FocusableTile title="Find an App" subtitle="Search, compare, alternatives" onPress={() => navigate('Discover')} preferredFocus />

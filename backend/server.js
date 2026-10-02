@@ -10,6 +10,10 @@ const HOST = process.env.HOST || '0.0.0.0';
 const CATALOG_PATH = path.join(__dirname, '..', 'shared', 'src', 'catalog.seed.json');
 const REQUESTS_PATH = path.join(__dirname, 'data', 'requests.json');
 
+const CATALOG_SOURCE = 'curated-verified-cache';
+const CATALOG_VERSION = '1.0';
+const CATALOG_LAST_UPDATED = '2026-10-01';
+
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '10kb' }));
@@ -73,18 +77,55 @@ function rankAlternatives(catalog, target) {
     return { app, score: Math.min(100, score), reasons: [...new Set(reasons)].slice(0, 4) };
   }).filter(r => r.score > 0).sort((a,b) => b.score-a.score || a.app.name.localeCompare(b.app.name)).slice(0,5);
 }
+
+function catalogStats(catalog) {
+  const categories = [...new Set(catalog.map(a => a.category))].sort();
+  const verifiedCount = catalog.filter(a => a.verified).length;
+  const fireOsCount = catalog.filter(a => a.platforms?.fireOs).length;
+  const vegaCount = catalog.filter(a => a.platforms?.vega).length;
+  return {
+    total: catalog.length,
+    verified: verifiedCount,
+    fireOs: fireOsCount,
+    vega: vegaCount,
+    categories,
+    coverage: catalog.length ? Math.round((verifiedCount / catalog.length) * 100) : 0,
+  };
+}
+
 app.get('/health', (_req, res) => {
   const catalog = readJson(CATALOG_PATH, []);
   const requests = readJson(REQUESTS_PATH, []);
   res.json({
     ok: true,
     service: 'archangel-api',
-    version: '0.2.0',
+    version: '0.3.0',
     catalogCount: catalog.length,
     requestCount: requests.length,
     uptimeSeconds: Math.floor(process.uptime()),
     timestamp: new Date().toISOString(),
   });
+});
+
+app.get('/catalog/status', (_req, res) => {
+  const catalog = readJson(CATALOG_PATH, []);
+  const stats = catalogStats(catalog);
+  res.json({
+    catalogVersion: CATALOG_VERSION,
+    source: CATALOG_SOURCE,
+    lastUpdated: CATALOG_LAST_UPDATED,
+    ...stats,
+    amazonAppstoreApi: {
+      status: 'not_available',
+      mode: 'feature-request-ready',
+      note: 'ARCHANGEL does not currently claim access to an Amazon Appstore-wide application catalog API.',
+    },
+  });
+});
+
+app.get('/apps/categories', (_req, res) => {
+  const catalog = readJson(CATALOG_PATH, []);
+  res.json(catalogStats(catalog).categories);
 });
 
 app.get('/apps', (req, res) => {
@@ -101,10 +142,13 @@ app.get('/apps', (req, res) => {
 app.get('/apps/discover', (req, res) => {
   const catalog = readJson(CATALOG_PATH, []);
   const results = rankDiscovery(catalog, req.query.q, req.query.category);
+  const stats = catalogStats(catalog);
   res.json({
     query: String(req.query.q || '').trim(),
     category: String(req.query.category || '').trim(),
     results,
+    catalogCount: stats.total,
+    catalogSource: CATALOG_SOURCE,
     generatedAt: new Date().toISOString(),
   });
 });
@@ -145,6 +189,6 @@ app.get('/requests/demand', (_req, res) => {
 });
 
 app.listen(PORT, HOST, () => {
-  console.log(`ARCHANGEL API listening on http://${HOST}:${PORT}`);
+  console.log(`ARCHANGEL API listening on http://${HOST}:4000`);
   console.log('LAN clients can reach this service using the Windows PC LAN IP.');
 });

@@ -31,6 +31,12 @@ export interface DiscoveryResult {
   reasons: string[];
 }
 
+export interface AlternativeResult {
+  app: AppProfile;
+  score: number;
+  reasons: string[];
+}
+
 export interface AppRequest {
   id: string;
   appName: string;

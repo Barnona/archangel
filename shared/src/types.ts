@@ -66,3 +66,33 @@ export interface DemandEntry {
   count: number;
   lastRequestedAt: string;
 }
+
+export interface AdLensProfile {
+  appId: string;
+  appName: string;
+  monetization: MonetizationModel[];
+  adLevel: AdLevel;
+  adSignal: 'known' | 'unknown';
+  transparency: 'verified' | 'limited';
+  explanation: string;
+  systemAds: {
+    controllable: false;
+    note: string;
+  };
+  verified: boolean;
+  lastVerified: string | null;
+}
+
+export interface AdLensSummary {
+  totalApps: number;
+  adSupported: number;
+  knownAdLevels: number;
+  unknownAdLevels: number;
+  verifiedProfiles: number;
+  profiles: AdLensProfile[];
+  systemAdControl: {
+    controllable: false;
+    note: string;
+  };
+  generatedAt: string;
+}

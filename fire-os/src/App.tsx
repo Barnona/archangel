@@ -12,6 +12,7 @@ type Screen = 'Home' | 'Discover' | 'Details' | 'Pulse' | 'Request' | 'Profile';
 export default function App() {
   const [screen, setScreen] = useState<Screen>('Home');
   const [selectedApp, setSelectedApp] = useState<string | null>(null);
+  const [requestedName, setRequestedName] = useState('');
 
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -24,10 +25,12 @@ export default function App() {
 
   const openApp = (id: string) => { setSelectedApp(id); setScreen('Details'); };
 
+  const openRequest = (name = '') => { setRequestedName(name); setScreen('Request'); };
+
   if (screen === 'Home') return <HomeScreen navigate={setScreen as (s: 'Discover'|'Pulse'|'Request'|'Profile') => void} />;
-  if (screen === 'Discover') return <DiscoverScreen onOpen={openApp} />;
+  if (screen === 'Discover') return <DiscoverScreen onOpen={openApp} onRequest={openRequest} />;
   if (screen === 'Details' && selectedApp) return <AppDetailsScreen id={selectedApp} onBack={() => setScreen('Discover')} onOpen={openApp} />;
   if (screen === 'Pulse') return <PulseScreen />;
-  if (screen === 'Request') return <RequestScreen />;
+  if (screen === 'Request') return <RequestScreen initialName={requestedName} />;
   return <ProfileScreen />;
 }

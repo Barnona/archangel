@@ -31,6 +31,21 @@ export const api = {
     return request<{ query: string; category: string; results: DiscoveryResult[]; catalogCount: number; catalogSource: string; generatedAt: string }>(`/apps/discover${suffix}`);
   },
   app: (id: string) => request<AppProfile & { alternativeProfiles: AlternativeResult[] }>(`/apps/${id}`),
+  aiDiscover: (requestText: string) =>
+    request<{
+      requestedApp: string;
+      understoodIntent: string;
+      exactMatch: string | null;
+      alternatives: { appId: string; reason: string; confidence: number }[];
+      message: string;
+      modelId?: string;
+      catalogCount: number;
+      catalogSource: string;
+      generatedAt: string;
+    }>('/ai/app-discovery', {
+      method: 'POST',
+      body: JSON.stringify({ request: requestText }),
+    }),
   createRequest: (appName: string, note: string) =>
     request<AppRequest>('/requests', {
       method: 'POST',

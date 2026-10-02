@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import type { AppProfile } from '../../../shared/src/types';
+import type { DiscoveryResult } from '../../../shared/src/types';
 import { api } from '../lib/api';
 import { colors } from '../theme/theme';
 
@@ -8,7 +8,7 @@ type Props = { onOpen: (id: string) => void };
 const categories = ['All', 'Streaming', 'Music', 'Games', 'Utility'];
 
 export default function DiscoverScreen({ onOpen }: Props) {
-  const [apps, setApps] = useState<AppProfile[]>([]);
+  const [results, setResults] = useState<DiscoveryResult[]>([]);
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('');
   const [loading, setLoading] = useState(true);
@@ -18,7 +18,8 @@ export default function DiscoverScreen({ onOpen }: Props) {
     setLoading(true);
     setError('');
     try {
-      setApps(await api.apps(query, category));
+      const response = await api.discover(query, category);
+      setResults(response.results);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not reach ARCHANGEL API');
     } finally {
@@ -37,7 +38,7 @@ export default function DiscoverScreen({ onOpen }: Props) {
     <ScrollView style={styles.root} contentContainerStyle={styles.content}>
       <Text style={styles.kicker}>DISCOVERY INTELLIGENCE</Text>
       <Text style={styles.title}>Find an App</Text>
-      <Text style={styles.sub}>Search the ARCHANGEL catalog, compare alternatives, and inspect source status.</Text>
+      <Text style={styles.sub}>Search the ARCHANGEL catalog, compare alternatives, and inspect why a result matched.</Text>
 
       <View style={styles.searchRow}>
         <TextInput
@@ -75,32 +76,39 @@ export default function DiscoverScreen({ onOpen }: Props) {
       </View>
 
       <View style={styles.resultBar}>
-        <Text style={styles.resultCount}>{loading ? 'SEARCHING CATALOG...' : `${apps.length} RESULT${apps.length === 1 ? '' : 'S'}`}</Text>
+        <Text style={styles.resultCount}>{loading ? 'ANALYZING CATALOG...' : `${results.length} RESULT${results.length === 1 ? '' : 'S'} • RANKED`}</Text>
         <Text style={styles.snapshot}>SOURCE SNAPSHOT • 2026-10-01</Text>
       </View>
 
       {loading ? <ActivityIndicator size="large" color={colors.red} style={styles.loader} /> : null}
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
-      {!loading && !error && apps.map((app) => (
-        <Pressable key={app.id} onPress={() => onOpen(app.id)} style={({ focused }) => [styles.card, focused && styles.cardFocused]}>
-          <View style={styles.cardTop}>
-            <View style={styles.nameWrap}>
-              <Text style={styles.appName}>{app.name}</Text>
-              {app.verified ? <Text style={styles.verified}>SOURCE CHECKED</Text> : null}
+      {!loading && !error && results.map((result) => {
+        const app = result.app;
+        return (
+          <Pressable key={app.id} onPress={() => onOpen(app.id)} style={({ focused }) => [styles.card, focused && styles.cardFocused]}>
+            <View style={styles.cardTop}>
+              <View style={styles.nameWrap}>
+                <Text style={styles.appName}>{app.name}</Text>
+                {app.verified ? <Text style={styles.verified}>SOURCE CHECKED</Text> : null}
+              </View>
+              <Text style={styles.category}>{app.category}</Text>
             </View>
-            <Text style={styles.category}>{app.category}</Text>
-          </View>
-          <Text style={styles.description} numberOfLines={2}>{app.description}</Text>
-          <Text style={styles.meta}>
-            {app.platforms.fireOs ? 'Fire OS ✓' : 'Fire OS —'}   {app.platforms.vega ? 'Vega ✓' : 'Vega ?'}   •   {app.monetization.join(', ')}
-          </Text>
-        </Pressable>
-      ))}
+            <Text style={styles.description} numberOfLines={2}>{app.description}</Text>
+            <Text style={styles.meta}>
+              {app.platforms.fireOs ? 'Fire OS ✓' : 'Fire OS —'}   {app.platforms.vega ? 'Vega ✓' : 'Vega ?'}   •   {app.monetization.join(', ')}
+            </Text>
+            <View style={styles.reasonBox}>
+              <Text style={styles.reasonLabel}>WHY THIS RESULT</Text>
+              <Text style={styles.reason}>{result.reasons.join('  •  ')}</Text>
+            </View>
+          </Pressable>
+        );
+      })}
 
-      {!loading && !error && apps.length === 0 ? (
+      {!loading && !error && results.length === 0 ? (
         <View style={styles.emptyBox}>
-          <Text style={styles.emptyTitle}>No catalog match</Text>
+          <Text style={styles.emptyTitle}>No intelligent match</Text>
           <Text style={styles.empty}>Try another search or clear the filters. If the app is missing, use Request an App to send a developer-demand signal.</Text>
         </View>
       ) : null}
@@ -141,6 +149,9 @@ const styles = StyleSheet.create({
   category:{color:colors.red,fontSize:15,fontWeight:'700'},
   description:{color:colors.muted,fontSize:16,lineHeight:23,marginTop:8},
   meta:{color:'#555555',fontSize:14,marginTop:12},
+  reasonBox:{marginTop:14,paddingTop:12,borderTopWidth:1,borderTopColor:colors.line},
+  reasonLabel:{color:colors.red,fontSize:10,fontWeight:'900',letterSpacing:1.5},
+  reason:{color:colors.text,fontSize:14,lineHeight:21,marginTop:4},
   error:{color:'#B4232B',fontSize:17,marginTop:25,maxWidth:800},
   emptyBox:{width:820,backgroundColor:colors.panel,padding:22,borderRadius:12,borderWidth:1,borderColor:colors.line},
   emptyTitle:{color:colors.text,fontSize:22,fontWeight:'800'},

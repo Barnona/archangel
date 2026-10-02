@@ -76,7 +76,33 @@ function parseResult(raw, modelId) {
   if (parsed.exactMatch !== null && typeof parsed.exactMatch !== 'string') parsed.exactMatch = null;
   if (typeof parsed.message !== 'string') parsed.message = '';
 
+  parsed.alternatives = parsed.alternatives
+    .filter(item => item && typeof item.appId === 'string' && typeof item.reason === 'string')
+    .map(item => ({
+      appId: item.appId,
+      reason: item.reason,
+      confidence: Number.isFinite(Number(item.confidence))
+        ? Math.max(0, Math.min(1, Number(item.confidence)))
+        : 0,
+    }));
+
   return { ...parsed, modelId, provider: 'gemini' };
+}
+
+function validateAgainstCatalog(result, catalog) {
+  const fireOsApps = catalog.filter(app => app.platforms?.fireOs);
+  const byId = new Map(fireOsApps.map(app => [app.id, app]));
+
+  if (result.exactMatch && !byId.has(result.exactMatch)) {
+    result.exactMatch = null;
+  }
+
+  result.alternatives = result.alternatives
+    .filter(item => byId.has(item.appId))
+    .filter((item, index, list) => list.findIndex(x => x.appId === item.appId) === index)
+    .slice(0, 5);
+
+  return result;
 }
 
 async function callModel(modelId, prompt) {
@@ -100,11 +126,11 @@ async function callModel(modelId, prompt) {
 async function analyzeWithGemini({ catalog, userRequest }) {
   const prompt = buildPrompt(userRequest, searchCatalog(catalog, userRequest));
   try {
-    return await callModel(GEMINI_MODELS.primary, prompt);
+    return validateAgainstCatalog(await callModel(GEMINI_MODELS.primary, prompt), catalog);
   } catch (primaryError) {
     console.warn(`Gemini primary failed (${GEMINI_MODELS.primary}); using fallback: ${primaryError.message}`);
     try {
-      const fallback = await callModel(GEMINI_MODELS.fallback, prompt);
+      const fallback = validateAgainstCatalog(await callModel(GEMINI_MODELS.fallback, prompt), catalog);
       return { ...fallback, fallbackUsed: true, fallbackReason: primaryError.message };
     } catch (fallbackError) {
       throw new Error(`Gemini primary and fallback failed: ${primaryError.message}; ${fallbackError.message}`);

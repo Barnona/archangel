@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
+const crypto = require('crypto');\nconst { analyzeAppRequest } = require('./ai');
 
 const PORT = Number(process.env.PORT || 4000);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -151,6 +151,33 @@ app.get('/apps/discover', (req, res) => {
     catalogSource: CATALOG_SOURCE,
     generatedAt: new Date().toISOString(),
   });
+});
+
+
+app.post('/ai/app-discovery', async (req, res) => {
+  const userRequest = String(req.body?.request || '').trim();
+  if (userRequest.length < 2 || userRequest.length > 500) {
+    return res.status(400).json({ error: 'request must be 2-500 characters' });
+  }
+
+  const catalog = readJson(CATALOG_PATH, []);
+  try {
+    const result = await analyzeAppRequest({ catalog, userRequest });
+    res.json({
+      ...result,
+      catalogCount: catalog.length,
+      catalogSource: CATALOG_SOURCE,
+      generatedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('AI discovery error:', error);
+    res.status(503).json({
+      error: 'AI discovery unavailable',
+      detail: error.message,
+      catalogCount: catalog.length,
+      catalogSource: CATALOG_SOURCE,
+    });
+  }
 });
 
 app.get('/apps/:id', (req, res) => {

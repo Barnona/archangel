@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import FocusableTile from '../components/FocusableTile';
 import { colors } from '../theme/theme';
 
@@ -8,7 +8,12 @@ type Props = { navigate: (screen: Screen) => void };
 
 export default function HomeScreen({ navigate }: Props) {
   return (
-    <View style={styles.root}>
+    <ScrollView
+      style={styles.root}
+      contentContainerStyle={styles.content}
+      scrollsChildToFocus
+      showsVerticalScrollIndicator={false}
+    >
       <Text style={styles.eyebrow}>AUTONOMOUS TV INTELLIGENCE</Text>
       <Text style={styles.brand}>ARCHANGEL</Text>
       <Text style={styles.tagline}>The Intelligent Layer for Fire TV</Text>
@@ -21,16 +26,17 @@ export default function HomeScreen({ navigate }: Props) {
         <FocusableTile title="Profile" subtitle="Preferences & privacy" onPress={() => navigate('Profile')} />
       </View>
       <Text style={styles.footer}>DISCOVER • DIAGNOSE • REQUEST • IMPROVE</Text>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.bg, paddingHorizontal: 64, paddingTop: 44 },
+  root: { flex: 1, backgroundColor: colors.bg },
+  content: { paddingHorizontal: 64, paddingTop: 44, paddingBottom: 72, minHeight: '100%' },
   eyebrow: { color: colors.red, fontSize: 14, fontWeight: '700', letterSpacing: 2 },
   brand: { color: colors.text, fontSize: 54, fontWeight: '900', letterSpacing: 5, marginTop: 5 },
   tagline: { color: colors.muted, fontSize: 22, marginTop: 4, marginBottom: 18 },
   rule: { height: 2, backgroundColor: colors.line, marginBottom: 28, width: '90%' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', maxWidth: 760 },
-  footer: { position: 'absolute', bottom: 28, color: colors.muted, fontSize: 12, letterSpacing: 2 },
+  footer: { color: colors.muted, fontSize: 12, letterSpacing: 2, marginTop: 26 },
 });

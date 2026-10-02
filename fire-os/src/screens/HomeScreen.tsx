@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import FocusableTile from '../components/FocusableTile';
 import { colors } from '../theme/theme';
 
-type Screen = 'Discover' | 'Pulse' | 'Request' | 'Profile';
+type Screen = 'Discover' | 'Pulse' | 'AdLens' | 'Request' | 'Profile';
 type Props = { navigate: (screen: Screen) => void };
 
 export default function HomeScreen({ navigate }: Props) {
@@ -15,6 +15,7 @@ export default function HomeScreen({ navigate }: Props) {
       <View style={styles.rule} />
       <View style={styles.grid}>
         <FocusableTile title="Find an App" subtitle="Search, compare, alternatives" onPress={() => navigate('Discover')} preferredFocus />
+        <FocusableTile title="AdLens" subtitle="Understand app ads & monetization" onPress={() => navigate('AdLens')} />
         <FocusableTile title="Fix My TV" subtitle="Pulse network & experience check" onPress={() => navigate('Pulse')} />
         <FocusableTile title="Request an App" subtitle="Tell developers what is missing" onPress={() => navigate('Request')} />
         <FocusableTile title="Profile" subtitle="Preferences & privacy" onPress={() => navigate('Profile')} />

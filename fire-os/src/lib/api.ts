@@ -1,5 +1,5 @@
 import { API_BASE } from '../config';
-import type { AppProfile, DemandEntry, AppRequest, DiscoveryResult } from '../../../shared/src/types';
+import type { AppProfile, AlternativeResult, DemandEntry, AppRequest, DiscoveryResult } from '../../../shared/src/types';
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
@@ -29,7 +29,7 @@ export const api = {
     const suffix = params.toString() ? `?${params.toString()}` : '';
     return request<{ query: string; category: string; results: DiscoveryResult[]; generatedAt: string }>(`/apps/discover${suffix}`);
   },
-  app: (id: string) => request<AppProfile & { alternativeProfiles: AppProfile[] }>(`/apps/${id}`),
+  app: (id: string) => request<AppProfile & { alternativeProfiles: AlternativeResult[] }>(`/apps/${id}`),
   createRequest: (appName: string, note: string) =>
     request<AppRequest>('/requests', {
       method: 'POST',

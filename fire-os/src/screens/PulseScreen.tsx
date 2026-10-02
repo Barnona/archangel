@@ -12,17 +12,29 @@ type PulseResult = {
   timestamp?: string;
 };
 
+type CatalogResult = {
+  total: number;
+  verified: number;
+  fireOs: number;
+  vega: number;
+  coverage: number;
+  source: string;
+  lastUpdated: string;
+};
+
 export default function PulseScreen() {
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<PulseResult | null>(null);
+  const [catalog, setCatalog] = useState<CatalogResult | null>(null);
 
   const run = async () => {
     setRunning(true);
     setResult(null);
+    setCatalog(null);
     const start = Date.now();
 
     try {
-      const response = await api.health();
+      const [response, catalogResponse] = await Promise.all([api.health(), api.catalogStatus()]);
       setResult({
         latency: Date.now() - start,
         ok: response.ok,
@@ -31,6 +43,7 @@ export default function PulseScreen() {
         uptimeSeconds: response.uptimeSeconds,
         timestamp: response.timestamp,
       });
+      setCatalog(catalogResponse);
     } catch {
       setResult({ latency: Date.now() - start, ok: false });
     } finally {
@@ -58,10 +71,10 @@ export default function PulseScreen() {
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>SERVICE</Text>
-          <Text style={styles.bigSmall}>{result?.ok ? 'ONLINE' : result ? 'OFFLINE' : '—'}</Text>
+          <Text style={styles.cardTitle}>CATALOG COVERAGE</Text>
+          <Text style={styles.bigSmall}>{catalog ? `${catalog.total} RECORDS` : '—'}</Text>
           <Text style={styles.meta}>
-            {result?.ok ? `API ${result.catalogCount ?? 0} apps • ${result.requestCount ?? 0} requests` : 'Backend status not measured yet.'}
+            {catalog ? `${catalog.verified} verified • ${catalog.fireOs} Fire OS • ${catalog.vega} Vega` : 'Catalog status not measured yet.'}
           </Text>
         </View>
       </View>
@@ -70,11 +83,14 @@ export default function PulseScreen() {
         <Text style={styles.cardTitle}>DIAGNOSIS</Text>
         <Text style={styles.diag}>
           {result?.ok
-            ? 'The ARCHANGEL service is responding. If streaming remains slow, compare the affected app and network conditions rather than assuming the TV needs a memory cleaner.'
+            ? catalog
+              ? `ARCHANGEL is online with ${catalog.total} catalog records. Current coverage is a curated verified cache, not a claim of the complete Amazon Appstore. The ingestion layer is structured so an authorized Amazon catalog API can replace this source later.`
+              : 'The ARCHANGEL service is responding.'
             : result
               ? 'The ARCHANGEL service could not be reached. Check that the backend is running and the TV can reach your development machine.'
               : 'ARCHANGEL only reports measurements it can actually observe.'}
         </Text>
+        {catalog ? <Text style={styles.observed}>Source {catalog.source} • updated {catalog.lastUpdated} • verification coverage {catalog.coverage}%</Text> : null}
         {observedAt ? <Text style={styles.observed}>Observed {observedAt} • backend uptime {result?.uptimeSeconds ?? 0}s</Text> : null}
       </View>
 

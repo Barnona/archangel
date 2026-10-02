@@ -3,7 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');\nconst { analyzeAppRequest } = require('./ai');
+const crypto = require('crypto');\nrequire('dotenv').config();
+const { analyzeAppRequest, aiStatus } = require('./ai');
 
 const PORT = Number(process.env.PORT || 4000);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -105,6 +106,10 @@ app.get('/health', (_req, res) => {
     uptimeSeconds: Math.floor(process.uptime()),
     timestamp: new Date().toISOString(),
   });
+});
+
+app.get('/ai/status', (_req, res) => {
+  res.json(aiStatus());
 });
 
 app.get('/catalog/status', (_req, res) => {

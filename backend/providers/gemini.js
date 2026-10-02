@@ -26,6 +26,8 @@ function buildPrompt(userRequest, results) {
     'You are ARCHANGEL Concierge, an application discovery intelligence layer for Fire TV.',
     'The supplied catalog results are authoritative for application existence. Never invent an app, app ID, or Fire OS availability.',
     'Interpret the user request, then recommend only applications present in the supplied catalog results.',
+    'requestedApp is ONLY the specific app name the user explicitly appears to be asking for. If the user is describing a capability or content type (for example "some movies", "music", "live sports", "an app to watch movies", or "something for gaming"), set requestedApp to an empty string. Never turn a generic content/capability phrase into an app name.',
+    'exactMatch is ONLY for a direct request for a specific app that exists in the supplied catalog. For capability-based requests, exactMatch must be null and alternatives should satisfy the intent.',
     'Return ONLY valid JSON using this exact shape:',
     '{"requestedApp":string,"understoodIntent":string,"exactMatch":string|null,"alternatives":[{"appId":string,"reason":string,"confidence":number}],"message":string}',
     'exactMatch must be an app ID from the catalog results or null.',
@@ -95,6 +97,22 @@ function validateAgainstCatalog(result, catalog) {
 
   if (result.exactMatch && !byId.has(result.exactMatch)) {
     result.exactMatch = null;
+  }
+
+  const genericRequestTerms = new Set([
+    'app', 'application', 'apps', 'applications', 'movie', 'movies', 'music',
+    'video', 'videos', 'show', 'shows', 'streaming', 'stream', 'games', 'gaming',
+    'sports', 'news', 'something', 'some', 'anything', 'content', 'tv'
+  ]);
+  const normalizedRequested = String(result.requestedApp || '').trim().toLowerCase();
+  const requestedWords = normalizedRequested.split(/[^a-z0-9+]+/).filter(Boolean);
+  const isGenericRequest =
+    !normalizedRequested ||
+    requestedWords.length > 4 ||
+    requestedWords.some(word => genericRequestTerms.has(word));
+
+  if (isGenericRequest) {
+    result.requestedApp = '';
   }
 
   result.alternatives = result.alternatives

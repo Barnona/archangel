@@ -202,7 +202,7 @@ The current working development environment is Windows.
 - Android TV emulator or a Fire TV device
 - Git
 
-Amazon documents React Native support for Fire TV and Android Studio/Android TV emulator development. citeturn0search0turn0search1
+Amazon documents React Native support for Fire TV and Android Studio/Android TV emulator development.
 
 ### Recommended Windows paths
 
@@ -295,7 +295,7 @@ Launch it:
 adb shell monkey -p com.archangelnative 1
 ```
 
-Amazon documents ADB as a development/testing mechanism for installing and running Fire TV applications. citeturn0search0
+Amazon documents ADB as a development/testing mechanism for installing and running Fire TV applications.
 
 ---
 
@@ -464,4 +464,4 @@ Diagnostics and ad intelligence will therefore be implemented around capabilitie
 
 ARCHANGEL is released under the **MIT License**. See [LICENSE](LICENSE).
 
-The MIT license permits use, modification, distribution, and private/commercial use subject to its conditions, including preservation of the copyright notice. citeturn0search2turn0search5
+The MIT license permits use, modification, distribution, and private/commercial use subject to its conditions, including preservation of the copyright notice.

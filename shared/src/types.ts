@@ -37,6 +37,23 @@ export interface AlternativeResult {
   reasons: string[];
 }
 
+export interface CatalogStatus {
+  catalogVersion: string;
+  source: string;
+  lastUpdated: string;
+  total: number;
+  verified: number;
+  fireOs: number;
+  vega: number;
+  categories: string[];
+  coverage: number;
+  amazonAppstoreApi: {
+    status: 'not_available' | 'available';
+    mode: string;
+    note: string;
+  };
+}
+
 export interface AppRequest {
   id: string;
   appName: string;

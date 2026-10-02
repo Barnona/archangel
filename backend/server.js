@@ -73,7 +73,19 @@ function rankAlternatives(catalog, target) {
     return { app, score: Math.min(100, score), reasons: [...new Set(reasons)].slice(0, 4) };
   }).filter(r => r.score > 0).sort((a,b) => b.score-a.score || a.app.name.localeCompare(b.app.name)).slice(0,5);
 }
-app.get('/health', (_req, res) => res.json({ ok: true }));
+app.get('/health', (_req, res) => {
+  const catalog = readJson(CATALOG_PATH, []);
+  const requests = readJson(REQUESTS_PATH, []);
+  res.json({
+    ok: true,
+    service: 'archangel-api',
+    version: '0.2.0',
+    catalogCount: catalog.length,
+    requestCount: requests.length,
+    uptimeSeconds: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+  });
+});
 
 app.get('/apps', (req, res) => {
   const catalog = readJson(CATALOG_PATH, []);

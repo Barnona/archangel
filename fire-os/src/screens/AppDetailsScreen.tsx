@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import type { AppProfile } from '../../../shared/src/types';
+import type { AlternativeResult, AppProfile } from '../../../shared/src/types';
 import { api } from '../lib/api';
 import { colors } from '../theme/theme';
 
 type Props = { id: string; onBack: () => void; onOpen: (id: string) => void };
 
 export default function AppDetailsScreen({ id, onBack, onOpen }: Props) {
-  const [app, setApp] = useState<(AppProfile & { alternativeProfiles: AppProfile[] }) | null>(null);
+  const [app, setApp] = useState<(AppProfile & { alternativeProfiles: AlternativeResult[] }) | null>(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -58,9 +58,15 @@ export default function AppDetailsScreen({ id, onBack, onOpen }: Props) {
         <>
           <Text style={styles.section}>ALTERNATIVES</Text>
           {app.alternativeProfiles.map(x => (
-            <Pressable key={x.id} onPress={() => onOpen(x.id)} style={({ focused }) => [styles.alt, focused && styles.focus]}>
-              <Text style={styles.altName}>{x.name}</Text>
-              <Text style={styles.altMeta}>{x.category} • {x.monetization.join(', ')}</Text>
+            <Pressable key={x.app.id} onPress={() => onOpen(x.app.id)} style={({ focused }) => [styles.alt, focused && styles.focus]}>
+              <View style={styles.altRow}>
+                <View style={styles.altMain}>
+                  <Text style={styles.altName}>{x.app.name}</Text>
+                  <Text style={styles.altMeta}>{x.app.category} • {x.app.monetization.join(', ')}</Text>
+                </View>
+                <Text style={styles.altScore}>{x.score}</Text>
+              </View>
+              <Text style={styles.altReason}>{x.reasons.join(' • ')}</Text>
             </Pressable>
           ))}
         </>
@@ -97,6 +103,10 @@ const styles=StyleSheet.create({
   alt:{width:850,padding:16,backgroundColor:colors.panel,borderRadius:10,borderWidth:1,borderColor:colors.line,marginBottom:10},
   altName:{color:colors.text,fontSize:20,fontWeight:'800'},
   altMeta:{color:colors.muted,fontSize:15,marginTop:4},
+  altRow:{flexDirection:'row',alignItems:'center'},
+  altMain:{flex:1},
+  altScore:{color:colors.red,fontSize:16,fontWeight:'900'},
+  altReason:{color:colors.muted,fontSize:13,marginTop:8},
   center:{flex:1,backgroundColor:colors.bg,alignItems:'center',justifyContent:'center'},
   error:{color:'#B4232B',fontSize:18}
 });

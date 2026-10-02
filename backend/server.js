@@ -91,6 +91,118 @@ app.get('/apps/discover', (req, res) => {
     category: String(req.query.category || '').trim(),
     results,
     generatedAt: new Date().toISOString(),
+    source: 'ARCHANGEL verified catalog',
+  });
+});
+
+app.get('/apps/:id', (req, res) => {
+  const catalog = readJson(CATALOG_PATH, []);
+  const found = catalog.find((a) => a.id === req.params.id);
+  if (!found) return res.status(404).json({ error: 'not found' });
+  const alternatives = rankAlternatives(catalog, found);
+  res.json({ ...found, alternativeProfiles: alternatives });
+});
+
+app.post('/requests', (req, res) => {
+  const appName = String(req.body.appName || '').trim();
+  const note = String(req.body.note || '').trim();
+  if (appName.length < 2 || appName.length > 80) {
+    return res.status(400).json({ error: 'appName must be 2-80 characters' });
+  }
+  if (note.length > 300) return res.status(400).json({ error: 'note too long' });
+  const requests = readJson(REQUESTS_PATH, []);
+  const entry = { id: crypto.randomUUID(), appName, note: note || undefined, createdAt: new Date().toISOString() };
+  requests.push(entry);
+  writeJson(REQUESTS_PATH, requests);
+  res.status(201).json(entry);
+});
+
+app.get('/requests/demand', (_req, res) => {
+  const requests = readJson(REQUESTS_PATH, []);
+  const map = new Map();
+  for (const r of requests) {
+    const key = r.appName.trim().toLowerCase();
+    const cur = map.get(key) || { appName: r.appName.trim(), count: 0, lastRequestedAt: r.createdAt };
+    cur.count += 1;
+    if (r.createdAt > cur.lastRequestedAt) cur.lastRequestedAt = r.createdAt;
+    map.set(key, cur);
+  }
+  res.json([...map.values()].sort((a, b) => b.count - a.count));
+});
+
+app.listen(PORT, HOST, () => {
+  console.log(`ARCHANGEL API listening on http://${HOST}:${PORT}`);
+  console.log('LAN clients can reach this service using the Windows PC LAN IP.');
+});const INTENT_RULES = [
+  { terms: ['cheap', 'free', 'budget', 'no cost'], reason: 'Matches a low-cost intent', weight: 18, test: a => a.monetization.includes('free') || a.monetization.includes('freemium') },
+  { terms: ['music', 'songs', 'audio'], reason: 'Matches a music intent', weight: 25, test: a => a.category === 'Music' || /music|audio|song/i.test(a.description) },
+  { terms: ['game', 'gaming', 'games'], reason: 'Matches a gaming intent', weight: 25, test: a => a.category === 'Games' },
+  { terms: ['watch', 'movie', 'movies', 'film', 'films', 'stream', 'streaming', 'series', 'show'], reason: 'Matches a viewing intent', weight: 18, test: a => a.category === 'Streaming' },
+  { terms: ['ad-free', 'fewer ads', 'less ads', 'without ads'], reason: 'Matches an ad-reduction intent', weight: 15, test: a => a.adLevel === 'none' },
+];
+
+function rankDiscovery(catalog, query, category) {
+  const q = String(query || '').trim().toLowerCase();
+  const tokens = tokenize(q);
+  const cat = String(category || '').trim().toLowerCase();
+  return catalog.filter(a => !cat || a.category.toLowerCase() === cat).map(app => {
+    const name = app.name.toLowerCase();
+    const description = app.description.toLowerCase();
+    const haystack = `${name} ${description} ${app.category.toLowerCase()}`;
+    let score = 0; const reasons = [];
+    if (!q) {
+      score += app.verified ? 25 : 0; score += app.platforms.fireOs ? 20 : 0;
+      if (app.platforms.vega) score += 5;
+      reasons.push(app.platforms.fireOs ? 'Available on Fire OS' : 'Catalogued for another platform');
+      if (app.verified) reasons.push('Source checked');
+    } else {
+      if (name === q) { score += 100; reasons.push('Exact name match'); }
+      else if (name.includes(q)) { score += 75; reasons.push('Name matches your search'); }
+      const matched = tokens.filter(t => haystack.includes(t));
+      if (matched.length) { score += matched.length * 15; reasons.push(`Matches ${matched.length === 1 ? 'your search term' : 'your search terms'}`); }
+      if (description.includes(q)) { score += 25; reasons.push('Description matches'); }
+      if (app.category.toLowerCase().includes(q)) { score += 20; reasons.push('Category matches'); }
+      for (const rule of INTENT_RULES) if (rule.terms.some(term => q.includes(term)) && rule.test(app)) { score += rule.weight; reasons.push(rule.reason); }
+    }
+    if (app.platforms.fireOs) { score += 10; if (q) reasons.push('Fire OS compatible'); }
+    if (app.verified) { score += 8; if (q) reasons.push('Source checked'); }
+    if (cat) reasons.push(`Category: ${app.category}`);
+    return { app, score: Math.min(100, score), reasons: [...new Set(reasons)].slice(0, 5) };
+  }).filter(r => !q || r.score > 0).sort((x, y) => y.score - x.score || x.app.name.localeCompare(y.app.name));
+}
+
+function rankAlternatives(catalog, target) {
+  if (!target) return [];
+  return catalog.filter(a => a.id !== target.id && a.platforms.fireOs).map(app => {
+    let score = 0; const reasons = [];
+    if (target.alternatives.includes(app.id)) { score += 70; reasons.push('Listed as an alternative'); }
+    if (app.category === target.category) { score += 20; reasons.push('Same category'); }
+    if (app.monetization.some(x => target.monetization.includes(x))) { score += 8; reasons.push('Similar monetization'); }
+    if (app.verified) { score += 5; reasons.push('Source checked'); }
+    return { app, score: Math.min(100, score), reasons: [...new Set(reasons)].slice(0, 4) };
+  }).filter(r => r.score > 0).sort((a,b) => b.score-a.score || a.app.name.localeCompare(b.app.name)).slice(0,5);
+}
+app.get('/health', (_req, res) => res.json({ ok: true }));
+
+app.get('/apps', (req, res) => {
+  const catalog = readJson(CATALOG_PATH, []);
+  const q = String(req.query.q || '').trim().toLowerCase();
+  const category = String(req.query.category || '').trim().toLowerCase();
+  const result = catalog.filter((a) =>
+    (!q || a.name.toLowerCase().includes(q) || a.description.toLowerCase().includes(q)) &&
+    (!category || a.category.toLowerCase() === category)
+  );
+  res.json(result);
+});
+
+app.get('/apps/discover', (req, res) => {
+  const catalog = readJson(CATALOG_PATH, []);
+  const results = rankDiscovery(catalog, req.query.q, req.query.category);
+  res.json({
+    query: String(req.query.q || '').trim(),
+    category: String(req.query.category || '').trim(),
+    results,
+    generatedAt: new Date().toISOString(),
   });
 });
 

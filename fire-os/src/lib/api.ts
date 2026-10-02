@@ -1,5 +1,5 @@
 import { API_BASE } from '../config';
-import type { AppProfile, AlternativeResult, DemandEntry, AppRequest, DiscoveryResult } from '../../../shared/src/types';
+import type { AppProfile, AlternativeResult, CatalogStatus, DemandEntry, AppRequest, DiscoveryResult } from '../../../shared/src/types';
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
@@ -15,6 +15,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
 export const api = {
   health: () => request<{ ok: boolean; service: string; version: string; catalogCount: number; requestCount: number; uptimeSeconds: number; timestamp: string }>('/health'),
+  catalogStatus: () => request<CatalogStatus>('/catalog/status'),
   apps: (q = '', category = '') => {
     const params = new URLSearchParams();
     if (q) params.set('q', q);
@@ -27,7 +28,7 @@ export const api = {
     if (q) params.set('q', q);
     if (category) params.set('category', category);
     const suffix = params.toString() ? `?${params.toString()}` : '';
-    return request<{ query: string; category: string; results: DiscoveryResult[]; generatedAt: string }>(`/apps/discover${suffix}`);
+    return request<{ query: string; category: string; results: DiscoveryResult[]; catalogCount: number; catalogSource: string; generatedAt: string }>(`/apps/discover${suffix}`);
   },
   app: (id: string) => request<AppProfile & { alternativeProfiles: AlternativeResult[] }>(`/apps/${id}`),
   createRequest: (appName: string, note: string) =>

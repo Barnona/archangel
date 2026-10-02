@@ -14,7 +14,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  health: () => request<{ ok: boolean }>('/health'),
+  health: () => request<{ ok: boolean; service: string; version: string; catalogCount: number; requestCount: number; uptimeSeconds: number; timestamp: string }>('/health'),
   apps: (q = '', category = '') => {
     const params = new URLSearchParams();
     if (q) params.set('q', q);

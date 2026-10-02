@@ -1,5 +1,5 @@
 import { API_BASE } from '../config';
-import type { AppProfile, AlternativeResult, CatalogStatus, DemandEntry, AppRequest, DiscoveryResult } from '../../../shared/src/types';
+import type { AdLensSummary, AppProfile, AlternativeResult, CatalogStatus, DemandEntry, AppRequest, DiscoveryResult } from '../../../shared/src/types';
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
@@ -52,4 +52,5 @@ export const api = {
       body: JSON.stringify({ appName, note }),
     }),
   demand: () => request<DemandEntry[]>('/requests/demand'),
+  adLens: () => request<AdLensSummary>('/adlens'),
 };

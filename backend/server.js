@@ -185,6 +185,51 @@ app.post('/ai/app-discovery', async (req, res) => {
   }
 });
 
+app.get('/adlens', (_req, res) => {
+  const catalog = readJson(CATALOG_PATH, []);
+  const profiles = catalog
+    .filter(a => a.platforms?.fireOs)
+    .map(a => {
+      const known = a.adLevel !== 'unknown';
+      const adSupported = a.monetization.includes('ad-supported');
+      return {
+        appId: a.id,
+        appName: a.name,
+        monetization: a.monetization,
+        adLevel: a.adLevel,
+        adSignal: known ? 'known' : 'unknown',
+        transparency: a.verified && known ? 'verified' : 'limited',
+        explanation: known
+          ? (a.adLevel === 'none'
+            ? 'The catalog records no known in-app advertising signal for this profile.'
+            : adSupported
+              ? 'The catalog identifies this app as ad-supported.'
+              : 'The catalog records an advertising level for this profile, but monetization may include other models.')
+          : 'The current verified catalog does not contain a reliable ad-level signal for this app.',
+        systemAds: {
+          controllable: false,
+          note: 'ARCHANGEL cannot disable or modify Fire TV system-level Sponsored-row advertising.'
+        },
+        verified: Boolean(a.verified),
+        lastVerified: a.lastVerified ?? null,
+      };
+    });
+
+  res.json({
+    totalApps: profiles.length,
+    adSupported: profiles.filter(p => p.monetization.includes('ad-supported')).length,
+    knownAdLevels: profiles.filter(p => p.adSignal === 'known').length,
+    unknownAdLevels: profiles.filter(p => p.adSignal === 'unknown').length,
+    verifiedProfiles: profiles.filter(p => p.transparency === 'verified').length,
+    profiles,
+    systemAdControl: {
+      controllable: false,
+      note: 'ARCHANGEL provides ad transparency and experience intelligence; it does not claim system-wide Fire TV ad-control privileges.'
+    },
+    generatedAt: new Date().toISOString(),
+  });
+});
+
 app.get('/apps/:id', (req, res) => {
   const catalog = readJson(CATALOG_PATH, []);
   const found = catalog.find((a) => a.id === req.params.id);

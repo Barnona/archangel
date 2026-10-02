@@ -109,14 +109,34 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
               <Text style={styles.aiIntent}>{aiResult.understoodIntent}</Text>
               <Text style={styles.aiMessage}>{aiResult.message}</Text>
               <Text style={styles.reasonLabel}>CATALOG DECISION</Text>
-              <Text style={styles.reason}>{aiResult.exactMatch ? `Exact catalog match: ${aiResult.exactMatch}` : 'No exact catalog match. Alternatives were evaluated.'}</Text>
+              {aiResult.exactMatch ? (
+                <>
+                  <Text style={styles.reason}>Exact catalog match found.</Text>
+                  <Pressable onPress={() => onOpen(aiResult.exactMatch!)} style={({ focused }) => [styles.aiExact, focused && styles.aiResultFocused]}>
+                    <Text style={styles.aiExactText}>OPEN {aiResult.exactMatch.toUpperCase()}</Text>
+                  </Pressable>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.reason}>No exact catalog match. Alternatives were evaluated.</Text>
+                  {aiResult.requestedApp.trim() && onRequest ? (
+                    <Pressable onPress={() => onRequest(aiResult.requestedApp)} style={({ focused }) => [styles.aiRequest, focused && styles.focusButton]}>
+                      <Text style={styles.requestButtonText}>REQUEST “{aiResult.requestedApp.toUpperCase()}”</Text>
+                    </Pressable>
+                  ) : null}
+                </>
+              )}
               {aiResult.alternatives.length ? (
                 <View style={styles.aiAlternatives}>
                   {aiResult.alternatives.slice(0, 3).map(item => (
-                    <View key={item.appId} style={styles.aiAlternative}>
-                      <Text style={styles.appName}>{item.appId}</Text>
-                      <Text style={styles.description}>{item.reason} • {Math.round(item.confidence * 100)}% confidence</Text>
-                    </View>
+                    <Pressable key={item.appId} onPress={() => onOpen(item.appId)} style={({ focused }) => [styles.aiAlternative, focused && styles.aiResultFocused]}>
+                      <View style={styles.aiAlternativeRow}>
+                        <Text style={styles.appName}>{item.appId}</Text>
+                        <Text style={styles.aiConfidence}>{Math.round(item.confidence * 100)}%</Text>
+                      </View>
+                      <Text style={styles.description}>{item.reason}</Text>
+                      <Text style={styles.aiOpenHint}>OPEN APP PROFILE ›</Text>
+                    </Pressable>
                   ))}
                 </View>
               ) : null}
@@ -204,8 +224,15 @@ const styles = StyleSheet.create({
   aiTitle:{color:colors.text,fontSize:21,fontWeight:'900',marginTop:3},
   aiIntent:{color:colors.text,fontSize:16,fontWeight:'700',marginTop:12},
   aiMessage:{color:colors.muted,fontSize:14,lineHeight:20,marginTop:5,marginBottom:12},
+  aiExact:{alignSelf:'flex-start',marginTop:10,backgroundColor:colors.red,paddingHorizontal:16,paddingVertical:10,borderRadius:8},
+  aiExactText:{color:'#fff',fontSize:11,fontWeight:'900',letterSpacing:1},
+  aiRequest:{alignSelf:'flex-start',marginTop:10,backgroundColor:colors.red,paddingHorizontal:16,paddingVertical:10,borderRadius:8},
+  aiResultFocused:{backgroundColor:colors.panel,borderRadius:8,borderWidth:1,borderColor:colors.red,paddingHorizontal:10},
   aiAlternatives:{marginTop:12},
   aiAlternative:{paddingTop:10,paddingBottom:10,borderTopWidth:1,borderTopColor:colors.line},
+  aiAlternativeRow:{flexDirection:'row',alignItems:'center',justifyContent:'space-between'},
+  aiConfidence:{color:colors.red,fontSize:12,fontWeight:'900'},
+  aiOpenHint:{color:colors.red,fontSize:9,fontWeight:'900',letterSpacing:1,marginTop:6},
   filters:{flexDirection:'row',marginVertical:14},
   filter:{paddingHorizontal:16,paddingVertical:8,borderRadius:7,marginRight:8,backgroundColor:colors.panel,borderWidth:1,borderColor:colors.line},
   filterActive:{backgroundColor:colors.red,borderColor:colors.red},

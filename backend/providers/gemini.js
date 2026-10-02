@@ -35,10 +35,48 @@ function buildPrompt(userRequest, results) {
   ].join('\n');
 }
 
+function extractResponseText(response) {
+  if (typeof response?.text === 'string' && response.text.trim()) return response.text.trim();
+
+  const parts = response?.candidates?.[0]?.content?.parts || [];
+  return parts
+    .filter(part => typeof part?.text === 'string' && part.text.trim())
+    .map(part => part.text.trim())
+    .join('\n')
+    .trim();
+}
+
+function extractJson(text) {
+  const cleaned = String(text || '')
+    .trim()
+    .replace(/^\uFEFF/, '')
+    .replace(/^\s*\`\`\`(?:json)?\s*/i, '')
+    .replace(/\s*\`\`\`\s*$/i, '')
+    .trim();
+
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+    if (start >= 0 && end > start) return JSON.parse(cleaned.slice(start, end + 1));
+    throw new Error('Model returned no valid JSON object.');
+  }
+}
+
 function parseResult(raw, modelId) {
   const text = String(raw || '').trim();
-  try { return { ...JSON.parse(text), modelId, provider: 'gemini' }; }
-  catch { return { requestedApp: '', understoodIntent: 'AI response could not be parsed as structured JSON.', exactMatch: null, alternatives: [], message: text || 'No AI response was returned.', modelId, provider: 'gemini' }; }
+  if (!text) throw new Error('Model returned an empty response.');
+  const parsed = extractJson(text);
+
+  if (!parsed || typeof parsed !== 'object') throw new Error('Model returned an invalid JSON object.');
+  if (!Array.isArray(parsed.alternatives)) parsed.alternatives = [];
+  if (typeof parsed.requestedApp !== 'string') parsed.requestedApp = '';
+  if (typeof parsed.understoodIntent !== 'string') parsed.understoodIntent = '';
+  if (parsed.exactMatch !== null && typeof parsed.exactMatch !== 'string') parsed.exactMatch = null;
+  if (typeof parsed.message !== 'string') parsed.message = '';
+
+  return { ...parsed, modelId, provider: 'gemini' };
 }
 
 async function callModel(modelId, prompt) {
@@ -47,9 +85,16 @@ async function callModel(modelId, prompt) {
   const response = await ai.models.generateContent({
     model: modelId,
     contents: prompt,
-    config: { temperature: 0.1, maxOutputTokens: 700, responseMimeType: 'application/json' },
+    config: {
+      temperature: 0.1,
+      maxOutputTokens: 900,
+      responseMimeType: 'application/json',
+      thinkingConfig: { thinkingLevel: 'minimal' },
+    },
   });
-  return parseResult(response.text, modelId);
+
+  const rawText = extractResponseText(response);
+  return parseResult(rawText, modelId);
 }
 
 async function analyzeWithGemini({ catalog, userRequest }) {

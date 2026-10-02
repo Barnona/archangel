@@ -6,8 +6,9 @@ import AppDetailsScreen from './screens/AppDetailsScreen';
 import PulseScreen from './screens/PulseScreen';
 import RequestScreen from './screens/RequestScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import AdLensScreen from './screens/AdLensScreen';
 
-type Screen = 'Home' | 'Discover' | 'Details' | 'Pulse' | 'Request' | 'Profile';
+type Screen = 'Home' | 'Discover' | 'Details' | 'Pulse' | 'AdLens' | 'Request' | 'Profile';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('Home');
@@ -29,6 +30,7 @@ export default function App() {
 
   if (screen === 'Home') return <HomeScreen navigate={setScreen as (s: 'Discover'|'Pulse'|'Request'|'Profile') => void} />;
   if (screen === 'Discover') return <DiscoverScreen onOpen={openApp} onRequest={openRequest} />;
+  if (screen === 'AdLens') return <AdLensScreen />;
   if (screen === 'Details' && selectedApp) return <AppDetailsScreen id={selectedApp} onBack={() => setScreen('Discover')} onOpen={openApp} />;
   if (screen === 'Pulse') return <PulseScreen />;
   if (screen === 'Request') return <RequestScreen initialName={requestedName} />;

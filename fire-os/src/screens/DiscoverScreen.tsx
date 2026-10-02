@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   searchButtonText:{color:'#fff',fontSize:12,fontWeight:'900',letterSpacing:1},
   clearButton:{marginLeft:8,height:50,paddingHorizontal:16,borderRadius:9,borderWidth:1,borderColor:colors.line,backgroundColor:colors.panel,alignItems:'center',justifyContent:'center'},
   clearText:{color:colors.text,fontSize:13,fontWeight:'800',letterSpacing:1},
-  focusButton:{backgroundColor:colors.text},
+  focusButton:{backgroundColor:colors.red},
   focusOutline:{borderColor:colors.red,backgroundColor:colors.panel2},
   aiBox:{width:760,backgroundColor:colors.panel2,borderRadius:10,borderWidth:2,borderColor:colors.red,padding:16,marginBottom:14},
   aiHeader:{flexDirection:'row',justifyContent:'space-between',alignItems:'center'},

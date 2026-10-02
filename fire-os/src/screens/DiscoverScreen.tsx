@@ -17,6 +17,7 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState('');
   const [aiResult, setAiResult] = useState<{
+    intentType: 'SPECIFIC_APP' | 'CAPABILITY' | 'CONTENT' | 'MISSING_APP' | 'AMBIGUOUS';
     requestedApp: string;
     understoodIntent: string;
     exactMatch: string | null;
@@ -106,6 +107,9 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
           {aiError ? <Text style={styles.error}>{aiError}</Text> : null}
           {aiResult ? (
             <>
+              <View style={styles.intentBadge}>
+                <Text style={styles.intentBadgeText}>{aiResult.intentType.replace('_', ' ')}</Text>
+              </View>
               <Text style={styles.aiIntent}>{aiResult.understoodIntent}</Text>
               <Text style={styles.aiMessage}>{aiResult.message}</Text>
               <Text style={styles.reasonLabel}>CATALOG DECISION</Text>
@@ -118,8 +122,12 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
                 </>
               ) : (
                 <>
-                  <Text style={styles.reason}>No exact catalog match. Alternatives were evaluated.</Text>
-                  {aiResult.requestedApp.trim() && onRequest ? (
+                  <Text style={styles.reason}>
+                    {aiResult.intentType === 'MISSING_APP'
+                      ? 'This app is not in the current verified catalog.'
+                      : 'No exact catalog match. Alternatives were evaluated.'}
+                  </Text>
+                  {aiResult.intentType === 'MISSING_APP' && aiResult.requestedApp.trim() && onRequest ? (
                     <Pressable onPress={() => onRequest(aiResult.requestedApp)} style={({ focused }) => [styles.aiRequest, focused && styles.focusButton]}>
                       <Text style={styles.requestButtonText}>REQUEST “{aiResult.requestedApp.toUpperCase()}”</Text>
                     </Pressable>
@@ -222,7 +230,9 @@ const styles = StyleSheet.create({
   aiHeader:{flexDirection:'row',justifyContent:'space-between',alignItems:'center'},
   aiLabel:{color:colors.red,fontSize:10,fontWeight:'900',letterSpacing:1.3},
   aiTitle:{color:colors.text,fontSize:21,fontWeight:'900',marginTop:3},
-  aiIntent:{color:colors.text,fontSize:16,fontWeight:'700',marginTop:12},
+  intentBadge:{alignSelf:'flex-start',marginTop:12,paddingHorizontal:9,paddingVertical:4,borderRadius:6,backgroundColor:colors.paleRed},
+  intentBadgeText:{color:colors.red,fontSize:9,fontWeight:'900',letterSpacing:1},
+  aiIntent:{color:colors.text,fontSize:16,fontWeight:'700',marginTop:7},
   aiMessage:{color:colors.muted,fontSize:14,lineHeight:20,marginTop:5,marginBottom:12},
   aiExact:{alignSelf:'flex-start',marginTop:10,backgroundColor:colors.red,paddingHorizontal:16,paddingVertical:10,borderRadius:8},
   aiExactText:{color:'#fff',fontSize:11,fontWeight:'900',letterSpacing:1},

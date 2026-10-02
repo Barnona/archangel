@@ -13,6 +13,16 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
   const [category, setCategory] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState('');
+  const [aiResult, setAiResult] = useState<{
+    requestedApp: string;
+    understoodIntent: string;
+    exactMatch: string | null;
+    alternatives: { appId: string; reason: string; confidence: number }[];
+    message: string;
+  } | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -28,6 +38,22 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
   };
 
   useEffect(() => { load(); }, [category]);
+
+  const askArchangel = async () => {
+    if (!query.trim()) return;
+    setAiLoading(true);
+    setAiError('');
+    try {
+      const result = await api.aiDiscover(query.trim());
+      setAiResult(result);
+      setAiOpen(true);
+    } catch (e) {
+      setAiError(e instanceof Error ? e.message : 'AI discovery is unavailable');
+      setAiOpen(true);
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const clearSearch = () => {
     setQuery('');
@@ -53,12 +79,48 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
         <Pressable onPress={load} style={({ focused }) => [styles.searchButton, focused && styles.focusButton]}>
           <Text style={styles.searchButtonText}>SEARCH</Text>
         </Pressable>
+        <Pressable onPress={askArchangel} style={({ focused }) => [styles.aiButton, focused && styles.focusButton]}>
+          <Text style={styles.searchButtonText}>{aiLoading ? 'THINKING...' : 'ASK ARCHANGEL'}</Text>
+        </Pressable>
         {(query || category) ? (
           <Pressable onPress={clearSearch} style={({ focused }) => [styles.clearButton, focused && styles.focusOutline]}>
             <Text style={styles.clearText}>CLEAR</Text>
           </Pressable>
         ) : null}
       </View>
+
+      {aiOpen ? (
+        <View style={styles.aiBox}>
+          <View style={styles.aiHeader}>
+            <View>
+              <Text style={styles.aiLabel}>ARCHANGEL CONCIERGE</Text>
+              <Text style={styles.aiTitle}>Application intent analysis</Text>
+            </View>
+            <Pressable onPress={() => setAiOpen(false)} style={({ focused }) => [styles.clearButton, focused && styles.focusOutline]}>
+              <Text style={styles.clearText}>CLOSE</Text>
+            </Pressable>
+          </View>
+          {aiError ? <Text style={styles.error}>{aiError}</Text> : null}
+          {aiResult ? (
+            <>
+              <Text style={styles.aiIntent}>{aiResult.understoodIntent}</Text>
+              <Text style={styles.aiMessage}>{aiResult.message}</Text>
+              <Text style={styles.reasonLabel}>CATALOG DECISION</Text>
+              <Text style={styles.reason}>{aiResult.exactMatch ? `Exact catalog match: ${aiResult.exactMatch}` : 'No exact catalog match. Alternatives were evaluated.'}</Text>
+              {aiResult.alternatives.length ? (
+                <View style={styles.aiAlternatives}>
+                  {aiResult.alternatives.slice(0, 3).map(item => (
+                    <View key={item.appId} style={styles.aiAlternative}>
+                      <Text style={styles.appName}>{item.appId}</Text>
+                      <Text style={styles.description}>{item.reason} • {Math.round(item.confidence * 100)}% confidence</Text>
+                    </View>
+                  ))}
+                </View>
+              ) : null}
+            </>
+          ) : null}
+        </View>
+      ) : null}
 
       <View style={styles.filters}>
         {categories.map((item) => {
@@ -125,12 +187,21 @@ const styles = StyleSheet.create({
   sub:{color:colors.muted,fontSize:19,marginTop:5,marginBottom:20,maxWidth:900},
   searchRow:{flexDirection:'row',alignItems:'center'},
   search:{width:590,height:58,borderRadius:10,backgroundColor:colors.panel,borderWidth:2,borderColor:colors.line,color:colors.text,fontSize:20,paddingHorizontal:18},
+  aiButton:{marginLeft:8,height:58,paddingHorizontal:22,borderRadius:10,backgroundColor:colors.text,alignItems:'center',justifyContent:'center'},
   searchButton:{marginLeft:10,height:58,paddingHorizontal:24,borderRadius:10,backgroundColor:colors.red,alignItems:'center',justifyContent:'center'},
   searchButtonText:{color:'#fff',fontSize:14,fontWeight:'900',letterSpacing:1},
   clearButton:{marginLeft:8,height:58,paddingHorizontal:18,borderRadius:10,borderWidth:1,borderColor:colors.line,backgroundColor:colors.panel,alignItems:'center',justifyContent:'center'},
   clearText:{color:colors.text,fontSize:13,fontWeight:'800',letterSpacing:1},
   focusButton:{backgroundColor:colors.text},
   focusOutline:{borderColor:colors.red,backgroundColor:colors.panel2},
+  aiBox:{width:820,backgroundColor:colors.panel2,borderRadius:12,borderWidth:2,borderColor:colors.red,padding:20,marginBottom:18},
+  aiHeader:{flexDirection:'row',justifyContent:'space-between',alignItems:'center'},
+  aiLabel:{color:colors.red,fontSize:11,fontWeight:'900',letterSpacing:1.5},
+  aiTitle:{color:colors.text,fontSize:24,fontWeight:'900',marginTop:4},
+  aiIntent:{color:colors.text,fontSize:18,fontWeight:'700',marginTop:16},
+  aiMessage:{color:colors.muted,fontSize:16,lineHeight:23,marginTop:6,marginBottom:16},
+  aiAlternatives:{marginTop:12},
+  aiAlternative:{paddingTop:10,paddingBottom:10,borderTopWidth:1,borderTopColor:colors.line},
   filters:{flexDirection:'row',marginVertical:18},
   filter:{paddingHorizontal:18,paddingVertical:10,borderRadius:8,marginRight:10,backgroundColor:colors.panel,borderWidth:1,borderColor:colors.line},
   filterActive:{backgroundColor:colors.red,borderColor:colors.red},

@@ -77,7 +77,7 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
           returnKeyType="search"
           style={styles.search}
         />
-        <Pressable onPress={load} style={({ focused }) => [styles.searchButton, focused && styles.focusButton]}>
+        <Pressable onPress={load} style={({ focused }) => [styles.searchButton, focused && styles.actionFocusButton]}>
           <Text style={styles.searchButtonText}>SEARCH</Text>
         </Pressable>
         {(query || category) ? (
@@ -88,7 +88,7 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
       </View>
 
       <View style={styles.aiRow}>
-        <Pressable onPress={askArchangel} style={({ focused }) => [styles.aiButton, focused && styles.focusButton]}>
+        <Pressable onPress={askArchangel} style={({ focused }) => [styles.aiButton, focused && styles.actionFocusButton]}>
           <Text style={styles.searchButtonText}>{aiLoading ? 'THINKING...' : 'ASK ARCHANGEL'}</Text>
         </Pressable>
       </View>
@@ -128,7 +128,7 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
                       : 'No exact catalog match. Alternatives were evaluated.'}
                   </Text>
                   {aiResult.intentType === 'MISSING_APP' && aiResult.requestedApp.trim() && onRequest ? (
-                    <Pressable onPress={() => onRequest(aiResult.requestedApp)} style={({ focused }) => [styles.aiRequest, focused && styles.focusButton]}>
+                    <Pressable onPress={() => onRequest(aiResult.requestedApp)} style={({ focused }) => [styles.aiRequest, focused && styles.actionFocusButton]}>
                       <Text style={styles.requestButtonText}>REQUEST “{aiResult.requestedApp.toUpperCase()}”</Text>
                     </Pressable>
                   ) : null}
@@ -225,6 +225,7 @@ const styles = StyleSheet.create({
   clearButton:{marginLeft:8,height:50,paddingHorizontal:16,borderRadius:9,borderWidth:1,borderColor:colors.line,backgroundColor:colors.panel,alignItems:'center',justifyContent:'center'},
   clearText:{color:colors.text,fontSize:13,fontWeight:'800',letterSpacing:1},
   focusButton:{backgroundColor:colors.red},
+  actionFocusButton:{backgroundColor:colors.redSoft},
   focusOutline:{borderColor:colors.red,backgroundColor:colors.panel2},
   aiBox:{width:760,backgroundColor:colors.panel2,borderRadius:10,borderWidth:2,borderColor:colors.red,padding:16,marginBottom:14},
   aiHeader:{flexDirection:'row',justifyContent:'space-between',alignItems:'center'},

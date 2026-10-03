@@ -19,7 +19,6 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
   const [searchFocused, setSearchFocused] = useState(false);
   const [askFocused, setAskFocused] = useState(false);
   const [requestFocused, setRequestFocused] = useState(false);
-  const [requestFocused, setRequestFocused] = useState(false);
   const [aiResult, setAiResult] = useState<{
     intentType: 'SPECIFIC_APP' | 'CAPABILITY' | 'CONTENT' | 'MISSING_APP' | 'AMBIGUOUS';
     requestedApp: string;

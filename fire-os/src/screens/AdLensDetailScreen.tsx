@@ -7,6 +7,7 @@ import { colors } from '../theme/theme';
 type Detail = AdLensProfile & { category: string; description: string };
 
 export default function AdLensDetailScreen({ id, onBack }: { id: string; onBack: () => void }) {
+  const [backFocused, setBackFocused] = useState(false);
   const [data, setData] = useState<Detail | null>(null);
   const [error, setError] = useState('');
   useEffect(() => { api.adLensApp(id).then(setData).catch(e => setError(e instanceof Error ? e.message : 'Unable to load AdLens profile')); }, [id]);

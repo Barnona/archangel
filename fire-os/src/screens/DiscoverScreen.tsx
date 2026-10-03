@@ -77,7 +77,7 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
           returnKeyType="search"
           style={styles.search}
         />
-        <Pressable onPress={load} style={({ focused }) => [styles.searchButton, focused && styles.actionFocusButton]}>
+        <Pressable onPress={load} style={({ focused }) => [styles.searchButton, focused && styles.focusButton]}>
           <Text style={styles.searchButtonText}>SEARCH</Text>
         </Pressable>
         {(query || category) ? (

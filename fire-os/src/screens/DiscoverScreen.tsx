@@ -19,6 +19,7 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
   const [searchFocused, setSearchFocused] = useState(false);
   const [askFocused, setAskFocused] = useState(false);
   const [requestFocused, setRequestFocused] = useState(false);
+  const [requestFocused, setRequestFocused] = useState(false);
   const [aiResult, setAiResult] = useState<{
     intentType: 'SPECIFIC_APP' | 'CAPABILITY' | 'CONTENT' | 'MISSING_APP' | 'AMBIGUOUS';
     requestedApp: string;
@@ -91,7 +92,7 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
       </View>
 
       <View style={styles.aiRow}>
-        <Pressable onPress={askArchangel} style={({ focused }) => [styles.aiButton, focused && styles.actionFocusButton]}>
+        <Pressable onPress={askArchangel} onFocus={() => setAskFocused(true)} onBlur={() => setAskFocused(false)} style={[styles.aiButton, askFocused && styles.focusButton]}>
           <Text style={styles.searchButtonText}>{aiLoading ? 'THINKING...' : 'ASK ARCHANGEL'}</Text>
         </Pressable>
       </View>
@@ -131,7 +132,7 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
                       : 'No exact catalog match. Alternatives were evaluated.'}
                   </Text>
                   {aiResult.intentType === 'MISSING_APP' && aiResult.requestedApp.trim() && onRequest ? (
-                    <Pressable onPress={() => onRequest(aiResult.requestedApp)} style={({ focused }) => [styles.aiRequest, focused && styles.actionFocusButton]}>
+                    <Pressable onPress={() => onRequest(aiResult.requestedApp)} onFocus={() => setRequestFocused(true)} onBlur={() => setRequestFocused(false)} style={[styles.aiRequest, requestFocused && styles.focusButton]}>
                       <Text style={styles.requestButtonText}>REQUEST “{aiResult.requestedApp.toUpperCase()}”</Text>
                     </Pressable>
                   ) : null}
@@ -227,7 +228,7 @@ const styles = StyleSheet.create({
   searchButtonText:{color:'#fff',fontSize:12,fontWeight:'900',letterSpacing:1},
   clearButton:{marginLeft:8,height:50,paddingHorizontal:16,borderRadius:9,borderWidth:1,borderColor:colors.line,backgroundColor:colors.panel,alignItems:'center',justifyContent:'center'},
   clearText:{color:colors.text,fontSize:13,fontWeight:'800',letterSpacing:1},
-  focusButton:{backgroundColor:colors.red},
+  focusButton:{backgroundColor:'#171717'},
   actionFocusButton:{backgroundColor: colors.black},
   focusOutline:{borderColor:colors.red,backgroundColor:colors.panel2},
   aiBox:{width:760,backgroundColor:colors.panel2,borderRadius:10,borderWidth:2,borderColor:colors.red,padding:16,marginBottom:14},

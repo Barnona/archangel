@@ -230,6 +230,38 @@ app.get('/adlens', (_req, res) => {
   });
 });
 
+app.get('/adlens/:appId', (req, res) => {
+  const catalog = readJson(CATALOG_PATH, []);
+  const app = catalog.find(a => a.id === req.params.appId && a.platforms?.fireOs);
+  if (!app) return res.status(404).json({ error: 'AdLens profile not found' });
+
+  const known = app.adLevel !== 'unknown';
+  const adSupported = app.monetization.includes('ad-supported');
+  res.json({
+    appId: app.id,
+    appName: app.name,
+    category: app.category,
+    description: app.description,
+    monetization: app.monetization,
+    adLevel: app.adLevel,
+    adSignal: known ? 'known' : 'unknown',
+    transparency: app.verified && known ? 'verified' : 'limited',
+    explanation: known
+      ? (app.adLevel === 'none'
+        ? 'The catalog records no known in-app advertising signal for this profile.'
+        : adSupported
+          ? 'The catalog identifies this app as ad-supported.'
+          : 'The catalog records an advertising level for this profile, but monetization may include other models.')
+      : 'The current verified catalog does not contain a reliable ad-level signal for this app.',
+    systemAds: {
+      controllable: false,
+      note: 'ARCHANGEL cannot disable or modify Fire TV system-level Sponsored-row advertising.'
+    },
+    verified: Boolean(app.verified),
+    lastVerified: app.lastVerified ?? null
+  });
+});
+
 app.get('/apps/:id', (req, res) => {
   const catalog = readJson(CATALOG_PATH, []);
   const found = catalog.find((a) => a.id === req.params.id);

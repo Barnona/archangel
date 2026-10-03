@@ -29,6 +29,12 @@ export default function AdLensDetailScreen({ id, onBack }: { id: string; onBack:
         <Info title="AD LEVEL" value={data.adLevel.toUpperCase()} />
       </View>
 
+      {data.monetization.includes('subscription') ? <View style={styles.card}>
+        <Text style={styles.label}>SUBSCRIPTION SIGNAL</Text>
+        <Text style={styles.value}>SUBSCRIPTION MODEL DETECTED</Text>
+        <Text style={styles.body}>The catalog identifies a subscription model for this app. ARCHANGEL does not currently verify whether a specific subscription tier removes advertising.</Text>
+      </View> : null}
+
       <View style={styles.card}>
         <Text style={styles.label}>AD EXPERIENCE SIGNAL</Text>
         <Text style={styles.value}>{data.adSignal === 'known' ? data.adLevel.toUpperCase() : 'UNKNOWN'}</Text>

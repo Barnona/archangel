@@ -203,7 +203,7 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
         <View style={styles.emptyBox}>
           <Text style={styles.emptyTitle}>No intelligent match</Text>
           <Text style={styles.empty}>Try another search or clear the filters. If the app is missing, send a developer-demand signal.</Text>
-          {query ? <Pressable onPress={() => onRequest?.(query)} style={({focused}) => [styles.requestButton, focused && styles.focusButton]}><Text style={styles.requestButtonText}>REQUEST “{query.toUpperCase()}”</Text></Pressable> : null}
+          {query ? <Pressable onPress={() => onRequest?.(query)} style={({ focused }) => [styles.requestButton, focused && styles.actionFocusButton]}><Text style={styles.requestButtonText}>REQUEST “{query.toUpperCase()}”</Text></Pressable> : null}
         </View>
       ) : null}
     </ScrollView>

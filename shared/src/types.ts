@@ -83,6 +83,11 @@ export interface AdLensProfile {
   lastVerified: string | null;
 }
 
+export interface AdLensDetail extends AdLensProfile {
+  category: string;
+  description: string;
+}
+
 export interface AdLensSummary {
   totalApps: number;
   adSupported: number;

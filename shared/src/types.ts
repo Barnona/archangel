@@ -64,7 +64,10 @@ export interface AppRequest {
 
 export interface DemandEntry {
   appName: string;
+  normalizedName?: string;
   count: number;
+  discoveryRequests?: number;
+  manualRequests?: number;
   lastRequestedAt: string;
 }
 

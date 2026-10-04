@@ -75,7 +75,6 @@ export interface SubscriptionIntelligence {
   offerStatus: 'unknown' | 'available' | 'unavailable';
   explanation: string;
   evidence: AdLensEvidence;
-  subscription: SubscriptionIntelligence;
 }
 
 export interface AdLensEvidence {

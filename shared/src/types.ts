@@ -67,6 +67,17 @@ export interface DemandEntry {
   lastRequestedAt: string;
 }
 
+export interface SubscriptionIntelligence {
+  model: 'subscription' | 'mixed' | 'unknown';
+  adFreeTierKnown: boolean;
+  adFreeTierName: string | null;
+  adFreeTierVerified: boolean;
+  offerStatus: 'unknown' | 'available' | 'unavailable';
+  explanation: string;
+  evidence: AdLensEvidence;
+  subscription: SubscriptionIntelligence;
+}
+
 export interface AdLensEvidence {
   source: string;
   catalogVersion: string;

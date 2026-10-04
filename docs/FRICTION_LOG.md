@@ -137,7 +137,7 @@ and explicitly exposes:
 
 `amazonAppstoreApi.status = not_available`
 
-This led to the documented Amazon Appstore Catalog API feature request.
+This led to the documented feature request for the Amazon Appstore Catalog API.
 
 The same principle now applies to subscriptions:
 
@@ -148,34 +148,7 @@ The same principle now applies to subscriptions:
 
 ---
 
-# 4. Visual evidence policy
-
-The friction log intentionally does **not** fabricate screenshots.
-
-Evidence currently available from the development history includes:
-
-- React Native **“Unable to load script”** error screen.
-- Fire TV/Android TV emulator navigation screenshots/videos.
-- Discover button focus-state screenshots.
-- AdLens `Cannot GET /adlens/prime-video` emulator error.
-- AdLens focused `← ADLENS` contrast issue.
-- PowerShell/Gradle/ADB diagnostic output.
-
-Most of these were shown during development conversations but are **not currently stored as image files in the repository**.
-
-For future entries, visual evidence should preferably be stored as:
-
-`docs/evidence/YYYY-MM-DD/<short-name>.png`
-
-and referenced directly from this log.
-
-Example:
-
-`![AdLens route error](./evidence/2026-10-03/adlens-route-error.png)`
-
----
-
-# 5. Current friction-to-feature evolution
+# 4. Current friction-to-feature evolution
 
 A useful pattern from the project is that several friction points directly produced product improvements.
 
@@ -193,7 +166,7 @@ A useful pattern from the project is that several friction points directly produ
 
 ---
 
-# 6. Current state
+# 5. Current state
 
 ### Completed
 
@@ -238,13 +211,13 @@ Next planned increments:
 
 ---
 
-# 7. Friction log operating rule
+# 6. Friction log operating rule
 
 Every significant friction from this point onward should record:
 
 `Timestamp → Expected → Actual → Friction → Evidence → Root cause → Solution → Time taken`
 
-This log is intended to document not only bugs, but also **product-discovery friction**: situations where the original assumption about Fire TV, Amazon APIs, TV navigation, or user behaviour turned out to be incorrect.
+This log is intended to document not only bugs but also **product-discovery friction**: situations where the original assumptions about Fire TV, Amazon APIs, TV navigation, or user behaviour proved incorrect.
 
 ---
 

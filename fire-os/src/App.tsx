@@ -15,6 +15,7 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>('Home');
   const [selectedApp, setSelectedApp] = useState<string | null>(null);
   const [requestedName, setRequestedName] = useState('');
+  const [requestSource, setRequestSource] = useState<'manual' | 'missing-app-discovery'>('manual');
   const [adLensAppId, setAdLensAppId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -29,14 +30,14 @@ export default function App() {
 
   const openApp = (id: string) => { setSelectedApp(id); setScreen('Details'); };
 
-  const openRequest = (name = '') => { setRequestedName(name); setScreen('Request'); };
+  const openRequest = (name = '', source: 'manual' | 'missing-app-discovery' = 'manual') => { setRequestedName(name); setRequestSource(source); setScreen('Request'); };
 
   if (screen === 'Home') return <HomeScreen navigate={setScreen as (s: 'Discover'|'Pulse'|'Request'|'Profile') => void} />;
-  if (screen === 'Discover') return <DiscoverScreen onOpen={openApp} onRequest={openRequest} />;
+  if (screen === 'Discover') return <DiscoverScreen onOpen={openApp} onRequest={(name) => openRequest(name, 'missing-app-discovery')} />;
   if (screen === 'AdLens') return <AdLensScreen onOpenApp={(id) => { setAdLensAppId(id); setScreen('AdLensDetail'); }} />;
   if (screen === 'AdLensDetail' && adLensAppId) return <AdLensDetailScreen id={adLensAppId} onBack={() => setScreen('AdLens')} />;
   if (screen === 'Details' && selectedApp) return <AppDetailsScreen id={selectedApp} onBack={() => setScreen('Discover')} onOpen={openApp} />;
   if (screen === 'Pulse') return <PulseScreen />;
-  if (screen === 'Request') return <RequestScreen initialName={requestedName} />;
+  if (screen === 'Request') return <RequestScreen initialName={requestedName} source={requestSource} />;
   return <ProfileScreen />;
 }

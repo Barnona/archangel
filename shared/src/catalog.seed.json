@@ -4,139 +4,375 @@
     "name": "Prime Video",
     "category": "Streaming",
     "description": "Video streaming service available in the Fire TV ecosystem.",
-    "platforms": { "fireOs": true, "vega": false },
-    "monetization": ["subscription"],
+    "platforms": {
+      "fireOs": true,
+      "vega": false
+    },
+    "monetization": [
+      "subscription"
+    ],
     "adLevel": "unknown",
-    "alternatives": ["netflix", "disney-plus", "hulu", "plex"],
+    "alternatives": [
+      "netflix",
+      "disney-plus",
+      "hulu",
+      "plex"
+    ],
     "source": "Amazon Fire TV / Alexa launch target reference",
     "availabilityNote": "Availability and catalog vary by region and device.",
     "lastVerified": "2026-10-04",
-    "verified": true
+    "verified": true,
+    "subscription": {
+      "model": "subscription",
+      "adFreeTierKnown": false,
+      "adFreeTierName": null,
+      "adFreeTierVerified": false,
+      "offerStatus": "unknown",
+      "explanation": "A subscription model is recorded, but the current ARCHANGEL catalog does not contain authoritative information confirming an ad-free tier or current subscription offer.",
+      "evidence": {
+        "source": "curated-verified-cache",
+        "catalogVersion": "1.0",
+        "lastVerified": "2026-10-04",
+        "verificationMethod": "curated-catalog"
+      }
+    }
   },
   {
     "id": "netflix",
     "name": "Netflix",
     "category": "Streaming",
     "description": "Subscription streaming service listed by Amazon among Fire TV experiences.",
-    "platforms": { "fireOs": true, "vega": false },
-    "monetization": ["subscription"],
+    "platforms": {
+      "fireOs": true,
+      "vega": false
+    },
+    "monetization": [
+      "subscription"
+    ],
     "adLevel": "unknown",
-    "alternatives": ["prime-video", "disney-plus", "hulu", "plex"],
+    "alternatives": [
+      "prime-video",
+      "disney-plus",
+      "hulu",
+      "plex"
+    ],
     "source": "Amazon Fire TV / Alexa launch target reference",
     "availabilityNote": "Availability and catalog vary by region and device.",
     "lastVerified": "2026-10-04",
-    "verified": true
+    "verified": true,
+    "subscription": {
+      "model": "subscription",
+      "adFreeTierKnown": false,
+      "adFreeTierName": null,
+      "adFreeTierVerified": false,
+      "offerStatus": "unknown",
+      "explanation": "A subscription model is recorded, but the current ARCHANGEL catalog does not contain authoritative information confirming an ad-free tier or current subscription offer.",
+      "evidence": {
+        "source": "curated-verified-cache",
+        "catalogVersion": "1.0",
+        "lastVerified": "2026-10-04",
+        "verificationMethod": "curated-catalog"
+      }
+    }
   },
   {
     "id": "disney-plus",
     "name": "Disney+",
     "category": "Streaming",
     "description": "Streaming service listed by Amazon among Fire TV experiences.",
-    "platforms": { "fireOs": true, "vega": false },
-    "monetization": ["subscription"],
+    "platforms": {
+      "fireOs": true,
+      "vega": false
+    },
+    "monetization": [
+      "subscription"
+    ],
     "adLevel": "unknown",
-    "alternatives": ["prime-video", "netflix", "hulu", "plex"],
+    "alternatives": [
+      "prime-video",
+      "netflix",
+      "hulu",
+      "plex"
+    ],
     "source": "Amazon Fire TV / Alexa launch target reference",
     "availabilityNote": "Availability and catalog vary by region and device.",
     "lastVerified": "2026-10-04",
-    "verified": true
+    "verified": true,
+    "subscription": {
+      "model": "subscription",
+      "adFreeTierKnown": false,
+      "adFreeTierName": null,
+      "adFreeTierVerified": false,
+      "offerStatus": "unknown",
+      "explanation": "A subscription model is recorded, but the current ARCHANGEL catalog does not contain authoritative information confirming an ad-free tier or current subscription offer.",
+      "evidence": {
+        "source": "curated-verified-cache",
+        "catalogVersion": "1.0",
+        "lastVerified": "2026-10-04",
+        "verificationMethod": "curated-catalog"
+      }
+    }
   },
   {
     "id": "hulu",
     "name": "Hulu",
     "category": "Streaming",
     "description": "Streaming service listed in Amazon Fire TV documentation.",
-    "platforms": { "fireOs": true, "vega": false },
-    "monetization": ["subscription"],
+    "platforms": {
+      "fireOs": true,
+      "vega": false
+    },
+    "monetization": [
+      "subscription"
+    ],
     "adLevel": "unknown",
-    "alternatives": ["prime-video", "netflix", "disney-plus", "plex"],
+    "alternatives": [
+      "prime-video",
+      "netflix",
+      "disney-plus",
+      "plex"
+    ],
     "source": "Amazon Fire TV / Alexa launch target reference",
     "availabilityNote": "Availability is region-dependent.",
     "lastVerified": "2026-10-04",
-    "verified": true
+    "verified": true,
+    "subscription": {
+      "model": "subscription",
+      "adFreeTierKnown": false,
+      "adFreeTierName": null,
+      "adFreeTierVerified": false,
+      "offerStatus": "unknown",
+      "explanation": "A subscription model is recorded, but the current ARCHANGEL catalog does not contain authoritative information confirming an ad-free tier or current subscription offer.",
+      "evidence": {
+        "source": "curated-verified-cache",
+        "catalogVersion": "1.0",
+        "lastVerified": "2026-10-04",
+        "verificationMethod": "curated-catalog"
+      }
+    }
   },
   {
     "id": "hbo-max",
     "name": "HBO Max",
     "category": "Streaming",
     "description": "Streaming service present in Amazon Fire TV ecosystem references.",
-    "platforms": { "fireOs": true, "vega": false },
-    "monetization": ["subscription"],
+    "platforms": {
+      "fireOs": true,
+      "vega": false
+    },
+    "monetization": [
+      "subscription"
+    ],
     "adLevel": "unknown",
-    "alternatives": ["prime-video", "netflix", "disney-plus", "plex"],
+    "alternatives": [
+      "prime-video",
+      "netflix",
+      "disney-plus",
+      "plex"
+    ],
     "source": "Amazon Fire TV / Alexa launch target reference",
     "availabilityNote": "Availability and catalog vary by region and device.",
     "lastVerified": "2026-10-04",
-    "verified": true
+    "verified": true,
+    "subscription": {
+      "model": "subscription",
+      "adFreeTierKnown": false,
+      "adFreeTierName": null,
+      "adFreeTierVerified": false,
+      "offerStatus": "unknown",
+      "explanation": "A subscription model is recorded, but the current ARCHANGEL catalog does not contain authoritative information confirming an ad-free tier or current subscription offer.",
+      "evidence": {
+        "source": "curated-verified-cache",
+        "catalogVersion": "1.0",
+        "lastVerified": "2026-10-04",
+        "verificationMethod": "curated-catalog"
+      }
+    }
   },
   {
     "id": "pluto-tv",
     "name": "Pluto TV",
     "category": "Streaming",
     "description": "Free streaming service listed by Amazon among Fire TV experiences.",
-    "platforms": { "fireOs": true, "vega": false },
-    "monetization": ["free", "ad-supported"],
+    "platforms": {
+      "fireOs": true,
+      "vega": false
+    },
+    "monetization": [
+      "free",
+      "ad-supported"
+    ],
     "adLevel": "unknown",
-    "alternatives": ["tubi", "plex", "prime-video"],
+    "alternatives": [
+      "tubi",
+      "plex",
+      "prime-video"
+    ],
     "source": "Amazon Fire TV features / Alexa launch target reference",
     "availabilityNote": "Availability and content vary by region.",
     "lastVerified": "2026-10-04",
-    "verified": true
+    "verified": true,
+    "subscription": {
+      "model": "unknown",
+      "adFreeTierKnown": false,
+      "adFreeTierName": null,
+      "adFreeTierVerified": false,
+      "offerStatus": "unknown",
+      "explanation": "The current ARCHANGEL catalog does not contain authoritative subscription-offer information for this profile.",
+      "evidence": {
+        "source": "curated-verified-cache",
+        "catalogVersion": "1.0",
+        "lastVerified": "2026-10-04",
+        "verificationMethod": "curated-catalog"
+      }
+    }
   },
   {
     "id": "tubi",
     "name": "Tubi",
     "category": "Streaming",
     "description": "Free streaming service listed by Amazon among Fire TV experiences.",
-    "platforms": { "fireOs": true, "vega": false },
-    "monetization": ["free", "ad-supported"],
+    "platforms": {
+      "fireOs": true,
+      "vega": false
+    },
+    "monetization": [
+      "free",
+      "ad-supported"
+    ],
     "adLevel": "unknown",
-    "alternatives": ["pluto-tv", "plex", "prime-video"],
+    "alternatives": [
+      "pluto-tv",
+      "plex",
+      "prime-video"
+    ],
     "source": "Amazon Fire TV features / Alexa launch target reference",
     "availabilityNote": "Availability and content vary by region.",
     "lastVerified": "2026-10-04",
-    "verified": true
+    "verified": true,
+    "subscription": {
+      "model": "unknown",
+      "adFreeTierKnown": false,
+      "adFreeTierName": null,
+      "adFreeTierVerified": false,
+      "offerStatus": "unknown",
+      "explanation": "The current ARCHANGEL catalog does not contain authoritative subscription-offer information for this profile.",
+      "evidence": {
+        "source": "curated-verified-cache",
+        "catalogVersion": "1.0",
+        "lastVerified": "2026-10-04",
+        "verificationMethod": "curated-catalog"
+      }
+    }
   },
   {
     "id": "plex",
     "name": "Plex",
     "category": "Streaming",
     "description": "Streaming and media application included in Amazon's Fire TV Alexa launch target reference.",
-    "platforms": { "fireOs": true, "vega": false },
-    "monetization": ["freemium"],
+    "platforms": {
+      "fireOs": true,
+      "vega": false
+    },
+    "monetization": [
+      "freemium"
+    ],
     "adLevel": "unknown",
-    "alternatives": ["pluto-tv", "tubi", "prime-video"],
+    "alternatives": [
+      "pluto-tv",
+      "tubi",
+      "prime-video"
+    ],
     "source": "Amazon Alexa video launch target reference",
     "availabilityNote": "Availability varies by region and account/service configuration.",
     "lastVerified": "2026-10-04",
-    "verified": true
+    "verified": true,
+    "subscription": {
+      "model": "unknown",
+      "adFreeTierKnown": false,
+      "adFreeTierName": null,
+      "adFreeTierVerified": false,
+      "offerStatus": "unknown",
+      "explanation": "The current ARCHANGEL catalog does not contain authoritative subscription-offer information for this profile.",
+      "evidence": {
+        "source": "curated-verified-cache",
+        "catalogVersion": "1.0",
+        "lastVerified": "2026-10-04",
+        "verificationMethod": "curated-catalog"
+      }
+    }
   },
   {
     "id": "twitch",
     "name": "Twitch",
     "category": "Games",
     "description": "Live-streaming platform included in Amazon's Fire TV Alexa launch target reference.",
-    "platforms": { "fireOs": true, "vega": false },
-    "monetization": ["free", "subscription"],
+    "platforms": {
+      "fireOs": true,
+      "vega": false
+    },
+    "monetization": [
+      "free",
+      "subscription"
+    ],
     "adLevel": "unknown",
-    "alternatives": ["plex"],
+    "alternatives": [
+      "plex"
+    ],
     "source": "Amazon Alexa video launch target reference",
     "availabilityNote": "Availability and content vary by region.",
     "lastVerified": "2026-10-04",
-    "verified": true
+    "verified": true,
+    "subscription": {
+      "model": "subscription",
+      "adFreeTierKnown": false,
+      "adFreeTierName": null,
+      "adFreeTierVerified": false,
+      "offerStatus": "unknown",
+      "explanation": "A subscription model is recorded, but the current ARCHANGEL catalog does not contain authoritative information confirming an ad-free tier or current subscription offer.",
+      "evidence": {
+        "source": "curated-verified-cache",
+        "catalogVersion": "1.0",
+        "lastVerified": "2026-10-04",
+        "verificationMethod": "curated-catalog"
+      }
+    }
   },
   {
     "id": "mubi",
     "name": "MUBI",
     "category": "Streaming",
     "description": "Curated film streaming service included in Amazon's Fire TV Alexa launch target reference.",
-    "platforms": { "fireOs": true, "vega": false },
-    "monetization": ["subscription"],
+    "platforms": {
+      "fireOs": true,
+      "vega": false
+    },
+    "monetization": [
+      "subscription"
+    ],
     "adLevel": "unknown",
-    "alternatives": ["prime-video", "netflix", "plex"],
+    "alternatives": [
+      "prime-video",
+      "netflix",
+      "plex"
+    ],
     "source": "Amazon Alexa video launch target reference",
     "availabilityNote": "Availability varies by region.",
     "lastVerified": "2026-10-04",
-    "verified": true
+    "verified": true,
+    "subscription": {
+      "model": "subscription",
+      "adFreeTierKnown": false,
+      "adFreeTierName": null,
+      "adFreeTierVerified": false,
+      "offerStatus": "unknown",
+      "explanation": "A subscription model is recorded, but the current ARCHANGEL catalog does not contain authoritative information confirming an ad-free tier or current subscription offer.",
+      "evidence": {
+        "source": "curated-verified-cache",
+        "catalogVersion": "1.0",
+        "lastVerified": "2026-10-04",
+        "verificationMethod": "curated-catalog"
+      }
+    }
   }
 ]

@@ -328,6 +328,31 @@ curl http://localhost:4000/health
 curl http://localhost:4000/catalog/status
 ```
 
+### AdLens evidence refresh
+AdLens history is maintained by an explicit refresh lifecycle rather than by read requests.
+
+The API performs a baseline refresh when the backend starts and then repeats it at the configured interval:
+
+```env
+ADLENS_REFRESH_INTERVAL_MS=86400000
+```
+
+Manual development refresh:
+
+```powershell
+curl.exe -X POST http://localhost:4000/adlens/refresh
+```
+
+The refresh response reports:
+
+- apps checked
+- snapshots added
+- unchanged apps
+- detected data-signal changes
+
+The refresh operates on ARCHANGEL's curated verified catalog. It does not claim access to an Amazon-wide live Appstore catalog.
+
+
 ### Categories
 ```powershell
 curl http://localhost:4000/apps/categories

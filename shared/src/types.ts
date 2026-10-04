@@ -58,6 +58,7 @@ export interface AppRequest {
   id: string;
   appName: string;
   note?: string;
+  source?: 'manual' | 'missing-app-discovery';
   createdAt: string;
 }
 

@@ -99,6 +99,37 @@ export interface AdLensProfile {
   verified: boolean;
   lastVerified: string | null;
   evidence: AdLensEvidence;
+  subscription: SubscriptionIntelligence;
+}
+
+export interface MonetizationSnapshot {
+  id: string;
+  appId: string;
+  appName: string;
+  capturedAt: string;
+  catalogVersion: string;
+  monetization: MonetizationModel[];
+  adSignal: 'known' | 'unknown';
+  adLevel: AdLevel;
+  subscriptionModel: 'subscription' | 'mixed' | 'unknown';
+  adFreeTierKnown: boolean;
+  adFreeTierName: string | null;
+  evidence: AdLensEvidence;
+}
+
+export interface MonetizationChange {
+  field: 'adSignal' | 'adLevel' | 'monetization' | 'subscriptionModel' | 'adFreeTier';
+  previous: string;
+  current: string;
+  kind: 'data-signal-changed';
+}
+
+export interface AdLensHistory {
+  appId: string;
+  appName: string;
+  snapshots: MonetizationSnapshot[];
+  changes: MonetizationChange[];
+  generatedAt: string;
 }
 
 export interface AdLensDetail extends AdLensProfile {

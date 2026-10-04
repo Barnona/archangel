@@ -289,6 +289,7 @@ app.post('/ai/app-discovery', async (req, res) => {
 
 app.get('/adlens', (_req, res) => {
   const catalog = readJson(CATALOG_PATH, []);
+  catalog.filter(a => a.platforms?.fireOs).forEach(updateHistoryForApp);
   const profiles = catalog
     .filter(a => a.platforms?.fireOs)
     .map(a => {

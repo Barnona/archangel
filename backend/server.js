@@ -339,6 +339,7 @@ app.post('/adlens/refresh', (_req, res) => {
 
 app.get('/adlens', (_req, res) => {
   const catalog = readJson(CATALOG_PATH, []);
+  const history = readJson(MONETIZATION_HISTORY_PATH, {});
   const profiles = catalog
     .filter(a => a.platforms?.fireOs)
     .map(a => {
@@ -371,8 +372,8 @@ app.get('/adlens', (_req, res) => {
           verificationMethod: 'curated-catalog',
         },
         history: {
-          status: Array.isArray(readJson(MONETIZATION_HISTORY_PATH, {})[a.id]) && readJson(MONETIZATION_HISTORY_PATH, {})[a.id].length > 1 ? 'changes-recorded' : 'baseline-recorded',
-          snapshotCount: Array.isArray(readJson(MONETIZATION_HISTORY_PATH, {})[a.id]) ? readJson(MONETIZATION_HISTORY_PATH, {})[a.id].length : 1,
+          status: Array.isArray(history[a.id]) && history[a.id].length > 1 ? 'changes-recorded' : 'baseline-recorded',
+          snapshotCount: Array.isArray(history[a.id]) ? history[a.id].length : 0,
         },
         subscription: a.subscription || {
           model: a.monetization.includes('subscription') ? 'subscription' : 'unknown',

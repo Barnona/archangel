@@ -478,12 +478,13 @@ app.get('/apps/:id', (req, res) => {
 app.post('/requests', (req, res) => {
   const appName = String(req.body.appName || '').trim();
   const note = String(req.body.note || '').trim();
+  const source = req.body.source === 'missing-app-discovery' ? 'missing-app-discovery' : 'manual';
   if (appName.length < 2 || appName.length > 80) {
     return res.status(400).json({ error: 'appName must be 2-80 characters' });
   }
   if (note.length > 300) return res.status(400).json({ error: 'note too long' });
   const requests = readJson(REQUESTS_PATH, []);
-  const entry = { id: crypto.randomUUID(), appName, note: note || undefined, createdAt: new Date().toISOString() };
+  const entry = { id: crypto.randomUUID(), appName, note: note || undefined, source, createdAt: new Date().toISOString() };
   requests.push(entry);
   writeJson(REQUESTS_PATH, requests);
   res.status(201).json(entry);

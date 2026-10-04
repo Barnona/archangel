@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import type { AdLensProfile } from '../../../shared/src/types';
+import type { AdLensHistory, AdLensProfile } from '../../../shared/src/types';
 import { api } from '../lib/api';
 import { colors } from '../theme/theme';
 
@@ -10,7 +10,12 @@ export default function AdLensDetailScreen({ id, onBack }: { id: string; onBack:
   const [backFocused, setBackFocused] = useState(false);
   const [data, setData] = useState<Detail | null>(null);
   const [error, setError] = useState('');
-  useEffect(() => { api.adLensApp(id).then(setData).catch(e => setError(e instanceof Error ? e.message : 'Unable to load AdLens profile')); }, [id]);
+  const [history, setHistory] = useState<AdLensHistory | null>(null);
+  useEffect(() => {
+    Promise.all([api.adLensApp(id), api.adLensHistory(id)])
+      .then(([profile, timeline]) => { setData(profile); setHistory(timeline); })
+      .catch(e => setError(e instanceof Error ? e.message : 'Unable to load AdLens profile'));
+  }, [id]);
 
   if (error) return <View style={styles.center}><Text style={styles.error}>{error}</Text><Pressable onPress={onBack} style={styles.button}><Text style={styles.buttonText}>BACK</Text></Pressable></View>;
   if (!data) return <View style={styles.center}><ActivityIndicator size="large" color={colors.red} /></View>;
@@ -70,6 +75,33 @@ export default function AdLensDetailScreen({ id, onBack }: { id: string; onBack:
         <Text style={styles.body}>{data.verified ? 'This profile is marked verified in the current ARCHANGEL catalog.' : 'This profile is not currently marked as verified.'}</Text>
       </View>
 
+
+      <View style={styles.card}>
+        <Text style={styles.label}>MONETIZATION HISTORY</Text>
+        <Text style={styles.value}>{history?.snapshots.length ? `${history.snapshots.length} SNAPSHOT${history.snapshots.length === 1 ? '' : 'S'} RECORDED` : 'NO HISTORY RECORDED'}</Text>
+        {history?.snapshots.length === 1 ? (
+          <Text style={styles.body}>Initial baseline captured from the current ARCHANGEL catalog. No earlier state is being claimed.</Text>
+        ) : null}
+        {history?.snapshots.slice().reverse().map(snapshot => (
+          <View key={snapshot.id} style={styles.historyRow}>
+            <Text style={styles.meta}>{snapshot.capturedAt}</Text>
+            <Text style={styles.historyTitle}>{snapshot.adLevel.toUpperCase()} • {snapshot.subscriptionModel.toUpperCase()}</Text>
+            <Text style={styles.body}>{snapshot.monetization.join(' • ')}</Text>
+          </View>
+        ))}
+        {history?.changes.length ? (
+          <View style={styles.changeBox}>
+            <Text style={styles.meta}>RECORDED DATA SIGNAL CHANGES</Text>
+            {history.changes.slice().reverse().map((change, index) => (
+              <Text key={`${change.field}-${index}`} style={styles.body}>
+                {change.field.toUpperCase()} • {change.previous} → {change.current}
+              </Text>
+            ))}
+          </View>
+        ) : (
+          <Text style={styles.body}>No monetization-state change has been observed in the recorded snapshots.</Text>
+        )}
+      </View>
       <View style={styles.warning}>
         <Text style={styles.label}>FIRE TV SYSTEM ADS</Text>
         <Text style={styles.value}>CONTROL NOT AVAILABLE</Text>
@@ -108,6 +140,9 @@ const styles = StyleSheet.create({
   verificationItem:{borderTopWidth:1,borderTopColor:colors.line,paddingVertical:10},
   verificationValue:{color:colors.text,fontSize:14,fontWeight:'800',marginTop:4},
   meta:{color:'#777777',fontSize:11,letterSpacing:1,marginTop:12},
+  historyRow:{borderTopWidth:1,borderTopColor:colors.line,paddingVertical:11,marginTop:10},
+  historyTitle:{color:colors.text,fontSize:15,fontWeight:'900',marginTop:4},
+  changeBox:{marginTop:10,paddingTop:10,borderTopWidth:1,borderTopColor:colors.line},
   warning:{width:760,backgroundColor:colors.panel2,borderWidth:1,borderColor:colors.line,borderRadius:10,padding:20,marginTop:2},
   button:{marginTop:16,backgroundColor:colors.red,paddingHorizontal:20,paddingVertical:12,borderRadius:8},
   buttonText:{color:'#fff',fontWeight:'900'},

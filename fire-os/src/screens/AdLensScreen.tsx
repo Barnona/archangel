@@ -4,7 +4,7 @@ import type { AdLensSummary } from '../../../shared/src/types';
 import { api } from '../lib/api';
 import { colors } from '../theme/theme';
 
-type Filter = 'all' | 'ad-supported' | 'no-known-ads' | 'unknown';
+type Filter = 'all' | 'ad-supported' | 'subscription' | 'no-known-ads' | 'unknown';
 
 export default function AdLensScreen({ onOpenApp }: { onOpenApp: (id: string) => void }) {
   const [filter, setFilter] = useState<Filter>('all');
@@ -16,6 +16,7 @@ export default function AdLensScreen({ onOpenApp }: { onOpenApp: (id: string) =>
   if (!data) return <View style={styles.center}><ActivityIndicator size="large" color={colors.red} /></View>;
   const filtered = data.profiles.filter(profile => {
     if (filter === 'ad-supported') return profile.monetization.includes('ad-supported');
+    if (filter === 'subscription') return profile.subscription.model === 'subscription';
     if (filter === 'no-known-ads') return profile.adSignal === 'known' && profile.adLevel === 'none';
     if (filter === 'unknown') return profile.adSignal === 'unknown';
     return true;
@@ -23,6 +24,7 @@ export default function AdLensScreen({ onOpenApp }: { onOpenApp: (id: string) =>
   const filters: { key: Filter; label: string; count: number }[] = [
     { key: 'all', label: 'ALL', count: data.totalApps },
     { key: 'ad-supported', label: 'AD-SUPPORTED', count: data.adSupported },
+    { key: 'subscription', label: 'SUBSCRIPTION', count: data.profiles.filter(p => p.subscription.model === 'subscription').length },
     { key: 'no-known-ads', label: 'NO KNOWN ADS', count: data.profiles.filter(p => p.adSignal === 'known' && p.adLevel === 'none').length },
     { key: 'unknown', label: 'UNKNOWN', count: data.unknownAdLevels },
   ];
@@ -31,11 +33,11 @@ export default function AdLensScreen({ onOpenApp }: { onOpenApp: (id: string) =>
       <Text style={styles.kicker}>ADLENS</Text>
       <Text style={styles.title}>Ad Experience Intelligence</Text>
       <Text style={styles.sub}>Understand how apps are monetized and what ARCHANGEL can actually observe.</Text>
-      <View style={styles.row}><Metric title="CATALOG APPS" value={String(data.totalApps)} /><Metric title="AD-SUPPORTED" value={String(data.adSupported)} /><Metric title="KNOWN AD SIGNALS" value={String(data.knownAdLevels)} /></View>
+      <View style={styles.row}><Metric title="CATALOG APPS" value={String(data.totalApps)} /><Metric title="AD-SUPPORTED" value={String(data.adSupported)} /><Metric title="KNOWN AD SIGNALS" value={String(data.knownAdLevels)} /><Metric title="SUBSCRIPTION APPS" value={String(data.profiles.filter(p => p.subscription.model === 'subscription').length)} /></View>
       <View style={styles.notice}><Text style={styles.noticeTitle}>SYSTEM AD CONTROL</Text><Text style={styles.noticeValue}>NOT AVAILABLE</Text><Text style={styles.noticeText}>{data.systemAdControl.note}</Text></View>
       <Text style={styles.section}>APP AD PROFILES</Text>
       <View style={styles.filters}>{filters.map(item => <Pressable key={item.key} onPress={() => setFilter(item.key)} onFocus={() => setFocusedFilter(item.key)} onBlur={() => setFocusedFilter(null)} style={[styles.filter, filter === item.key && styles.filterActive, focusedFilter === item.key && styles.filterFocused]}><Text style={[styles.filterText, (filter === item.key || focusedFilter === item.key) && styles.filterTextActive]}>{item.label} • {item.count}</Text></Pressable>)}</View>
-      {filtered.map(profile => <Pressable key={profile.appId} onPress={() => onOpenApp(profile.appId)} style={({ focused }) => [styles.card, focused && styles.cardFocused]}><View style={styles.cardHead}><View style={styles.main}><Text style={styles.appName}>{profile.appName}</Text><Text style={styles.meta}>{profile.monetization.join(' • ')}</Text></View><Text style={[styles.badge, profile.adSignal === 'known' ? styles.known : styles.unknown]}>{profile.adSignal === 'known' ? profile.adLevel.toUpperCase() : 'UNKNOWN'}</Text></View><Text style={styles.explanation}>{profile.explanation}</Text><Text style={styles.source}>{profile.transparency === 'verified' ? 'SOURCE-CHECKED' : 'LIMITED SIGNAL'}{profile.lastVerified ? ` • verified ${profile.lastVerified}` : ''}</Text></Pressable>)}
+      {filtered.map(profile => <Pressable key={profile.appId} onPress={() => onOpenApp(profile.appId)} style={({ focused }) => [styles.card, focused && styles.cardFocused]}><View style={styles.cardHead}><View style={styles.main}><Text style={styles.appName}>{profile.appName}</Text><Text style={styles.meta}>{profile.monetization.join(' • ')}</Text></View><Text style={[styles.badge, profile.adSignal === 'known' ? styles.known : styles.unknown]}>{profile.adSignal === 'known' ? profile.adLevel.toUpperCase() : 'UNKNOWN'}</Text></View><Text style={styles.explanation}>{profile.explanation}</Text><Text style={styles.source}>{profile.transparency === 'verified' ? 'SOURCE-CHECKED' : 'LIMITED SIGNAL'}{profile.lastVerified ? ` • verified ${profile.lastVerified}` : ''}{profile.subscription.model === 'subscription' ? ` • SUBSCRIPTION${profile.subscription.adFreeTierVerified ? ' • AD-FREE VERIFIED' : ' • AD-FREE UNKNOWN'}` : ''}</Text></Pressable>)}
       <View style={styles.footerCard}><Text style={styles.noticeTitle}>WHAT ADLENS DOES</Text><Text style={styles.footerText}>AdLens provides transparency about catalogued app monetization and known advertising signals. It does not intercept, suppress, or modify advertising traffic, and it does not claim control over Fire TV system advertising.</Text></View>
     </ScrollView>
   );

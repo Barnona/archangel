@@ -50,16 +50,16 @@ export default function AdLensDetailScreen({ id, onBack }: { id: string; onBack:
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.label}>AD EXPERIENCE SIGNAL</Text>
-        <Text style={styles.value}>{data.adSignal === 'known' ? data.adLevel.toUpperCase() : 'UNKNOWN'}</Text>
-        <Text style={styles.body}>{data.explanation}</Text>
-      </View>
-
-      <View style={styles.card}>
         <Text style={styles.label}>VERIFICATION</Text>
         <Text style={styles.value}>{data.transparency === 'verified' ? 'VERIFIED' : 'LIMITED SIGNAL'}</Text>
-        <Text style={styles.body}>{data.verified ? 'This profile is marked verified in the ARCHANGEL catalog.' : 'This profile is not currently marked as verified.'}</Text>
-        {data.lastVerified ? <Text style={styles.meta}>LAST VERIFIED • {data.lastVerified}</Text> : null}
+        <View style={styles.verificationGrid}>
+          <VerificationItem title="STATUS" value={data.verified ? 'VERIFIED' : 'NOT VERIFIED'} />
+          <VerificationItem title="SOURCE" value="ARCHANGEL CURATED VERIFIED CATALOG" />
+          <VerificationItem title="CATALOG VERSION" value={data.evidence.catalogVersion} />
+          <VerificationItem title="VERIFICATION METHOD" value={data.evidence.verificationMethod === 'curated-catalog' ? 'CURATED CATALOG REVIEW' : data.evidence.verificationMethod.toUpperCase()} />
+          <VerificationItem title="LAST VERIFIED" value={data.evidence.lastVerified ?? 'NOT RECORDED'} />
+        </View>
+        <Text style={styles.body}>{data.verified ? 'This profile is marked verified in the current ARCHANGEL catalog.' : 'This profile is not currently marked as verified.'}</Text>
       </View>
 
       <View style={styles.warning}>
@@ -73,6 +73,10 @@ export default function AdLensDetailScreen({ id, onBack }: { id: string; onBack:
 
 function Info({ title, value }: { title: string; value: string }) {
   return <View style={styles.info}><Text style={styles.label}>{title}</Text><Text style={styles.infoValue}>{value}</Text></View>;
+}
+
+function VerificationItem({ title, value }: { title: string; value: string }) {
+  return <View style={styles.verificationItem}><Text style={styles.meta}>{title}</Text><Text style={styles.verificationValue}>{value}</Text></View>;
 }
 
 const styles = StyleSheet.create({
@@ -92,6 +96,9 @@ const styles = StyleSheet.create({
   card:{width:760,backgroundColor:colors.panel,borderWidth:1,borderColor:colors.line,borderRadius:10,padding:20,marginTop:2,marginBottom:12},
   value:{color:colors.text,fontSize:22,fontWeight:'900',marginTop:6},
   body:{color:colors.muted,fontSize:15,lineHeight:23,marginTop:7},
+  verificationGrid:{marginTop:14},
+  verificationItem:{borderTopWidth:1,borderTopColor:colors.line,paddingVertical:10},
+  verificationValue:{color:colors.text,fontSize:14,fontWeight:'800',marginTop:4},
   meta:{color:'#777777',fontSize:11,letterSpacing:1,marginTop:12},
   warning:{width:760,backgroundColor:colors.panel2,borderWidth:1,borderColor:colors.line,borderRadius:10,padding:20,marginTop:2},
   button:{marginTop:16,backgroundColor:colors.red,paddingHorizontal:20,paddingVertical:12,borderRadius:8},

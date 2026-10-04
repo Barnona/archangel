@@ -29,11 +29,19 @@ export default function AdLensDetailScreen({ id, onBack }: { id: string; onBack:
         <Info title="AD LEVEL" value={data.adLevel.toUpperCase()} />
       </View>
 
-      {data.monetization.includes('subscription') ? <View style={styles.card}>
-        <Text style={styles.label}>SUBSCRIPTION SIGNAL</Text>
-        <Text style={styles.value}>SUBSCRIPTION MODEL DETECTED</Text>
-        <Text style={styles.body}>The catalog identifies a subscription model for this app. ARCHANGEL does not currently verify whether a specific subscription tier removes advertising.</Text>
-      </View> : null}
+      <View style={styles.card}>
+        <Text style={styles.label}>SUBSCRIPTION INTELLIGENCE</Text>
+        <Text style={styles.value}>
+          {data.subscription.model === 'subscription' ? 'SUBSCRIPTION MODEL DETECTED' : 'NO VERIFIED SUBSCRIPTION SIGNAL'}
+        </Text>
+        <View style={styles.verificationGrid}>
+          <VerificationItem title="AD-FREE TIER" value={data.subscription.adFreeTierKnown ? (data.subscription.adFreeTierName ?? 'KNOWN') : 'UNKNOWN'} />
+          <VerificationItem title="OFFER STATUS" value={data.subscription.offerStatus.toUpperCase()} />
+          <VerificationItem title="AD-FREE VERIFIED" value={data.subscription.adFreeTierVerified ? 'VERIFIED' : 'NOT VERIFIED'} />
+          <VerificationItem title="EVIDENCE" value={data.subscription.evidence.verificationMethod === 'curated-catalog' ? 'ARCHANGEL CURATED VERIFIED CATALOG' : data.subscription.evidence.verificationMethod.toUpperCase()} />
+        </View>
+        <Text style={styles.body}>{data.subscription.explanation}</Text>
+      </View>
 
       <View style={styles.card}>
         <Text style={styles.label}>WHY THIS SIGNAL?</Text>

@@ -67,6 +67,13 @@ export interface DemandEntry {
   lastRequestedAt: string;
 }
 
+export interface AdLensEvidence {
+  source: string;
+  catalogVersion: string;
+  lastVerified: string | null;
+  verificationMethod: 'curated-catalog' | 'official-amazon-api' | 'unknown';
+}
+
 export interface AdLensProfile {
   appId: string;
   appName: string;
@@ -81,6 +88,7 @@ export interface AdLensProfile {
   };
   verified: boolean;
   lastVerified: string | null;
+  evidence: AdLensEvidence;
 }
 
 export interface AdLensDetail extends AdLensProfile {

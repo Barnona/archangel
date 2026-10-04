@@ -195,9 +195,9 @@ A useful pattern from the project is that several friction points directly produ
 
 Next planned increments:
 
-1. Evidence/source panel
-2. “Why this signal?” explanation
-3. Verification metadata presentation
+1. Historical ad/monetization changes
+2. Better profile filtering and focus navigation
+3. Subscription Intelligence
 4. Historical ad/monetization changes
 5. Better profile filtering and focus navigation
 6. Subscription Intelligence
@@ -221,4 +221,4 @@ This log is intended to document not only bugs but also **product-discovery fric
 
 ## Last updated
 
-**2026-10-04 — AdLens development phase**
+**2026-10-04 — AdLens Evidence Model phase**

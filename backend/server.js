@@ -10,6 +10,7 @@ const PORT = Number(process.env.PORT || 4000);
 const HOST = process.env.HOST || '0.0.0.0';
 const CATALOG_PATH = path.join(__dirname, '..', 'shared', 'src', 'catalog.seed.json');
 const REQUESTS_PATH = path.join(__dirname, 'data', 'requests.json');
+const MONETIZATION_HISTORY_PATH = path.join(__dirname, 'data', 'monetization-history.json');
 
 const CATALOG_SOURCE = 'curated-verified-cache';
 const CATALOG_VERSION = '1.0';
@@ -26,6 +27,106 @@ const writeJson = (p, data) => {
   fs.mkdirSync(path.dirname(p), { recursive: true });
   fs.writeFileSync(p, JSON.stringify(data, null, 2));
 };
+
+function subscriptionFor(app) {
+  return app.subscription || {
+    model: app.monetization.includes('subscription') ? 'subscription' : 'unknown',
+    adFreeTierKnown: false,
+    adFreeTierName: null,
+  };
+}
+
+function buildMonetizationSnapshot(app, capturedAt = new Date().toISOString()) {
+  const subscription = subscriptionFor(app);
+  return {
+    id: crypto.randomUUID(),
+    appId: app.id,
+    appName: app.name,
+    capturedAt,
+    catalogVersion: CATALOG_VERSION,
+    monetization: [...app.monetization],
+    adSignal: app.adLevel !== 'unknown' ? 'known' : 'unknown',
+    adLevel: app.adLevel,
+    subscriptionModel: subscription.model,
+    adFreeTierKnown: Boolean(subscription.adFreeTierKnown),
+    adFreeTierName: subscription.adFreeTierName ?? null,
+    evidence: {
+      source: CATALOG_SOURCE,
+      catalogVersion: CATALOG_VERSION,
+      lastVerified: app.lastVerified ?? null,
+      verificationMethod: 'curated-catalog',
+    },
+  };
+}
+
+function snapshotChanges(previous, current) {
+  const changes = [];
+  const fields = [
+    ['adSignal', previous.adSignal, current.adSignal],
+    ['adLevel', previous.adLevel, current.adLevel],
+    ['monetization', previous.monetization.join('|'), current.monetization.join('|')],
+    ['subscriptionModel', previous.subscriptionModel, current.subscriptionModel],
+    ['adFreeTier', previous.adFreeTierName || 'UNKNOWN', current.adFreeTierName || 'UNKNOWN'],
+  ];
+  for (const [field, previousValue, currentValue] of fields) {
+    if (String(previousValue) !== String(currentValue)) {
+      changes.push({
+        field,
+        previous: String(previousValue),
+        current: String(currentValue),
+        kind: 'data-signal-changed',
+      });
+    }
+  }
+  return changes;
+}
+
+function updateHistoryForApp(app) {
+  const history = readJson(MONETIZATION_HISTORY_PATH, {});
+  const snapshots = Array.isArray(history[app.id]) ? history[app.id] : [];
+  const current = buildMonetizationSnapshot(app);
+  const previous = snapshots[snapshots.length - 1];
+  const sameState = previous && JSON.stringify({
+    monetization: previous.monetization,
+    adSignal: previous.adSignal,
+    adLevel: previous.adLevel,
+    subscriptionModel: previous.subscriptionModel,
+    adFreeTierKnown: previous.adFreeTierKnown,
+    adFreeTierName: previous.adFreeTierName,
+  }) === JSON.stringify({
+    monetization: current.monetization,
+    adSignal: current.adSignal,
+    adLevel: current.adLevel,
+    subscriptionModel: current.subscriptionModel,
+    adFreeTierKnown: current.adFreeTierKnown,
+    adFreeTierName: current.adFreeTierName,
+  });
+  if (!previous || !sameState) {
+    snapshots.push(current);
+    history[app.id] = snapshots;
+    writeJson(MONETIZATION_HISTORY_PATH, history);
+  }
+  return history[app.id] || [current];
+}
+
+function historyResponse(app) {
+  const snapshots = updateHistoryForApp(app);
+  const changes = [];
+  for (let i = 1; i < snapshots.length; i += 1) {
+    changes.push(...snapshotChanges(snapshots[i - 1], snapshots[i]).map(change => ({
+      ...change,
+      previous: `${snapshots[i - 1].capturedAt}: ${change.previous}`,
+      current: `${snapshots[i].capturedAt}: ${change.current}`,
+    })));
+  }
+  return {
+    appId: app.id,
+    appName: app.name,
+    snapshots,
+    changes,
+    generatedAt: new Date().toISOString(),
+  };
+}
 
 const tokenize = (value) => String(value || '').toLowerCase().split(/[^a-z0-9+]+/).filter(Boolean);
 
@@ -248,6 +349,14 @@ app.get('/adlens', (_req, res) => {
     },
     generatedAt: new Date().toISOString(),
   });
+});
+
+
+app.get('/adlens/:appId/history', (req, res) => {
+  const catalog = readJson(CATALOG_PATH, []);
+  const app = catalog.find(a => a.id === req.params.appId && a.platforms?.fireOs);
+  if (!app) return res.status(404).json({ error: 'AdLens history not found' });
+  res.json(historyResponse(app));
 });
 
 app.get('/adlens/:appId', (req, res) => {

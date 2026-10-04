@@ -475,32 +475,78 @@ app.get('/apps/:id', (req, res) => {
   res.json({ ...found, alternativeProfiles });
 });
 
+function normalizeRequestedAppName(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\\bapp\\b/g, ' ')
+    .replace(/\\s+/g, ' ')
+    .trim();
+}
+
+function displayRequestedAppName(value) {
+  return String(value || '')
+    .trim()
+    .replace(/\\s+/g, ' ');
+}
+
 app.post('/requests', (req, res) => {
-  const appName = String(req.body.appName || '').trim();
+  const appName = displayRequestedAppName(req.body.appName);
   const note = String(req.body.note || '').trim();
   const source = req.body.source === 'missing-app-discovery' ? 'missing-app-discovery' : 'manual';
   if (appName.length < 2 || appName.length > 80) {
     return res.status(400).json({ error: 'appName must be 2-80 characters' });
   }
   if (note.length > 300) return res.status(400).json({ error: 'note too long' });
+
   const requests = readJson(REQUESTS_PATH, []);
-  const entry = { id: crypto.randomUUID(), appName, note: note || undefined, source, createdAt: new Date().toISOString() };
+  const normalizedName = normalizeRequestedAppName(appName);
+  const existing = requests.find(r => normalizeRequestedAppName(r.appName) === normalizedName);
+
+  const entry = {
+    id: crypto.randomUUID(),
+    appName,
+    normalizedName,
+    note: note || undefined,
+    source,
+    createdAt: new Date().toISOString(),
+  };
   requests.push(entry);
   writeJson(REQUESTS_PATH, requests);
-  res.status(201).json(entry);
+
+  res.status(201).json({
+    ...entry,
+    duplicateOf: existing ? existing.id : null,
+    demandCount: requests.filter(r => normalizeRequestedAppName(r.appName) === normalizedName).length,
+  });
 });
 
 app.get('/requests/demand', (_req, res) => {
   const requests = readJson(REQUESTS_PATH, []);
   const map = new Map();
+
   for (const r of requests) {
-    const key = r.appName.trim().toLowerCase();
-    const cur = map.get(key) || { appName: r.appName.trim(), count: 0, lastRequestedAt: r.createdAt };
+    const key = r.normalizedName || normalizeRequestedAppName(r.appName);
+    const cur = map.get(key) || {
+      appName: r.appName.trim(),
+      normalizedName: key,
+      count: 0,
+      discoveryRequests: 0,
+      manualRequests: 0,
+      lastRequestedAt: r.createdAt,
+    };
     cur.count += 1;
-    if (r.createdAt > cur.lastRequestedAt) cur.lastRequestedAt = r.createdAt;
+    if (r.source === 'missing-app-discovery') cur.discoveryRequests += 1;
+    else cur.manualRequests += 1;
+    if (r.createdAt > cur.lastRequestedAt) {
+      cur.lastRequestedAt = r.createdAt;
+      cur.appName = r.appName.trim();
+    }
     map.set(key, cur);
   }
-  res.json([...map.values()].sort((a, b) => b.count - a.count));
+
+  res.json([...map.values()].sort((a, b) => b.count - a.count || b.lastRequestedAt.localeCompare(a.lastRequestedAt)));
 });
 
 const server = app.listen(PORT, HOST, () => {

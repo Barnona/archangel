@@ -129,16 +129,6 @@ NEXT → Subscription Intelligence UI → Evidence/source presentation → Offer
 
 FUTURE → Amazon Subscription Discovery API → Amazon-managed purchase flow → Entitlement verification → Ad-free tier discovery
 
-## 14. Relationship to Existing Amazon Feature Requests
-
-### Request #1 — Amazon Appstore Application Catalog API
-Official read-only catalog access for application discovery and metadata.
-
-### Request #2 — Amazon Subscription Discovery & Entitlement Integration
-Official subscription offer discovery, ad-free plan information where available, Amazon-managed purchase flow, and authorized entitlement verification.
-
-These remain separate requests because they address different platform capabilities.
-
 ## Status
 
 PROPOSED — FUTURE AMAZON FEATURE REQUEST

@@ -46,10 +46,10 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ request: requestText }),
     }),
-  createRequest: (appName: string, note: string) =>
+  createRequest: (appName: string, note: string, source: AppRequest['source'] = 'manual') =>
     request<AppRequest>('/requests', {
       method: 'POST',
-      body: JSON.stringify({ appName, note }),
+      body: JSON.stringify({ appName, note, source }),
     }),
   demand: () => request<DemandEntry[]>('/requests/demand'),
   adLens: () => request<AdLensSummary>('/adlens'),

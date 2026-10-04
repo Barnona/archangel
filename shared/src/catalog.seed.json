@@ -10,7 +10,7 @@
     "alternatives": ["netflix", "disney-plus", "hulu", "plex"],
     "source": "Amazon Fire TV / Alexa launch target reference",
     "availabilityNote": "Availability and catalog vary by region and device.",
-    "lastVerified": "2026-10-01",
+    "lastVerified": "2026-10-04",
     "verified": true
   },
   {
@@ -24,7 +24,7 @@
     "alternatives": ["prime-video", "disney-plus", "hulu", "plex"],
     "source": "Amazon Fire TV / Alexa launch target reference",
     "availabilityNote": "Availability and catalog vary by region and device.",
-    "lastVerified": "2026-10-01",
+    "lastVerified": "2026-10-04",
     "verified": true
   },
   {
@@ -38,7 +38,7 @@
     "alternatives": ["prime-video", "netflix", "hulu", "plex"],
     "source": "Amazon Fire TV / Alexa launch target reference",
     "availabilityNote": "Availability and catalog vary by region and device.",
-    "lastVerified": "2026-10-01",
+    "lastVerified": "2026-10-04",
     "verified": true
   },
   {
@@ -52,7 +52,7 @@
     "alternatives": ["prime-video", "netflix", "disney-plus", "plex"],
     "source": "Amazon Fire TV / Alexa launch target reference",
     "availabilityNote": "Availability is region-dependent.",
-    "lastVerified": "2026-10-01",
+    "lastVerified": "2026-10-04",
     "verified": true
   },
   {
@@ -66,7 +66,7 @@
     "alternatives": ["prime-video", "netflix", "disney-plus", "plex"],
     "source": "Amazon Fire TV / Alexa launch target reference",
     "availabilityNote": "Availability and catalog vary by region and device.",
-    "lastVerified": "2026-10-01",
+    "lastVerified": "2026-10-04",
     "verified": true
   },
   {
@@ -80,7 +80,7 @@
     "alternatives": ["tubi", "plex", "prime-video"],
     "source": "Amazon Fire TV features / Alexa launch target reference",
     "availabilityNote": "Availability and content vary by region.",
-    "lastVerified": "2026-10-01",
+    "lastVerified": "2026-10-04",
     "verified": true
   },
   {
@@ -94,7 +94,7 @@
     "alternatives": ["pluto-tv", "plex", "prime-video"],
     "source": "Amazon Fire TV features / Alexa launch target reference",
     "availabilityNote": "Availability and content vary by region.",
-    "lastVerified": "2026-10-01",
+    "lastVerified": "2026-10-04",
     "verified": true
   },
   {
@@ -108,7 +108,7 @@
     "alternatives": ["pluto-tv", "tubi", "prime-video"],
     "source": "Amazon Alexa video launch target reference",
     "availabilityNote": "Availability varies by region and account/service configuration.",
-    "lastVerified": "2026-10-01",
+    "lastVerified": "2026-10-04",
     "verified": true
   },
   {
@@ -122,7 +122,7 @@
     "alternatives": ["plex"],
     "source": "Amazon Alexa video launch target reference",
     "availabilityNote": "Availability and content vary by region.",
-    "lastVerified": "2026-10-01",
+    "lastVerified": "2026-10-04",
     "verified": true
   },
   {
@@ -136,7 +136,7 @@
     "alternatives": ["prime-video", "netflix", "plex"],
     "source": "Amazon Alexa video launch target reference",
     "availabilityNote": "Availability varies by region.",
-    "lastVerified": "2026-10-01",
+    "lastVerified": "2026-10-04",
     "verified": true
   }
 ]

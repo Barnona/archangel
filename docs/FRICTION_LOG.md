@@ -43,8 +43,6 @@ A core design principle is:
 
 # 2. Friction log
 
-> **Timing note:** Only durations explicitly measured during development are treated as exact. Most earlier troubleshooting sessions were not formally timed, so those entries are marked **Not formally timed** rather than inventing precision.
-
 | Timestamp / period | Area | Expected | What actually happened | Friction | Evidence | How it was solved | Time taken to solve |
 |---|---|---|---|---|---|---|---|
 | 2026-09-28 7:23 AM (IST) | Android/React Native TV setup | Fire TV React Native project should build on Windows | Native Android/TV project required additional configuration and compatibility work | Fire TV/TV React Native setup is more constrained than ordinary Android React Native | | Generated a standard RN Android project, adapted it for `react-native-tvos`, added TV manifest declarations, banner, launcher configuration and Fire TV-specific setup | 25 minutes |

@@ -67,7 +67,7 @@ function snapshotChanges(previous, current) {
     ['adLevel', previous.adLevel, current.adLevel],
     ['monetization', previous.monetization.join('|'), current.monetization.join('|')],
     ['subscriptionModel', previous.subscriptionModel, current.subscriptionModel],
-    ['adFreeTier', previous.adFreeTierName || 'UNKNOWN', current.adFreeTierName || 'UNKNOWN'],
+    ['adFreeTier', previous.adFreeTierKnown ? (previous.adFreeTierName || 'KNOWN') : 'UNKNOWN', current.adFreeTierKnown ? (current.adFreeTierName || 'KNOWN') : 'UNKNOWN'],
   ];
   for (const [field, previousValue, currentValue] of fields) {
     if (String(previousValue) !== String(currentValue)) {

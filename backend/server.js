@@ -212,6 +212,12 @@ app.get('/adlens', (_req, res) => {
         },
         verified: Boolean(a.verified),
         lastVerified: a.lastVerified ?? null,
+        evidence: {
+          source: CATALOG_SOURCE,
+          catalogVersion: CATALOG_VERSION,
+          lastVerified: a.lastVerified ?? null,
+          verificationMethod: 'curated-catalog',
+        },
       };
     });
 
@@ -258,7 +264,13 @@ app.get('/adlens/:appId', (req, res) => {
       note: 'ARCHANGEL cannot disable or modify Fire TV system-level Sponsored-row advertising.'
     },
     verified: Boolean(app.verified),
-    lastVerified: app.lastVerified ?? null
+    lastVerified: app.lastVerified ?? null,
+    evidence: {
+      source: CATALOG_SOURCE,
+      catalogVersion: CATALOG_VERSION,
+      lastVerified: app.lastVerified ?? null,
+      verificationMethod: 'curated-catalog',
+    }
   });
 });
 

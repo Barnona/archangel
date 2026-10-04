@@ -15,7 +15,8 @@ const MONETIZATION_HISTORY_PATH = path.join(__dirname, 'data', 'monetization-his
 
 const CATALOG_SOURCE = 'curated-verified-cache';
 const CATALOG_VERSION = '1.0';
-const CATALOG_LAST_UPDATED = '2026-10-01';
+const CATALOG_LAST_UPDATED = '2026-10-04';
+const ADLENS_REFRESH_INTERVAL_MS = Math.max(0, Number(process.env.ADLENS_REFRESH_INTERVAL_MS || 86400000));
 
 const app = express();
 app.use(cors());
@@ -82,36 +83,72 @@ function snapshotChanges(previous, current) {
   return changes;
 }
 
-function updateHistoryForApp(app) {
-  const history = readJson(MONETIZATION_HISTORY_PATH, {});
+function snapshotState(app) {
+  const subscription = subscriptionFor(app);
+  return {
+    monetization: [...app.monetization],
+    adSignal: app.adLevel !== 'unknown' ? 'known' : 'unknown',
+    adLevel: app.adLevel,
+    subscriptionModel: subscription.model,
+    adFreeTierKnown: Boolean(subscription.adFreeTierKnown),
+    adFreeTierName: subscription.adFreeTierName ?? null,
+  };
+}
+
+function updateHistoryForApp(app, history) {
   const snapshots = Array.isArray(history[app.id]) ? history[app.id] : [];
-  const current = buildMonetizationSnapshot(app);
+  const currentState = snapshotState(app);
   const previous = snapshots[snapshots.length - 1];
-  const sameState = previous && JSON.stringify({
+  const previousState = previous ? {
     monetization: previous.monetization,
     adSignal: previous.adSignal,
     adLevel: previous.adLevel,
     subscriptionModel: previous.subscriptionModel,
     adFreeTierKnown: previous.adFreeTierKnown,
     adFreeTierName: previous.adFreeTierName,
-  }) === JSON.stringify({
-    monetization: current.monetization,
-    adSignal: current.adSignal,
-    adLevel: current.adLevel,
-    subscriptionModel: current.subscriptionModel,
-    adFreeTierKnown: current.adFreeTierKnown,
-    adFreeTierName: current.adFreeTierName,
-  });
-  if (!previous || !sameState) {
-    snapshots.push(current);
+  } : null;
+  const changed = !previous || JSON.stringify(previousState) !== JSON.stringify(currentState);
+  if (changed) {
+    snapshots.push(buildMonetizationSnapshot(app));
     history[app.id] = snapshots;
-    writeJson(MONETIZATION_HISTORY_PATH, history);
   }
-  return history[app.id] || [current];
+  return { snapshots, added: changed, previous };
 }
 
+function refreshAdLensHistory() {
+  const catalog = readJson(CATALOG_PATH, []);
+  const history = readJson(MONETIZATION_HISTORY_PATH, {});
+  let snapshotsAdded = 0;
+  let unchanged = 0;
+  let changesDetected = 0;
+
+  for (const app of catalog.filter(a => a.platforms?.fireOs)) {
+    const result = updateHistoryForApp(app, history);
+    if (result.added) {
+      snapshotsAdded += 1;
+      if (result.previous) {
+        const current = history[app.id][history[app.id].length - 1];
+        changesDetected += snapshotChanges(result.previous, current).length;
+      }
+    } else {
+      unchanged += 1;
+    }
+  }
+
+  writeJson(MONETIZATION_HISTORY_PATH, history);
+  return {
+    catalogVersion: CATALOG_VERSION,
+    catalogSource: CATALOG_SOURCE,
+    refreshedAt: new Date().toISOString(),
+    appsChecked: catalog.filter(a => a.platforms?.fireOs).length,
+    snapshotsAdded,
+    unchanged,
+    changesDetected,
+  };
+}
 function historyResponse(app) {
-  const snapshots = updateHistoryForApp(app);
+  const history = readJson(MONETIZATION_HISTORY_PATH, {});
+  const snapshots = Array.isArray(history[app.id]) ? history[app.id] : [];
   const changes = [];
   for (let i = 1; i < snapshots.length; i += 1) {
     changes.push(...snapshotChanges(snapshots[i - 1], snapshots[i]).map(change => ({
@@ -287,9 +324,21 @@ app.post('/ai/app-discovery', async (req, res) => {
   }
 });
 
+app.get('/adlens/refresh', (_req, res) => {
+  res.status(405).json({ error: 'Use POST /adlens/refresh' });
+});
+
+app.post('/adlens/refresh', (_req, res) => {
+  try {
+    res.json(refreshAdLensHistory());
+  } catch (error) {
+    console.error('AdLens refresh error:', error);
+    res.status(500).json({ error: 'AdLens refresh failed', detail: error.message });
+  }
+});
+
 app.get('/adlens', (_req, res) => {
   const catalog = readJson(CATALOG_PATH, []);
-  catalog.filter(a => a.platforms?.fireOs).forEach(updateHistoryForApp);
   const profiles = catalog
     .filter(a => a.platforms?.fireOs)
     .map(a => {
@@ -452,7 +501,24 @@ app.get('/requests/demand', (_req, res) => {
   res.json([...map.values()].sort((a, b) => b.count - a.count));
 });
 
-app.listen(PORT, HOST, () => {
+const server = app.listen(PORT, HOST, () => {
   console.log(`ARCHANGEL API listening on http://${HOST}:4000`);
   console.log('LAN clients can reach this service using the Windows PC LAN IP.');
+  try {
+    const result = refreshAdLensHistory();
+    console.log(`AdLens startup refresh: ${result.appsChecked} apps checked, ${result.snapshotsAdded} snapshots added, ${result.changesDetected} changes detected.`);
+  } catch (error) {
+    console.error('AdLens startup refresh failed:', error.message);
+  }
 });
+
+if (ADLENS_REFRESH_INTERVAL_MS > 0) {
+  setInterval(() => {
+    try {
+      const result = refreshAdLensHistory();
+      console.log(`AdLens scheduled refresh: ${result.appsChecked} apps checked, ${result.snapshotsAdded} snapshots added, ${result.changesDetected} changes detected.`);
+    } catch (error) {
+      console.error('AdLens scheduled refresh failed:', error.message);
+    }
+  }, ADLENS_REFRESH_INTERVAL_MS);
+}

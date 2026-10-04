@@ -321,6 +321,10 @@ app.get('/adlens', (_req, res) => {
           lastVerified: a.lastVerified ?? null,
           verificationMethod: 'curated-catalog',
         },
+        history: {
+          status: Array.isArray(readJson(MONETIZATION_HISTORY_PATH, {})[a.id]) && readJson(MONETIZATION_HISTORY_PATH, {})[a.id].length > 1 ? 'changes-recorded' : 'baseline-recorded',
+          snapshotCount: Array.isArray(readJson(MONETIZATION_HISTORY_PATH, {})[a.id]) ? readJson(MONETIZATION_HISTORY_PATH, {})[a.id].length : 1,
+        },
         subscription: a.subscription || {
           model: a.monetization.includes('subscription') ? 'subscription' : 'unknown',
           adFreeTierKnown: false,

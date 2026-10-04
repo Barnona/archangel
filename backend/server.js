@@ -218,6 +218,20 @@ app.get('/adlens', (_req, res) => {
           lastVerified: a.lastVerified ?? null,
           verificationMethod: 'curated-catalog',
         },
+        subscription: a.subscription || {
+          model: a.monetization.includes('subscription') ? 'subscription' : 'unknown',
+          adFreeTierKnown: false,
+          adFreeTierName: null,
+          adFreeTierVerified: false,
+          offerStatus: 'unknown',
+          explanation: 'The current ARCHANGEL catalog does not contain authoritative subscription-offer information for this profile.',
+          evidence: {
+            source: CATALOG_SOURCE,
+            catalogVersion: CATALOG_VERSION,
+            lastVerified: a.lastVerified ?? null,
+            verificationMethod: 'curated-catalog',
+          },
+        },
       };
     });
 
@@ -270,7 +284,21 @@ app.get('/adlens/:appId', (req, res) => {
       catalogVersion: CATALOG_VERSION,
       lastVerified: app.lastVerified ?? null,
       verificationMethod: 'curated-catalog',
-    }
+    },
+    subscription: app.subscription || {
+      model: app.monetization.includes('subscription') ? 'subscription' : 'unknown',
+      adFreeTierKnown: false,
+      adFreeTierName: null,
+      adFreeTierVerified: false,
+      offerStatus: 'unknown',
+      explanation: 'The current ARCHANGEL catalog does not contain authoritative subscription-offer information for this profile.',
+      evidence: {
+        source: CATALOG_SOURCE,
+        catalogVersion: CATALOG_VERSION,
+        lastVerified: app.lastVerified ?? null,
+        verificationMethod: 'curated-catalog',
+      },
+    },
   });
 });
 

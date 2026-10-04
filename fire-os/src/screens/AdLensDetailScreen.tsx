@@ -36,6 +36,20 @@ export default function AdLensDetailScreen({ id, onBack }: { id: string; onBack:
       </View> : null}
 
       <View style={styles.card}>
+        <Text style={styles.label}>WHY THIS SIGNAL?</Text>
+        <Text style={styles.value}>{data.adSignal === 'known' ? 'SIGNAL: ' + data.adSignal.toUpperCase() : 'SIGNAL: UNKNOWN'}</Text>
+        <Text style={styles.body}>{data.explanation}</Text>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.label}>EVIDENCE</Text>
+        <Text style={styles.value}>{data.evidence.source}</Text>
+        <Text style={styles.body}>Verification method: {data.evidence.verificationMethod === 'curated-catalog' ? 'ARCHANGEL curated verified catalog' : data.evidence.verificationMethod}</Text>
+        <Text style={styles.meta}>CATALOG VERSION • {data.evidence.catalogVersion}</Text>
+        {data.evidence.lastVerified ? <Text style={styles.meta}>LAST VERIFIED • {data.evidence.lastVerified}</Text> : null}
+      </View>
+
+      <View style={styles.card}>
         <Text style={styles.label}>AD EXPERIENCE SIGNAL</Text>
         <Text style={styles.value}>{data.adSignal === 'known' ? data.adLevel.toUpperCase() : 'UNKNOWN'}</Text>
         <Text style={styles.body}>{data.explanation}</Text>

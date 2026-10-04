@@ -3,7 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');\nrequire('dotenv').config();
+const crypto = require('crypto');
+require('dotenv').config();
 const { analyzeAppRequest, aiStatus } = require('./ai');
 
 const PORT = Number(process.env.PORT || 4000);

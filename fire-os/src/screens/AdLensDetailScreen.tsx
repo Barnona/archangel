@@ -17,7 +17,7 @@ export default function AdLensDetailScreen({ id, onBack }: { id: string; onBack:
 
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.content} scrollsChildToFocus showsVerticalScrollIndicator={false}>
-      <Pressable onPress={onBack} style={({ focused }) => [styles.back, focused && styles.focused]}><Text style={styles.backText}>← ADLENS</Text></Pressable>
+      <Pressable onPress={onBack} onFocus={() => setBackFocused(true)} onBlur={() => setBackFocused(false)} style={[styles.back, backFocused && styles.focused]}><Text style={[styles.backText, backFocused && styles.backTextFocused]}>← ADLENS</Text></Pressable>
       <Text style={styles.kicker}>ADLENS / APP PROFILE</Text>
       <Text style={styles.title}>{data.appName}</Text>
       <Text style={styles.sub}>{data.description}</Text>
@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
   back:{alignSelf:'flex-start',paddingHorizontal:15,paddingVertical:9,borderRadius:8,borderWidth:1,borderColor:colors.line,backgroundColor:colors.panel},
   focused:{backgroundColor:colors.text,borderColor:colors.text},
   backText:{color:colors.text,fontSize:12,fontWeight:'900',letterSpacing:1},
+  backTextFocused:{color:'#FFFFFF'},
   grid:{flexDirection:'row',flexWrap:'wrap',maxWidth:800},
   info:{width:245,backgroundColor:colors.panel,borderWidth:1,borderColor:colors.line,borderRadius:10,padding:17,marginRight:12,marginBottom:12},
   label:{color:colors.red,fontSize:11,fontWeight:'900',letterSpacing:1.4},

@@ -8,6 +8,7 @@ type Filter = 'all' | 'ad-supported' | 'no-known-ads' | 'unknown';
 
 export default function AdLensScreen({ onOpenApp }: { onOpenApp: (id: string) => void }) {
   const [filter, setFilter] = useState<Filter>('all');
+  const [focusedFilter, setFocusedFilter] = useState<Filter | null>(null);
   const [data, setData] = useState<AdLensSummary | null>(null);
   const [error, setError] = useState('');
   useEffect(() => { api.adLens().then(setData).catch(e => setError(e instanceof Error ? e.message : 'Unable to load AdLens')); }, []);
@@ -33,7 +34,7 @@ export default function AdLensScreen({ onOpenApp }: { onOpenApp: (id: string) =>
       <View style={styles.row}><Metric title="CATALOG APPS" value={String(data.totalApps)} /><Metric title="AD-SUPPORTED" value={String(data.adSupported)} /><Metric title="KNOWN AD SIGNALS" value={String(data.knownAdLevels)} /></View>
       <View style={styles.notice}><Text style={styles.noticeTitle}>SYSTEM AD CONTROL</Text><Text style={styles.noticeValue}>NOT AVAILABLE</Text><Text style={styles.noticeText}>{data.systemAdControl.note}</Text></View>
       <Text style={styles.section}>APP AD PROFILES</Text>
-      <View style={styles.filters}>{filters.map(item => <Pressable key={item.key} onPress={() => setFilter(item.key)} style={({ focused }) => [styles.filter, filter === item.key && styles.filterActive, focused && styles.filterFocused]}><Text style={({ focused }) => [styles.filterText, (filter === item.key || focused) && styles.filterTextActive]}>{item.label} • {item.count}</Text></Pressable>)}</View>
+      <View style={styles.filters}>{filters.map(item => <Pressable key={item.key} onPress={() => setFilter(item.key)} onFocus={() => setFocusedFilter(item.key)} onBlur={() => setFocusedFilter(null)} style={[styles.filter, filter === item.key && styles.filterActive, focusedFilter === item.key && styles.filterFocused]}><Text style={[styles.filterText, (filter === item.key || focusedFilter === item.key) && styles.filterTextActive]}>{item.label} • {item.count}</Text></Pressable>)}</View>
       {filtered.map(profile => <Pressable key={profile.appId} onPress={() => onOpenApp(profile.appId)} style={({ focused }) => [styles.card, focused && styles.cardFocused]}><View style={styles.cardHead}><View style={styles.main}><Text style={styles.appName}>{profile.appName}</Text><Text style={styles.meta}>{profile.monetization.join(' • ')}</Text></View><Text style={[styles.badge, profile.adSignal === 'known' ? styles.known : styles.unknown]}>{profile.adSignal === 'known' ? profile.adLevel.toUpperCase() : 'UNKNOWN'}</Text></View><Text style={styles.explanation}>{profile.explanation}</Text><Text style={styles.source}>{profile.transparency === 'verified' ? 'SOURCE-CHECKED' : 'LIMITED SIGNAL'}{profile.lastVerified ? ` • verified ${profile.lastVerified}` : ''}</Text></Pressable>)}
       <View style={styles.footerCard}><Text style={styles.noticeTitle}>WHAT ADLENS DOES</Text><Text style={styles.footerText}>AdLens provides transparency about catalogued app monetization and known advertising signals. It does not intercept, suppress, or modify advertising traffic, and it does not claim control over Fire TV system advertising.</Text></View>
     </ScrollView>

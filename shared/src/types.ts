@@ -60,6 +60,8 @@ export interface AppRequest {
   note?: string;
   source?: 'manual' | 'missing-app-discovery';
   createdAt: string;
+  duplicateOf?: string | null;
+  demandCount?: number;
 }
 
 export interface DemandEntry {

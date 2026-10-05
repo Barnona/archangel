@@ -4,7 +4,7 @@ import type { DemandEntry } from '../../../shared/src/types';
 import { api } from '../lib/api';
 import { colors } from '../theme/theme';
 type Props = { initialName?: string; source?: 'manual' | 'missing-app-discovery' };
-export default function RequestScreen({ initialName = '' }: Props){
+export default function RequestScreen({ initialName = '', source = 'manual' }: Props){
  const [appName,setAppName]=useState(initialName);const[note,setNote]=useState('');const[demand,setDemand]=useState<DemandEntry[]>([]);const[status,setStatus]=useState('');const[loading,setLoading]=useState(false);
  const loadDemand=()=>api.demand().then(setDemand).catch(()=>setDemand([]));useEffect(()=>{loadDemand();},[]);
  useEffect(()=>{if(initialName) setAppName(initialName);},[initialName]);

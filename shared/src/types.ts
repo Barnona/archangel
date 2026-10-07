@@ -73,6 +73,9 @@ export interface DemandEntry {
   lastRequestedAt: string;
   recentRequests?: number;
   demandScore?: number;
+  trendPercent?: number;
+  trend?: 'rising' | 'stable' | 'falling' | 'inactive';
+  last7Days?: number;
 }
 
 export interface SubscriptionIntelligence {

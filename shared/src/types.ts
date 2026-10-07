@@ -76,6 +76,10 @@ export interface DemandEntry {
   trendPercent?: number;
   trend?: 'rising' | 'stable' | 'falling' | 'inactive';
   last7Days?: number;
+  discoveryShare?: number;
+  opportunityScore?: number;
+  opportunity?: 'high' | 'medium' | 'emerging';
+  opportunityReasons?: string[];
 }
 
 export interface SubscriptionIntelligence {

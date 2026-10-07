@@ -4,8 +4,29 @@ const { analyzeWithBedrock, analyzeDemandOpportunity: analyzeDemandWithBedrock, 
 const PROVIDER = String(process.env.AI_PROVIDER || 'gemini').toLowerCase();
 
 async function analyzeAppRequest({ catalog, userRequest }) {
-  if (PROVIDER === 'gemini') return analyzeWithGemini({ catalog, userRequest });
-  if (PROVIDER === 'bedrock') return analyzeWithBedrock({ catalog, userRequest });
+  if (PROVIDER === 'bedrock') {
+    try {
+      return await analyzeWithBedrock({ catalog, userRequest });
+    } catch (bedrockError) {
+      console.warn(`Bedrock App Discovery failed; falling back to Gemini: ${bedrockError.message}`);
+      try {
+        const result = await analyzeWithGemini({ catalog, userRequest });
+        return {
+          ...result,
+          fallbackUsed: true,
+          fallbackProvider: 'gemini',
+          fallbackReason: bedrockError.message,
+        };
+      } catch (geminiError) {
+        throw new Error(`Bedrock and Gemini App Discovery failed: ${bedrockError.message}; ${geminiError.message}`);
+      }
+    }
+  }
+
+  if (PROVIDER === 'gemini') {
+    return analyzeWithGemini({ catalog, userRequest });
+  }
+
   throw new Error(`Unsupported AI_PROVIDER: ${PROVIDER}. Use gemini or bedrock.`);
 }
 
@@ -26,6 +47,7 @@ function aiStatus() {
     provider: PROVIDER,
     gemini: { primaryModel: GEMINI_MODELS.primary, fallbackModel: GEMINI_MODELS.fallback },
     bedrock: { modelId: BEDROCK_MODEL_ID, region: BEDROCK_REGION },
+    appDiscoveryFallback: PROVIDER === 'bedrock' ? 'gemini' : null,
   };
 }
 

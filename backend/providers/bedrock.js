@@ -58,4 +58,50 @@ async function analyzeWithBedrock({ catalog, userRequest }) {
   return parseResult(extractText(response));
 }
 
-module.exports = { analyzeWithBedrock, BEDROCK_MODEL_ID, BEDROCK_REGION };
+
+function extractJson(raw) {
+  const cleaned = String(raw || '').trim().replace(/^\uFEFF/, '').replace(/^\s*\`\`\`(?:json)?\s*/i, '').replace(/\s*\`\`\`\s*$/i, '').trim();
+  try { return JSON.parse(cleaned); } catch {
+    const start = cleaned.indexOf('{'); const end = cleaned.lastIndexOf('}');
+    if (start >= 0 && end > start) return JSON.parse(cleaned.slice(start, end + 1));
+    throw new Error('Model returned no valid JSON object.');
+  }
+}
+
+function validateDemandResult(parsed) {
+  if (!parsed || typeof parsed !== 'object') throw new Error('Invalid demand analysis response.');
+  const allowed = ['high', 'medium', 'emerging'];
+  parsed.opportunity = allowed.includes(parsed.opportunity) ? parsed.opportunity : 'emerging';
+  parsed.summary = typeof parsed.summary === 'string' ? parsed.summary : '';
+  parsed.recommendation = typeof parsed.recommendation === 'string' ? parsed.recommendation : '';
+  parsed.reasons = Array.isArray(parsed.reasons) ? parsed.reasons.filter(x => typeof x === 'string').slice(0, 5) : [];
+  parsed.confidence = Math.max(0, Math.min(1, Number(parsed.confidence) || 0));
+  return parsed;
+}
+
+async function analyzeDemandOpportunity({ opportunity }) {
+  if (!process.env.AWS_BEARER_TOKEN_BEDROCK && !process.env.AWS_ACCESS_KEY_ID && !process.env.AWS_PROFILE && !process.env.AWS_ROLE_ARN) {
+    throw new Error('AWS Bedrock credentials are not configured');
+  }
+  const prompt = [
+    'You are ARCHANGEL Developer Opportunity Intelligence.',
+    'Interpret the supplied deterministic demand metrics. Do not change the numbers and do not invent demand.',
+    'Use exactly one opportunity level: high, medium, emerging.',
+    'Return ONLY valid JSON:',
+    '{"opportunity":"high|medium|emerging","summary":string,"reasons":[string],"recommendation":string,"confidence":number}',
+    'Keep the analysis concise and grounded only in the supplied data.',
+    '',
+    'DEMAND DATA:',
+    JSON.stringify(opportunity),
+  ].join('\\n');
+  const response = await client.send(new ConverseCommand({
+    modelId: BEDROCK_MODEL_ID,
+    system: [{ text: 'You are ARCHANGEL Developer Opportunity Intelligence. Follow the JSON schema exactly.' }],
+    messages: [{ role: 'user', content: [{ text: prompt }] }],
+    inferenceConfig: { temperature: 0.1, maxTokens: 500 },
+  }));
+  const parsed = extractJson(extractText(response));
+  return { ...validateDemandResult(parsed), modelId: BEDROCK_MODEL_ID, provider: 'bedrock' };
+}
+
+module.exports = { analyzeWithBedrock, analyzeDemandOpportunity, BEDROCK_MODEL_ID, BEDROCK_REGION };

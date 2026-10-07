@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 require('dotenv').config();
-const { analyzeAppRequest, aiStatus } = require('./ai');
+const { analyzeAppRequest, analyzeDemandOpportunity, aiStatus } = require('./ai');
 
 const PORT = Number(process.env.PORT || 4000);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -520,6 +520,49 @@ app.post('/requests', (req, res) => {
     duplicateOf: existing ? existing.id : null,
     demandCount: requests.filter(r => normalizeRequestedAppName(r.appName) === normalizedName).length,
   });
+});
+
+app.post('/ai/demand-opportunity', async (req, res) => {
+  const requestedApp = String(req.body?.appName || '').trim();
+  if (requestedApp.length < 2 || requestedApp.length > 100) {
+    return res.status(400).json({ error: 'appName must be 2-100 characters' });
+  }
+
+  const requests = readJson(REQUESTS_PATH, []);
+  const catalog = readJson(CATALOG_PATH, []);
+  const windowDays = Math.max(1, Number(req.body?.days || 30));
+  const windowMs = windowDays * 86400000;
+  const normalized = normalizeRequestedAppName(requestedApp);
+  const matching = requests.filter(r =>
+    (r.normalizedName || normalizeRequestedAppName(r.appName)) === normalized
+  );
+
+  const now = Date.now();
+  const recent = matching.filter(r => now - new Date(r.createdAt).getTime() <= windowMs);
+  const last7 = matching.filter(r => now - new Date(r.createdAt).getTime() <= 7 * 86400000);
+  const previous = matching.filter(r => {
+    const age = now - new Date(r.createdAt).getTime();
+    return age > windowMs && age <= windowMs * 2;
+  });
+
+  const opportunityInput = {
+    appName: requestedApp,
+    totalRequests: matching.length,
+    recentRequests: recent.length,
+    last7Days: last7.length,
+    previousWindowRequests: previous.length,
+    discoveryRequests: matching.filter(r => r.source === 'missing-app-discovery').length,
+    manualRequests: matching.filter(r => r.source !== 'missing-app-discovery').length,
+    catalogMatch: catalog.find(a => normalizeRequestedAppName(a.name) === normalized) || null,
+  };
+
+  try {
+    const result = await analyzeDemandOpportunity({ opportunity: opportunityInput });
+    res.json({ ...result, input: opportunityInput, generatedAt: new Date().toISOString() });
+  } catch (error) {
+    console.error('AI demand opportunity error:', error);
+    res.status(503).json({ error: 'AI demand opportunity unavailable', detail: error.message });
+  }
 });
 
 app.get('/requests/demand', (req, res) => {

@@ -549,7 +549,7 @@ app.get('/requests/demand', (req, res) => {
     else cur.manualRequests += 1;
     if (age <= windowMs) cur.recentRequests += 1;
     if (age <= weekMs) cur.last7Days += 1;
-    else if (age <= windowMs + weekMs) cur.previousWindowRequests += 1;
+    if (age > windowMs && age <= windowMs * 2) cur.previousWindowRequests += 1;
     if (r.createdAt > cur.lastRequestedAt) {
       cur.lastRequestedAt = r.createdAt;
       cur.appName = r.appName.trim();

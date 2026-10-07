@@ -522,9 +522,12 @@ app.post('/requests', (req, res) => {
   });
 });
 
-app.get('/requests/demand', (_req, res) => {
+app.get('/requests/demand', (req, res) => {
   const requests = readJson(REQUESTS_PATH, []);
   const map = new Map();
+  const now = Date.now();
+  const windowDays = Math.max(1, Number(req.query.days || 30));
+  const windowMs = windowDays * 86400000;
 
   for (const r of requests) {
     const key = r.normalizedName || normalizeRequestedAppName(r.appName);
@@ -534,11 +537,13 @@ app.get('/requests/demand', (_req, res) => {
       count: 0,
       discoveryRequests: 0,
       manualRequests: 0,
+      recentRequests: 0,
       lastRequestedAt: r.createdAt,
     };
     cur.count += 1;
     if (r.source === 'missing-app-discovery') cur.discoveryRequests += 1;
     else cur.manualRequests += 1;
+    if (now - new Date(r.createdAt).getTime() <= windowMs) cur.recentRequests += 1;
     if (r.createdAt > cur.lastRequestedAt) {
       cur.lastRequestedAt = r.createdAt;
       cur.appName = r.appName.trim();
@@ -546,7 +551,23 @@ app.get('/requests/demand', (_req, res) => {
     map.set(key, cur);
   }
 
-  res.json([...map.values()].sort((a, b) => b.count - a.count || b.lastRequestedAt.localeCompare(a.lastRequestedAt)));
+  const ranked = [...map.values()].map(item => ({
+    ...item,
+    demandScore: Math.round(item.count * 10 + item.discoveryRequests * 4 + item.recentRequests * 6),
+  })).sort((a, b) =>
+    b.demandScore - a.demandScore ||
+    b.count - a.count ||
+    b.lastRequestedAt.localeCompare(a.lastRequestedAt)
+  );
+
+  res.json({
+    windowDays,
+    totalRequestedApps: ranked.length,
+    totalRequests: requests.length,
+    topDemand: ranked.slice(0, 10),
+    items: ranked,
+    generatedAt: new Date().toISOString(),
+  });
 });
 
 const server = app.listen(PORT, HOST, () => {

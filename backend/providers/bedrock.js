@@ -45,9 +45,8 @@ function parseResult(raw) {
 }
 
 async function analyzeWithBedrock({ catalog, userRequest }) {
-  if (!process.env.AWS_BEARER_TOKEN_BEDROCK && !process.env.AWS_ACCESS_KEY_ID && !process.env.AWS_PROFILE && !process.env.AWS_ROLE_ARN) {
-    throw new Error('AWS Bedrock credentials are not configured');
-  }
+  // Let the AWS SDK resolve credentials through its standard provider chain
+  // (environment variables, shared AWS config/credentials, IAM roles, etc.).
   const prompt = buildPrompt(userRequest, searchCatalog(catalog, userRequest));
   const response = await client.send(new ConverseCommand({
     modelId: BEDROCK_MODEL_ID,
@@ -80,9 +79,7 @@ function validateDemandResult(parsed) {
 }
 
 async function analyzeDemandOpportunity({ opportunity }) {
-  if (!process.env.AWS_BEARER_TOKEN_BEDROCK && !process.env.AWS_ACCESS_KEY_ID && !process.env.AWS_PROFILE && !process.env.AWS_ROLE_ARN) {
-    throw new Error('AWS Bedrock credentials are not configured');
-  }
+  // Let the AWS SDK resolve credentials through its standard provider chain.
   const prompt = [
     'You are ARCHANGEL Developer Opportunity Intelligence.',
     'Interpret the supplied deterministic demand metrics. Do not change the numbers and do not invent demand.',

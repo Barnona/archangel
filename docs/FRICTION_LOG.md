@@ -1,4 +1,4 @@
-# ARCHANGEL Friction Log
+| 2026-10-07 (IST) | Demand Intelligence — trend analysis | Ranked demand should show momentum, not only accumulated request volume | Demand scoring showed total demand but did not distinguish recent acceleration from older requests | Developers need recency and trend signals to identify emerging demand | — | Added configurable 30-day demand windows, last-7-day counts, previous-window comparison, rising/stable/falling trend classification, and trend-aware UI | Not formally timed |\n# ARCHANGEL Friction Log
 
 ## Metadata
 

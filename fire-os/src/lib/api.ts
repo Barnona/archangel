@@ -51,7 +51,7 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ appName, note, source }),
     }),
-  demand: (days = 30) => request<{ windowDays: number; totalRequestedApps: number; totalRequests: number; recentRequests: number; last7DaysRequests: number; topDemand: DemandEntry[]; items: DemandEntry[]; generatedAt: string }>(`/requests/demand?days=${days}`),
+  demand: (days = 30) => request<{ windowDays: number; totalRequestedApps: number; totalRequests: number; recentRequests: number; last7DaysRequests: number; topDemand: DemandEntry[]; topOpportunities: DemandEntry[]; items: DemandEntry[]; generatedAt: string }>(`/requests/demand?days=${days}`),
   adLens: () => request<AdLensSummary>('/adlens'),
   adLensApp: (id: string) => request<AdLensProfile & { category: string; description: string; subscription: SubscriptionIntelligence }>(`/adlens/${id}`),
   adLensHistory: (id: string) => request<AdLensHistory>(`/adlens/${id}/history`),

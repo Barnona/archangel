@@ -573,7 +573,20 @@ app.get('/requests/demand', (req, res) => {
     const recencyBonus = item.last7Days * 8;
     const discoveryBonus = item.discoveryRequests * 4;
     const demandScore = Math.round(currentWindow * 10 + recencyBonus + discoveryBonus);
-    return { ...item, demandScore, trendPercent, trend };
+    const discoveryShare = item.count ? Math.round((item.discoveryRequests / item.count) * 100) : 0;
+    const opportunityScore = Math.min(100, Math.round(
+      Math.min(40, currentWindow * 4) +
+      Math.min(25, item.last7Days * 5) +
+      Math.min(20, discoveryShare * 0.2) +
+      (trend === 'rising' ? 15 : trend === 'stable' ? 8 : 0)
+    ));
+    const opportunity = opportunityScore >= 70 ? 'high' : opportunityScore >= 40 ? 'medium' : 'emerging';
+    const opportunityReasons = [];
+    if (currentWindow > 0) opportunityReasons.push(`${currentWindow} requests in the last ${windowDays} days`);
+    if (item.last7Days > 0) opportunityReasons.push(`${item.last7Days} requests in the last 7 days`);
+    if (discoveryShare >= 60) opportunityReasons.push(`${discoveryShare}% discovery-driven demand`);
+    if (trend === 'rising') opportunityReasons.push(`Demand is rising ${Math.abs(trendPercent)}%`);
+    return { ...item, demandScore, trendPercent, trend, discoveryShare, opportunityScore, opportunity, opportunityReasons };
   }).sort((a, b) =>
     b.demandScore - a.demandScore ||
     b.recentRequests - a.recentRequests ||
@@ -590,6 +603,7 @@ app.get('/requests/demand', (req, res) => {
     recentRequests: recentTotal,
     last7DaysRequests: last7Total,
     topDemand: ranked.slice(0, 10),
+    topOpportunities: ranked.filter(item => item.opportunityScore >= 40).sort((a,b) => b.opportunityScore - a.opportunityScore || b.demandScore - a.demandScore).slice(0, 5),
     items: ranked,
     generatedAt: new Date().toISOString(),
   });

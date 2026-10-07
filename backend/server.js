@@ -528,6 +528,7 @@ app.get('/requests/demand', (req, res) => {
   const now = Date.now();
   const windowDays = Math.max(1, Number(req.query.days || 30));
   const windowMs = windowDays * 86400000;
+  const weekMs = 7 * 86400000;
 
   for (const r of requests) {
     const key = r.normalizedName || normalizeRequestedAppName(r.appName);
@@ -538,12 +539,17 @@ app.get('/requests/demand', (req, res) => {
       discoveryRequests: 0,
       manualRequests: 0,
       recentRequests: 0,
+      last7Days: 0,
+      previousWindowRequests: 0,
       lastRequestedAt: r.createdAt,
     };
+    const age = now - new Date(r.createdAt).getTime();
     cur.count += 1;
     if (r.source === 'missing-app-discovery') cur.discoveryRequests += 1;
     else cur.manualRequests += 1;
-    if (now - new Date(r.createdAt).getTime() <= windowMs) cur.recentRequests += 1;
+    if (age <= windowMs) cur.recentRequests += 1;
+    if (age <= weekMs) cur.last7Days += 1;
+    else if (age <= windowMs + weekMs) cur.previousWindowRequests += 1;
     if (r.createdAt > cur.lastRequestedAt) {
       cur.lastRequestedAt = r.createdAt;
       cur.appName = r.appName.trim();
@@ -551,19 +557,38 @@ app.get('/requests/demand', (req, res) => {
     map.set(key, cur);
   }
 
-  const ranked = [...map.values()].map(item => ({
-    ...item,
-    demandScore: Math.round(item.count * 10 + item.discoveryRequests * 4 + item.recentRequests * 6),
-  })).sort((a, b) =>
+  const ranked = [...map.values()].map(item => {
+    const currentWindow = item.recentRequests;
+    const previousWindow = item.previousWindowRequests;
+    const trendPercent = previousWindow === 0
+      ? (currentWindow > 0 ? 100 : 0)
+      : Math.round(((currentWindow - previousWindow) / previousWindow) * 100);
+    const trend = currentWindow === 0
+      ? 'inactive'
+      : previousWindow === 0 || trendPercent >= 20
+        ? 'rising'
+        : trendPercent <= -20
+          ? 'falling'
+          : 'stable';
+    const recencyBonus = item.last7Days * 8;
+    const discoveryBonus = item.discoveryRequests * 4;
+    const demandScore = Math.round(currentWindow * 10 + recencyBonus + discoveryBonus);
+    return { ...item, demandScore, trendPercent, trend };
+  }).sort((a, b) =>
     b.demandScore - a.demandScore ||
+    b.recentRequests - a.recentRequests ||
     b.count - a.count ||
     b.lastRequestedAt.localeCompare(a.lastRequestedAt)
   );
 
+  const recentTotal = ranked.reduce((sum, item) => sum + item.recentRequests, 0);
+  const last7Total = ranked.reduce((sum, item) => sum + item.last7Days, 0);
   res.json({
     windowDays,
     totalRequestedApps: ranked.length,
     totalRequests: requests.length,
+    recentRequests: recentTotal,
+    last7DaysRequests: last7Total,
     topDemand: ranked.slice(0, 10),
     items: ranked,
     generatedAt: new Date().toISOString(),

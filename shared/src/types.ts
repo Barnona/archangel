@@ -71,6 +71,8 @@ export interface DemandEntry {
   discoveryRequests?: number;
   manualRequests?: number;
   lastRequestedAt: string;
+  recentRequests?: number;
+  demandScore?: number;
 }
 
 export interface SubscriptionIntelligence {

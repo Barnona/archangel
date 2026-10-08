@@ -30,6 +30,51 @@ const writeJson = (p, data) => {
   fs.writeFileSync(p, JSON.stringify(data, null, 2));
 };
 
+function evidenceFor({ app, known, changed = false }) {
+  let status = 'UNKNOWN';
+  let confidence = 0;
+  if (changed) status = 'DATA_SIGNAL_CHANGED';
+  else if (known && app.verified) { status = 'VERIFIED'; confidence = 1; }
+  else if (known) { status = 'SUPPORTED'; confidence = 0.8; }
+  return {
+    source: CATALOG_SOURCE,
+    catalogVersion: CATALOG_VERSION,
+    lastVerified: app.lastVerified ?? null,
+    verificationMethod: 'curated-catalog',
+    status,
+    confidence,
+  };
+}
+
+function adLensEvidenceSummary(app, historyChanges = []) {
+  const subscription = subscriptionFor(app);
+  const signals = [
+    { id: 'advertising', label: 'Advertising', known: app.adLevel !== 'unknown', field: 'adLevel' },
+    { id: 'subscription', label: 'Subscription', known: subscription.model !== 'unknown', field: 'subscriptionModel' },
+    { id: 'adFreeTier', label: 'Ad-free tier', known: Boolean(subscription.adFreeTierKnown), field: 'adFreeTier' },
+    { id: 'monetization', label: 'Monetization', known: Array.isArray(app.monetization) && app.monetization.length > 0 && !app.monetization.includes('unknown'), field: 'monetization' },
+  ].map(signal => {
+    const changed = historyChanges.some(change => change.field === signal.field);
+    return {
+      id: signal.id,
+      label: signal.label,
+      evidence: evidenceFor({ app, known: signal.known, changed }),
+    };
+  });
+  const supportedSignals = signals.filter(signal => signal.evidence.status !== 'UNKNOWN').length;
+  return {
+    completeness: Math.round((supportedSignals / signals.length) * 100),
+    supportedSignals,
+    totalSignals: signals.length,
+    signals: signals.map(signal => ({
+      id: signal.id,
+      label: signal.label,
+      status: signal.evidence.status,
+      confidence: signal.evidence.confidence,
+    })),
+  };
+}
+
 function subscriptionFor(app) {
   return app.subscription || {
     model: app.monetization.includes('subscription') ? 'subscription' : 'unknown',
@@ -52,12 +97,7 @@ function buildMonetizationSnapshot(app, capturedAt = new Date().toISOString()) {
     subscriptionModel: subscription.model,
     adFreeTierKnown: Boolean(subscription.adFreeTierKnown),
     adFreeTierName: subscription.adFreeTierName ?? null,
-    evidence: {
-      source: CATALOG_SOURCE,
-      catalogVersion: CATALOG_VERSION,
-      lastVerified: app.lastVerified ?? null,
-      verificationMethod: 'curated-catalog',
-    },
+    evidence: evidenceFor({ app, known: true }),
   };
 }
 
@@ -449,12 +489,8 @@ app.get('/adlens', (_req, res) => {
         },
         verified: Boolean(a.verified),
         lastVerified: a.lastVerified ?? null,
-        evidence: {
-          source: CATALOG_SOURCE,
-          catalogVersion: CATALOG_VERSION,
-          lastVerified: a.lastVerified ?? null,
-          verificationMethod: 'curated-catalog',
-        },
+        evidence: evidenceFor({ app: a, known }),
+        evidenceSummary: adLensEvidenceSummary(a),
         history: {
           status: Array.isArray(history[a.id]) && history[a.id].length > 1 ? 'changes-recorded' : 'baseline-recorded',
           snapshotCount: Array.isArray(history[a.id]) ? history[a.id].length : 0,
@@ -466,12 +502,7 @@ app.get('/adlens', (_req, res) => {
           adFreeTierVerified: false,
           offerStatus: 'unknown',
           explanation: 'The current ARCHANGEL catalog does not contain authoritative subscription-offer information for this profile.',
-          evidence: {
-            source: CATALOG_SOURCE,
-            catalogVersion: CATALOG_VERSION,
-            lastVerified: a.lastVerified ?? null,
-            verificationMethod: 'curated-catalog',
-          },
+          evidence: evidenceFor({ app: a, known: Boolean(a.subscription?.model && a.subscription.model !== 'unknown') }),
         },
       };
     });
@@ -528,12 +559,8 @@ app.get('/adlens/:appId', (req, res) => {
     },
     verified: Boolean(app.verified),
     lastVerified: app.lastVerified ?? null,
-    evidence: {
-      source: CATALOG_SOURCE,
-      catalogVersion: CATALOG_VERSION,
-      lastVerified: app.lastVerified ?? null,
-      verificationMethod: 'curated-catalog',
-    },
+    evidence: evidenceFor({ app, known }),
+    evidenceSummary: adLensEvidenceSummary(app),
     subscription: app.subscription || {
       model: app.monetization.includes('subscription') ? 'subscription' : 'unknown',
       adFreeTierKnown: false,
@@ -541,12 +568,7 @@ app.get('/adlens/:appId', (req, res) => {
       adFreeTierVerified: false,
       offerStatus: 'unknown',
       explanation: 'The current ARCHANGEL catalog does not contain authoritative subscription-offer information for this profile.',
-      evidence: {
-        source: CATALOG_SOURCE,
-        catalogVersion: CATALOG_VERSION,
-        lastVerified: app.lastVerified ?? null,
-        verificationMethod: 'curated-catalog',
-      },
+      evidence: evidenceFor({ app, known: Boolean(app.subscription?.model && app.subscription.model !== 'unknown') }),
     },
   });
 });

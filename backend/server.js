@@ -251,6 +251,90 @@ app.get('/ai/status', (_req, res) => {
   res.json(aiStatus());
 });
 
+
+function pulseStatus() {
+  const catalog = readJson(CATALOG_PATH, []);
+  const requests = readJson(REQUESTS_PATH, []);
+  const history = readJson(MONETIZATION_HISTORY_PATH, {});
+  const fireOsApps = catalog.filter(a => a.platforms?.fireOs);
+  const snapshots = Object.values(history).reduce((sum, items) => sum + (Array.isArray(items) ? items.length : 0), 0);
+  const ai = aiStatus();
+
+  const catalogAgeDays = Math.max(0, Math.floor((Date.now() - Date.parse(CATALOG_LAST_UPDATED)) / 86400000));
+  const catalogStatus = catalog.length === 0
+    ? 'attention'
+    : catalogAgeDays > 30
+      ? 'degraded'
+      : 'healthy';
+
+  const checks = [
+    {
+      id: 'api',
+      label: 'API SERVICE',
+      status: 'healthy',
+      summary: 'ARCHANGEL API is running.',
+      detail: `Uptime ${Math.floor(process.uptime())}s • local service health confirmed`,
+    },
+    {
+      id: 'catalog',
+      label: 'CATALOG INTEGRITY',
+      status: catalogStatus,
+      summary: catalog.length ? `${fireOsApps.length} Fire OS records available.` : 'Catalog is empty.',
+      detail: `Source ${CATALOG_SOURCE} • last updated ${CATALOG_LAST_UPDATED} • ${catalogAgeDays} day(s) old • ${catalog.filter(a => a.verified).length} verified`,
+    },
+    {
+      id: 'requests',
+      label: 'REQUEST NETWORK',
+      status: 'healthy',
+      summary: `${requests.length} request signal(s) stored.`,
+      detail: 'Demand data is available for aggregation and developer opportunity analysis.',
+    },
+    {
+      id: 'adlens',
+      label: 'ADLENS EVIDENCE',
+      status: fireOsApps.length && snapshots ? 'healthy' : fireOsApps.length ? 'degraded' : 'attention',
+      summary: snapshots ? `${snapshots} historical snapshot(s) stored.` : 'No historical snapshots are stored yet.',
+      detail: snapshots ? 'Historical monetization evidence is persisted separately from read-only AdLens views.' : 'Run the AdLens evidence refresh to establish a baseline.',
+    },
+    {
+      id: 'ai',
+      label: 'AI INTELLIGENCE',
+      status: ai.provider === 'bedrock' ? 'degraded' : 'healthy',
+      summary: `Provider configured: ${ai.provider}.`,
+      detail: ai.provider === 'bedrock'
+        ? `Bedrock primary: ${ai.bedrock.modelId} • Gemini fallback retained`
+        : `Gemini primary: ${ai.gemini.primaryModel} • fallback: ${ai.gemini.fallbackModel}`,
+    },
+  ];
+
+  const rank = { healthy: 0, degraded: 1, attention: 2 };
+  const overall = checks.reduce((worst, check) => rank[check.status] > rank[worst] ? check.status : worst, 'healthy');
+
+  return {
+    overall,
+    generatedAt: new Date().toISOString(),
+    checks,
+    metrics: {
+      apiUptimeSeconds: Math.floor(process.uptime()),
+      catalogRecords: catalog.length,
+      verifiedCatalogRecords: catalog.filter(a => a.verified).length,
+      requestCount: requests.length,
+      adLensSnapshots: snapshots,
+      aiProvider: ai.provider,
+    },
+  };
+}
+
+app.get('/pulse', (_req, res) => {
+  try {
+    res.json(pulseStatus());
+  } catch (error) {
+    console.error('Pulse status error:', error);
+    res.status(500).json({ error: 'Pulse status unavailable', detail: error.message });
+  }
+});
+
+
 app.get('/catalog/status', (_req, res) => {
   const catalog = readJson(CATALOG_PATH, []);
   const stats = catalogStats(catalog);

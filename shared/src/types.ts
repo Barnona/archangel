@@ -152,6 +152,31 @@ export interface AdLensDetail extends AdLensProfile {
   description: string;
 }
 
+
+export type PulseHealth = 'healthy' | 'degraded' | 'attention';
+
+export interface PulseCheck {
+  id: 'api' | 'catalog' | 'requests' | 'adlens' | 'ai';
+  label: string;
+  status: PulseHealth;
+  summary: string;
+  detail: string;
+}
+
+export interface PulseStatus {
+  overall: PulseHealth;
+  generatedAt: string;
+  checks: PulseCheck[];
+  metrics: {
+    apiUptimeSeconds: number;
+    catalogRecords: number;
+    verifiedCatalogRecords: number;
+    requestCount: number;
+    adLensSnapshots: number;
+    aiProvider: string;
+  };
+}
+
 export interface AdLensSummary {
   totalApps: number;
   adSupported: number;

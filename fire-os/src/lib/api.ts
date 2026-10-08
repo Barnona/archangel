@@ -1,5 +1,5 @@
 import { API_BASE } from '../config';
-import type { AdLensSummary, AdLensProfile, SubscriptionIntelligence, AdLensHistory, AppProfile, AlternativeResult, CatalogStatus, DemandEntry, AppRequest, DiscoveryResult } from '../../../shared/src/types';
+import type { PulseStatus, AdLensSummary, AdLensProfile, SubscriptionIntelligence, AdLensHistory, AppProfile, AlternativeResult, CatalogStatus, DemandEntry, AppRequest, DiscoveryResult } from '../../../shared/src/types';
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
@@ -14,6 +14,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  pulse: () => request<PulseStatus>('/pulse'),
   health: () => request<{ ok: boolean; service: string; version: string; catalogCount: number; requestCount: number; uptimeSeconds: number; timestamp: string }>('/health'),
   catalogStatus: () => request<CatalogStatus>('/catalog/status'),
   apps: (q = '', category = '') => {

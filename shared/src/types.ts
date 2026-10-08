@@ -92,11 +92,27 @@ export interface SubscriptionIntelligence {
   evidence: AdLensEvidence;
 }
 
+export type EvidenceStatus = 'VERIFIED' | 'SUPPORTED' | 'INFERRED' | 'UNKNOWN' | 'DATA_SIGNAL_CHANGED';
+
 export interface AdLensEvidence {
   source: string;
   catalogVersion: string;
   lastVerified: string | null;
   verificationMethod: 'curated-catalog' | 'official-amazon-api' | 'unknown';
+  status: EvidenceStatus;
+  confidence: number;
+}
+
+export interface AdLensEvidenceSummary {
+  completeness: number;
+  supportedSignals: number;
+  totalSignals: number;
+  signals: Array<{
+    id: 'advertising' | 'subscription' | 'adFreeTier' | 'monetization';
+    label: string;
+    status: EvidenceStatus;
+    confidence: number;
+  }>;
 }
 
 export interface AdLensProfile {

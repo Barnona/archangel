@@ -106,7 +106,7 @@ function snapshotChanges(previous, current) {
   const fields = [
     ['adSignal', previous.adSignal, current.adSignal],
     ['adLevel', previous.adLevel, current.adLevel],
-    ['monetization', previous.monetization.join('|'), current.monetization.join('|')],
+    ['monetization', (previous.monetization || []).join('|'), (current.monetization || []).join('|')],
     ['subscriptionModel', previous.subscriptionModel, current.subscriptionModel],
     ['adFreeTier', previous.adFreeTierKnown ? (previous.adFreeTierName || 'KNOWN') : 'UNKNOWN', current.adFreeTierKnown ? (current.adFreeTierName || 'KNOWN') : 'UNKNOWN'],
   ];
@@ -188,20 +188,38 @@ function refreshAdLensHistory() {
 }
 function historyResponse(app) {
   const history = readJson(MONETIZATION_HISTORY_PATH, {});
-  const snapshots = Array.isArray(history[app.id]) ? history[app.id] : [];
+  const storedSnapshots = Array.isArray(history[app.id]) ? history[app.id] : [];
+  const chronological = [...storedSnapshots].sort((a, b) => {
+    const aTime = Date.parse(a.capturedAt || '');
+    const bTime = Date.parse(b.capturedAt || '');
+    return (Number.isFinite(aTime) ? aTime : 0) - (Number.isFinite(bTime) ? bTime : 0);
+  });
   const changes = [];
-  for (let i = 1; i < snapshots.length; i += 1) {
-    changes.push(...snapshotChanges(snapshots[i - 1], snapshots[i]).map(change => ({
+  for (let i = 1; i < chronological.length; i += 1) {
+    changes.push(...snapshotChanges(chronological[i - 1], chronological[i]).map(change => ({
       ...change,
-      previous: `${snapshots[i - 1].capturedAt}: ${change.previous}`,
-      current: `${snapshots[i].capturedAt}: ${change.current}`,
+      previous: `${chronological[i - 1].capturedAt || 'Unknown date'}: ${change.previous}`,
+      current: `${chronological[i].capturedAt || 'Unknown date'}: ${change.current}`,
     })));
   }
+  const snapshots = [...chronological].reverse();
+  const latest = chronological[chronological.length - 1] || null;
+  const baseline = chronological[0] || null;
+  const latestChanges = chronological.length > 1
+    ? snapshotChanges(chronological[chronological.length - 2], latest)
+    : [];
   return {
     appId: app.id,
     appName: app.name,
     snapshots,
     changes,
+    summary: {
+      snapshotCount: snapshots.length,
+      baselineAt: baseline?.capturedAt || null,
+      latestAt: latest?.capturedAt || null,
+      latestChangedFields: latestChanges.map(change => change.field),
+      hasBaseline: Boolean(baseline),
+    },
     generatedAt: new Date().toISOString(),
   };
 }

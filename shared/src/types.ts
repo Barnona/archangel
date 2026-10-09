@@ -161,6 +161,13 @@ export interface AdLensHistory {
   appName: string;
   snapshots: MonetizationSnapshot[];
   changes: MonetizationChange[];
+  summary?: {
+    snapshotCount: number;
+    baselineAt: string | null;
+    latestAt: string | null;
+    latestChangedFields: string[];
+    hasBaseline: boolean;
+  };
   generatedAt: string;
 }
 

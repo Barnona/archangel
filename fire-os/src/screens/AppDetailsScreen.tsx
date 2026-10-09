@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import type { AlternativeResult, AppProfile } from '../../../shared/src/types';
+import type { AlternativeResult, AppProfile, AdLensHistory } from '../../../shared/src/types';
 import { api } from '../lib/api';
 import { colors } from '../theme/theme';
 
@@ -9,6 +9,8 @@ type Props = { id: string; onBack: () => void; onOpen: (id: string) => void };
 export default function AppDetailsScreen({ id, onBack, onOpen }: Props) {
   const [app, setApp] = useState<(AppProfile & { alternativeProfiles: AlternativeResult[] }) | null>(null);
   const [error, setError] = useState('');
+  const [history, setHistory] = useState<AdLensHistory | null>(null);
+  const [historyError, setHistoryError] = useState('');
 
   useEffect(() => {
     setApp(null);
@@ -16,6 +18,11 @@ export default function AppDetailsScreen({ id, onBack, onOpen }: Props) {
     api.app(id)
       .then(setApp)
       .catch(e => setError(e instanceof Error ? e.message : 'Unable to load app'));
+    setHistory(null);
+    setHistoryError('');
+    api.adLensHistory(id)
+      .then(setHistory)
+      .catch(e => setHistoryError(e instanceof Error ? e.message : 'History unavailable'));
   }, [id]);
 
   if (error) return <View style={styles.center}><Text style={styles.error}>{error}</Text></View>;
@@ -53,6 +60,13 @@ export default function AppDetailsScreen({ id, onBack, onOpen }: Props) {
       ) : null}
 
       <Text style={styles.source}>Source: {app.source}</Text>
+
+      <Text style={styles.section}>MONETIZATION HISTORY</Text>
+      <Text style={styles.historyIntro}>Recorded snapshots show how ARCHANGEL's catalog signals have changed over time. A signal change does not, by itself, prove that the app changed its actual monetization policy.</Text>
+      {historyError ? <View style={styles.historyEmpty}><Text style={styles.historyEmptyTitle}>HISTORY UNAVAILABLE</Text><Text style={styles.historyEmptyText}>{historyError}</Text></View> : !history ? <View style={styles.historyEmpty}><ActivityIndicator color={colors.red} /><Text style={styles.historyEmptyText}>Loading recorded history…</Text></View> : history.snapshots.length === 0 ? <View style={styles.historyEmpty}><Text style={styles.historyEmptyTitle}>NO SNAPSHOTS RECORDED</Text><Text style={styles.historyEmptyText}>A historical baseline has not been recorded for this app yet. ARCHANGEL will not invent earlier states.</Text></View> : <>
+        {history.changes.length > 0 ? <View style={styles.changeBox}><Text style={styles.changeTitle}>DATA SIGNAL CHANGED</Text>{history.changes.map((change, index) => <View key={change.field + index} style={styles.changeRow}><Text style={styles.changeField}>{change.field.replace(/([A-Z])/g, ' $1').toUpperCase()}</Text><Text style={styles.changeValue}>{change.previous}  →  {change.current}</Text></View>)}<Text style={styles.changeNote}>This is a change in recorded data signals, not independent confirmation of an app policy change.</Text></View> : <Text style={styles.noChange}>No recorded signal changes in the available history.</Text>}
+        {history.snapshots.map((snapshot, index) => <View key={snapshot.id} style={styles.timelineRow}><View style={styles.timelineRail}><View style={[styles.timelineDot, index === 0 && styles.timelineDotLatest]} />{index < history.snapshots.length - 1 ? <View style={styles.timelineLine} /> : null}</View><View style={styles.snapshotCard}><View style={styles.snapshotHead}><Text style={styles.snapshotDate}>{new Date(snapshot.capturedAt).toLocaleString()}</Text><Text style={styles.snapshotVersion}>{snapshot.catalogVersion}</Text></View><Text style={styles.snapshotSummary}>Ads: {snapshot.adSignal === 'unknown' ? 'Unknown' : snapshot.adLevel}  •  Subscription: {snapshot.subscriptionModel}  •  Ad-free tier: {snapshot.adFreeTierKnown ? snapshot.adFreeTierName || 'Known' : 'Unknown'}</Text><Text style={styles.snapshotMeta}>Monetization: {snapshot.monetization.join(', ') || 'Unknown'}</Text><Text style={styles.snapshotMeta}>Evidence: {snapshot.evidence.status.replace(/_/g, ' ')} · {Math.round(snapshot.evidence.confidence * 100)}% confidence</Text></View></View>)}
+      </>
 
       {app.alternativeProfiles.length > 0 ? (
         <>
@@ -99,6 +113,28 @@ const styles=StyleSheet.create({
   noteTitle:{color:colors.red,fontSize:11,letterSpacing:1.5,fontWeight:'900'},
   noteText:{color:colors.muted,fontSize:15,lineHeight:22,marginTop:5},
   source:{color:'#777777',fontSize:13,marginTop:12},
+  historyIntro:{color:colors.muted,fontSize:15,lineHeight:22,maxWidth:850,marginBottom:14},
+  historyEmpty:{width:850,backgroundColor:colors.panel,borderWidth:1,borderColor:colors.line,borderRadius:10,padding:18,marginBottom:12},
+  historyEmptyTitle:{color:colors.red,fontSize:12,fontWeight:'900',letterSpacing:1.2},
+  historyEmptyText:{color:colors.muted,fontSize:14,lineHeight:21,marginTop:6},
+  noChange:{color:colors.success,fontSize:13,fontWeight:'700',marginBottom:12},
+  changeBox:{width:850,backgroundColor:'#FFF4E5',borderWidth:1,borderColor:'#F1D5A8',borderRadius:10,padding:16,marginBottom:14},
+  changeTitle:{color:'#B45309',fontSize:12,fontWeight:'900',letterSpacing:1.2,marginBottom:8},
+  changeRow:{flexDirection:'row',justifyContent:'space-between',paddingVertical:5},
+  changeField:{color:colors.text,fontSize:11,fontWeight:'800'},
+  changeValue:{color:colors.text,fontSize:12,fontWeight:'700',maxWidth:480},
+  changeNote:{color:'#79521B',fontSize:11,lineHeight:16,marginTop:8},
+  timelineRow:{flexDirection:'row',width:850,minHeight:105},
+  timelineRail:{width:24,alignItems:'center'},
+  timelineDot:{width:10,height:10,borderRadius:5,backgroundColor:colors.muted,marginTop:18},
+  timelineDotLatest:{backgroundColor:colors.red},
+  timelineLine:{width:2,flex:1,backgroundColor:colors.line,marginTop:3},
+  snapshotCard:{flex:1,backgroundColor:colors.panel,borderWidth:1,borderColor:colors.line,borderRadius:9,padding:14,marginBottom:10},
+  snapshotHead:{flexDirection:'row',justifyContent:'space-between',flexWrap:'wrap'},
+  snapshotDate:{color:colors.text,fontSize:14,fontWeight:'800'},
+  snapshotVersion:{color:colors.muted,fontSize:11},
+  snapshotSummary:{color:colors.text,fontSize:13,lineHeight:20,marginTop:9},
+  snapshotMeta:{color:colors.muted,fontSize:12,lineHeight:18,marginTop:4},
   section:{color:colors.red,fontSize:13,letterSpacing:2,fontWeight:'700',marginTop:30,marginBottom:12},
   alt:{width:850,padding:16,backgroundColor:colors.panel,borderRadius:10,borderWidth:1,borderColor:colors.line,marginBottom:10},
   altName:{color:colors.text,fontSize:20,fontWeight:'800'},

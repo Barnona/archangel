@@ -19,11 +19,11 @@ export default function HomeScreen({ navigate }: Props) {
       <Text style={styles.tagline}>The Intelligent Layer for Fire TV</Text>
       <View style={styles.rule} />
       <View style={styles.grid}>
-        <FocusableTile title="Find an App" subtitle="Search, compare, alternatives" onPress={() => navigate('Discover')} preferredFocus />
-        <FocusableTile title="AdLens" subtitle="Understand app ads & monetization" onPress={() => navigate('AdLens')} />
-        <FocusableTile title="Fix My TV" subtitle="Pulse network & experience check" onPress={() => navigate('Pulse')} />
-        <FocusableTile title="Request an App" subtitle="Tell developers what is missing" onPress={() => navigate('Request')} />
-        <FocusableTile title="Profile" subtitle="Preferences & privacy" onPress={() => navigate('Profile')} />
+        <FocusableTile title="Find an App" icon="⌕" subtitle="Search, compare, alternatives" onPress={() => navigate('Discover')} preferredFocus />
+        <FocusableTile title="AdLens" icon="◉" subtitle="Understand app ads & monetization" onPress={() => navigate('AdLens')} />
+        <FocusableTile title="Fix My TV" icon="⌁" subtitle="Pulse network & experience check" onPress={() => navigate('Pulse')} />
+        <FocusableTile title="Request an App" icon="＋" subtitle="Tell developers what is missing" onPress={() => navigate('Request')} />
+        <FocusableTile title="Profile" icon="⚙" subtitle="Preferences & privacy" onPress={() => navigate('Profile')} />
       </View>
       <Text style={styles.footer}>DISCOVER • DIAGNOSE • REQUEST • IMPROVE</Text>
     </ScrollView>

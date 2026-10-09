@@ -66,7 +66,7 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
 
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.content}>
-      <Text style={styles.kicker}>DISCOVERY INTELLIGENCE</Text>
+      <Text style={styles.kicker}>⌕  DISCOVERY INTELLIGENCE</Text>
       <Text style={styles.title}>Find an App</Text>
       <Text style={styles.sub}>Search the ARCHANGEL catalog, compare alternatives, and inspect why a result matched.</Text>
 
@@ -81,7 +81,7 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
           style={styles.search}
         />
         <Pressable onPress={load} onFocus={() => setSearchFocused(true)} onBlur={() => setSearchFocused(false)} style={[styles.searchButton, searchFocused && styles.focusButton]}>
-          <Text style={styles.searchButtonText}>SEARCH</Text>
+          <Text style={styles.searchButtonText}>⌕  SEARCH</Text>
         </Pressable>
         {(query || category) ? (
           <Pressable onPress={clearSearch} style={({ focused }) => [styles.clearButton, focused && styles.focusOutline]}>
@@ -92,7 +92,7 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
 
       <View style={styles.aiRow}>
         <Pressable onPress={askArchangel} onFocus={() => setAskFocused(true)} onBlur={() => setAskFocused(false)} style={[styles.aiButton, askFocused && styles.focusButton]}>
-          <Text style={styles.searchButtonText}>{aiLoading ? 'THINKING...' : 'ASK ARCHANGEL'}</Text>
+          <Text style={styles.searchButtonText}>{aiLoading ? '◌  THINKING...' : '✦  ASK ARCHANGEL'}</Text>
         </Pressable>
       </View>
 
@@ -115,7 +115,7 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
               </View>
               <Text style={styles.aiIntent}>{aiResult.understoodIntent}</Text>
               <Text style={styles.aiMessage}>{aiResult.message}</Text>
-              <Text style={styles.reasonLabel}>CATALOG DECISION</Text>
+              <Text style={styles.reasonLabel}>◉  CATALOG DECISION</Text>
               {aiResult.exactMatch ? (
                 <>
                   <Text style={styles.reason}>Exact catalog match found.</Text>
@@ -146,7 +146,7 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
                         <Text style={styles.aiConfidence}>{Math.round(item.confidence * 100)}%</Text>
                       </View>
                       <Text style={styles.description}>{item.reason}</Text>
-                      <Text style={styles.aiOpenHint}>OPEN APP PROFILE ›</Text>
+                      <Text style={styles.aiOpenHint}>↗  OPEN APP PROFILE</Text>
                     </Pressable>
                   ))}
                 </View>
@@ -195,7 +195,7 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
               {app.platforms.fireOs ? 'Fire OS ✓' : 'Fire OS —'}   {app.platforms.vega ? 'Vega ✓' : 'Vega ?'}   •   {app.monetization.join(', ')}
             </Text>
             <View style={styles.reasonBox}>
-              <Text style={styles.reasonLabel}>WHY THIS RESULT</Text>
+              <Text style={styles.reasonLabel}>ⓘ  WHY THIS RESULT</Text>
               <Text style={styles.reason}>{result.reasons.join('  •  ')}</Text>
             </View>
           </Pressable>

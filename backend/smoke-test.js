@@ -77,7 +77,7 @@ async function main() {
 
   const demand = await get('/requests/demand');
   await check('demand endpoint returns aggregate arrays', async () => {
-    assert.ok(Array.isArray(demand.entries));
+    assert.ok(Array.isArray(demand.items));
     assert.ok(Array.isArray(demand.topDemand));
     assert.ok(Array.isArray(demand.topOpportunities));
   });

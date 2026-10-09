@@ -314,6 +314,16 @@ For production, replace the local HTTP endpoint with an authenticated HTTPS serv
 
 ---
 
+## Automated backend smoke tests
+
+With the backend running in a separate terminal, run from the repository root:
+
+```powershell
+npm --workspace backend run test:smoke
+```
+
+The smoke test performs read-only requests against the local API by default. To test a different running instance, set `ARCHANGEL_API_URL` to its base URL. It does not call AI inference or create app requests.
+
 ## API testing workflow
 
 With the backend running:

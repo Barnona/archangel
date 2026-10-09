@@ -32,18 +32,18 @@ export default function PulseScreen() {
 
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.content} scrollsChildToFocus showsVerticalScrollIndicator={false}>
-      <Text style={styles.kicker}>FIRE TV PULSE</Text>
+      <Text style={styles.kicker}>⌁  FIRE TV PULSE</Text>
       <Text style={styles.title}>Fix My TV</Text>
       <Text style={styles.sub}>A transparent experience check — separate system signals from assumptions and report only what ARCHANGEL can observe.</Text>
       <View style={styles.overview}>
-        <View style={styles.overviewMain}><Text style={styles.cardTitle}>OVERALL EXPERIENCE</Text><Text style={styles.overall}>{data ? statusLabel(data.overall) : 'NOT CHECKED'}</Text><Text style={styles.meta}>{data ? 'Observed ' + new Date(data.generatedAt).toLocaleTimeString() : 'Run a check to inspect the intelligence layer.'}</Text></View>
-        <View style={styles.latencyCard}><Text style={styles.cardTitle}>API LATENCY</Text><Text style={styles.big}>{latency !== null ? latency + ' ms' : '—'}</Text><Text style={styles.meta}>Round-trip from the TV client.</Text></View>
+        <View style={styles.overviewMain}><Text style={styles.cardTitle}>◉  OVERALL EXPERIENCE</Text><Text style={styles.overall}>{data ? statusLabel(data.overall) : 'NOT CHECKED'}</Text><Text style={styles.meta}>{data ? 'Observed ' + new Date(data.generatedAt).toLocaleTimeString() : 'Run a check to inspect the intelligence layer.'}</Text></View>
+        <View style={styles.latencyCard}><Text style={styles.cardTitle}>↔  API LATENCY</Text><Text style={styles.big}>{latency !== null ? latency + ' ms' : '—'}</Text><Text style={styles.meta}>Round-trip from the TV client.</Text></View>
       </View>
       {error ? <Text style={styles.error}>{error}</Text> : null}
-      {data ? <><Text style={styles.section}>SYSTEM SIGNALS</Text>{data.checks.map(check => <View key={check.id} style={styles.checkCard}><View style={styles.checkHead}><View style={styles.checkMain}><Text style={styles.checkLabel}>{check.label}</Text><Text style={styles.checkSummary}>{check.summary}</Text></View><Text style={[styles.status, statusStyle(check.status)]}>{check.status.toUpperCase()}</Text></View><Text style={styles.detail}>{check.detail}</Text></View>)}</> : null}
-      {data ? <><Text style={styles.section}>OBSERVED METRICS</Text><View style={styles.metrics}><Metric title="CATALOG RECORDS" value={String(data.metrics.catalogRecords)} /><Metric title="VERIFIED RECORDS" value={String(data.metrics.verifiedCatalogRecords)} /><Metric title="REQUEST SIGNALS" value={String(data.metrics.requestCount)} /><Metric title="ADLENS SNAPSHOTS" value={String(data.metrics.adLensSnapshots)} /></View></> : null}
-      <View style={styles.boundary}><Text style={styles.cardTitle}>PULSE BOUNDARY</Text><Text style={styles.boundaryText}>Pulse does not claim access to Fire TV system internals, remote diagnostics, ISP telemetry, or Amazon-private APIs. It diagnoses ARCHANGEL-observable service and data signals.</Text></View>
-      <Pressable onPress={run} style={({ focused }) => [styles.button, focused && styles.focus]}>{running ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>RUN FULL CHECK</Text>}</Pressable>
+      {data ? <><Text style={styles.section}>◈  SYSTEM SIGNALS</Text>{data.checks.map(check => <View key={check.id} style={styles.checkCard}><View style={styles.checkHead}><View style={styles.checkMain}><Text style={styles.checkLabel}>{check.label}</Text><Text style={styles.checkSummary}>{check.summary}</Text></View><Text style={[styles.status, statusStyle(check.status)]}>{check.status.toUpperCase()}</Text></View><Text style={styles.detail}>{check.detail}</Text></View>)}</> : null}
+      {data ? <><Text style={styles.section}>▥  OBSERVED METRICS</Text><View style={styles.metrics}><Metric title="CATALOG RECORDS" value={String(data.metrics.catalogRecords)} /><Metric title="VERIFIED RECORDS" value={String(data.metrics.verifiedCatalogRecords)} /><Metric title="REQUEST SIGNALS" value={String(data.metrics.requestCount)} /><Metric title="ADLENS SNAPSHOTS" value={String(data.metrics.adLensSnapshots)} /></View></> : null}
+      <View style={styles.boundary}><Text style={styles.cardTitle}>ⓘ  PULSE BOUNDARY</Text><Text style={styles.boundaryText}>Pulse does not claim access to Fire TV system internals, remote diagnostics, ISP telemetry, or Amazon-private APIs. It diagnoses ARCHANGEL-observable service and data signals.</Text></View>
+      <Pressable onPress={run} style={({ focused }) => [styles.button, focused && styles.focus]}>{running ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>⟳  RUN FULL CHECK</Text>}</Pressable>
     </ScrollView>
   );
 }

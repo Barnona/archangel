@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 
-const BASE_URL = (process.env.ARCHANGEL_API_URL || 'http://127.0.0.1:4000').replace(/\\/$/, '');
+const BASE_URL = (process.env.ARCHANGEL_API_URL || 'http://127.0.0.1:4000').replace(/\/$/, '');
 
 async function get(path) {
   const response = await fetch(`${BASE_URL}${path}`);
@@ -82,11 +82,11 @@ async function main() {
     assert.ok(Array.isArray(demand.topOpportunities));
   });
 
-  console.log(`\\n${passed} integration smoke checks passed.`);
+  console.log(`\n${passed} integration smoke checks passed.`);
 }
 
 main().catch(error => {
-  console.error('\\nINTEGRATION SMOKE TEST FAILED');
+  console.error('\nINTEGRATION SMOKE TEST FAILED');
   console.error(error.stack || error.message || error);
   process.exitCode = 1;
 });

@@ -130,6 +130,7 @@ export interface AdLensProfile {
   verified: boolean;
   lastVerified: string | null;
   evidence: AdLensEvidence;
+  evidenceSummary?: AdLensEvidenceSummary;
   subscription: SubscriptionIntelligence;
 }
 

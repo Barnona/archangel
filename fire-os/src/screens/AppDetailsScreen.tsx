@@ -61,11 +61,16 @@ export default function AppDetailsScreen({ id, onBack, onOpen }: Props) {
 
       <Text style={styles.source}>Source: {app.source}</Text>
 
-      <Text style={styles.section}>MONETIZATION HISTORY</Text>
-      <Text style={styles.historyIntro}>Recorded snapshots show how ARCHANGEL's catalog signals have changed over time. A signal change does not, by itself, prove that the app changed its actual monetization policy.</Text>
+      <View style={styles.sectionHeading}><Text style={styles.sectionIcon}>◷</Text><Text style={styles.section}>MONETIZATION HISTORY</Text></View>
+      <Text style={styles.historyIntro}>Compare recorded snapshots over time. A signal change does not, by itself, prove that the app changed its actual monetization policy.</Text>
+      {history?.summary ? <View style={styles.historyStats}>
+        <View style={styles.historyStat}><Text style={styles.statIcon}>▤</Text><Text style={styles.statValue}>{history.summary.snapshotCount}</Text><Text style={styles.statLabel}>SNAPSHOTS</Text></View>
+        <View style={styles.historyStat}><Text style={styles.statIcon}>◉</Text><Text style={styles.statValue}>{history.summary.hasBaseline ? 'RECORDED' : 'NONE'}</Text><Text style={styles.statLabel}>BASELINE</Text></View>
+        <View style={styles.historyStat}><Text style={styles.statIcon}>↻</Text><Text style={styles.statValue}>{history.summary.latestChangedFields.length}</Text><Text style={styles.statLabel}>LATEST CHANGES</Text></View>
+      </View> : null}
       {historyError ? <View style={styles.historyEmpty}><Text style={styles.historyEmptyTitle}>HISTORY UNAVAILABLE</Text><Text style={styles.historyEmptyText}>{historyError}</Text></View> : !history ? <View style={styles.historyEmpty}><ActivityIndicator color={colors.red} /><Text style={styles.historyEmptyText}>Loading recorded history…</Text></View> : history.snapshots.length === 0 ? <View style={styles.historyEmpty}><Text style={styles.historyEmptyTitle}>NO SNAPSHOTS RECORDED</Text><Text style={styles.historyEmptyText}>A historical baseline has not been recorded for this app yet. ARCHANGEL will not invent earlier states.</Text></View> : <>
-        {history.changes.length > 0 ? <View style={styles.changeBox}><Text style={styles.changeTitle}>DATA SIGNAL CHANGED</Text>{history.changes.map((change, index) => <View key={change.field + index} style={styles.changeRow}><Text style={styles.changeField}>{String(change.field || 'unknown').replace(/([A-Z])/g, ' $1').toUpperCase()}</Text><Text style={styles.changeValue}>{change.previous}  →  {change.current}</Text></View>)}<Text style={styles.changeNote}>This is a change in recorded data signals, not independent confirmation of an app policy change.</Text></View> : <Text style={styles.noChange}>No recorded signal changes in the available history.</Text>}
-        {history.snapshots.map((snapshot, index) => <View key={snapshot.id} style={styles.timelineRow}><View style={styles.timelineRail}><View style={[styles.timelineDot, index === 0 && styles.timelineDotLatest]} />{index < history.snapshots.length - 1 ? <View style={styles.timelineLine} /> : null}</View><View style={styles.snapshotCard}><View style={styles.snapshotHead}><Text style={styles.snapshotDate}>{new Date(snapshot.capturedAt).toLocaleString()}</Text><Text style={styles.snapshotVersion}>{snapshot.catalogVersion}</Text></View><Text style={styles.snapshotSummary}>Ads: {snapshot.adSignal === 'unknown' ? 'Unknown' : snapshot.adLevel}  •  Subscription: {snapshot.subscriptionModel}  •  Ad-free tier: {snapshot.adFreeTierKnown ? snapshot.adFreeTierName || 'Known' : 'Unknown'}</Text><Text style={styles.snapshotMeta}>Monetization: {(snapshot.monetization || []).join(', ') || 'Unknown'}</Text><Text style={styles.snapshotMeta}>Evidence: {String(snapshot.evidence?.status || 'UNKNOWN').replace(/_/g, ' ')} · {Math.round((snapshot.evidence?.confidence ?? 0) * 100)}% confidence</Text></View></View>)}
+        {history.changes.length > 0 ? <View style={styles.changeBox}><View style={styles.changeHeading}><Text style={styles.changeIcon}>↕</Text><Text style={styles.changeTitle}>RECORDED SIGNAL CHANGES</Text></View>{history.changes.map((change, index) => <View key={change.field + index} style={styles.changeRow}><Text style={styles.changeField}>{String(change.field || 'unknown').replace(/([A-Z])/g, ' $1').toUpperCase()}</Text><Text style={styles.changeValue}>{change.previous}  →  {change.current}</Text></View>)}<Text style={styles.changeNote}>This is a change in recorded data signals, not independent confirmation of an app policy change.</Text></View> : <Text style={styles.noChange}>No recorded signal changes in the available history.</Text>}
+        {history.snapshots.map((snapshot, index) => <View key={snapshot.id || `${snapshot.capturedAt || 'snapshot'}-${index}`} style={styles.timelineRow}><View style={styles.timelineRail}><View style={[styles.timelineDot, index === 0 && styles.timelineDotLatest]} />{index < history.snapshots.length - 1 ? <View style={styles.timelineLine} /> : null}</View><View style={styles.snapshotCard}><View style={styles.snapshotHead}><View style={styles.snapshotDateRow}><Text style={styles.snapshotIcon}>{index === 0 ? '●' : '○'}</Text><Text style={styles.snapshotDate}>{snapshot.capturedAt && Number.isFinite(Date.parse(snapshot.capturedAt)) ? new Date(snapshot.capturedAt).toLocaleString() : 'Unknown date'}{index === 0 ? '  ·  LATEST' : ''}</Text></View><Text style={styles.snapshotVersion}>CATALOG {snapshot.catalogVersion || 'UNKNOWN'}</Text></View><Text style={styles.snapshotSummary}>Ads: {snapshot.adSignal === 'unknown' ? 'Unknown' : snapshot.adLevel}  •  Subscription: {snapshot.subscriptionModel}  •  Ad-free tier: {snapshot.adFreeTierKnown ? snapshot.adFreeTierName || 'Known' : 'Unknown'}</Text><Text style={styles.snapshotMeta}>Monetization: {(snapshot.monetization || []).join(', ') || 'Unknown'}</Text><Text style={styles.snapshotMeta}>Evidence: {String(snapshot.evidence?.status || 'UNKNOWN').replace(/_/g, ' ')} · {Math.round((snapshot.evidence?.confidence ?? 0) * 100)}% confidence</Text></View></View>)}
       </>}
 
       {app.alternativeProfiles.length > 0 ? (
@@ -114,12 +119,21 @@ const styles=StyleSheet.create({
   noteText:{color:colors.muted,fontSize:15,lineHeight:22,marginTop:5},
   source:{color:'#777777',fontSize:13,marginTop:12},
   historyIntro:{color:colors.muted,fontSize:15,lineHeight:22,maxWidth:850,marginBottom:14},
+  sectionHeading:{flexDirection:'row',alignItems:'center',marginTop:30,marginBottom:12},
+  sectionIcon:{color:colors.red,fontSize:25,fontWeight:'900',marginRight:10},
+  historyStats:{flexDirection:'row',flexWrap:'wrap',gap:10,marginBottom:16,maxWidth:850},
+  historyStat:{width:190,minHeight:95,backgroundColor:colors.panel,borderWidth:1,borderColor:colors.line,borderRadius:10,padding:12},
+  statIcon:{color:colors.red,fontSize:20,fontWeight:'900'},
+  statValue:{color:colors.text,fontSize:17,fontWeight:'900',marginTop:4},
+  statLabel:{color:colors.muted,fontSize:10,fontWeight:'900',letterSpacing:1,marginTop:3},
   historyEmpty:{width:850,backgroundColor:colors.panel,borderWidth:1,borderColor:colors.line,borderRadius:10,padding:18,marginBottom:12},
   historyEmptyTitle:{color:colors.red,fontSize:12,fontWeight:'900',letterSpacing:1.2},
   historyEmptyText:{color:colors.muted,fontSize:14,lineHeight:21,marginTop:6},
   noChange:{color:colors.success,fontSize:13,fontWeight:'700',marginBottom:12},
   changeBox:{width:850,backgroundColor:'#FFF4E5',borderWidth:1,borderColor:'#F1D5A8',borderRadius:10,padding:16,marginBottom:14},
-  changeTitle:{color:'#B45309',fontSize:12,fontWeight:'900',letterSpacing:1.2,marginBottom:8},
+  changeHeading:{flexDirection:'row',alignItems:'center',marginBottom:8},
+  changeIcon:{color:'#B45309',fontSize:20,fontWeight:'900',marginRight:8},
+  changeTitle:{color:'#B45309',fontSize:12,fontWeight:'900',letterSpacing:1.2},
   changeRow:{flexDirection:'row',justifyContent:'space-between',paddingVertical:5},
   changeField:{color:colors.text,fontSize:11,fontWeight:'800'},
   changeValue:{color:colors.text,fontSize:12,fontWeight:'700',maxWidth:480},
@@ -131,6 +145,8 @@ const styles=StyleSheet.create({
   timelineLine:{width:2,flex:1,backgroundColor:colors.line,marginTop:3},
   snapshotCard:{flex:1,backgroundColor:colors.panel,borderWidth:1,borderColor:colors.line,borderRadius:9,padding:14,marginBottom:10},
   snapshotHead:{flexDirection:'row',justifyContent:'space-between',flexWrap:'wrap'},
+  snapshotDateRow:{flexDirection:'row',alignItems:'center',flexWrap:'wrap'},
+  snapshotIcon:{color:colors.red,fontSize:13,marginRight:7},
   snapshotDate:{color:colors.text,fontSize:14,fontWeight:'800'},
   snapshotVersion:{color:colors.muted,fontSize:11},
   snapshotSummary:{color:colors.text,fontSize:13,lineHeight:20,marginTop:9},

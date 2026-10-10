@@ -15,6 +15,10 @@ export type ApkInspection = {
   fileSha256: string;
   signerCertificateSha256: string[];
   signatureStatus: string;
+  compatibilityWarnings?: string[];
+  integrityStatus?: string;
+  cryptographicSignatureVerified?: boolean;
+  securityScanStatus?: string;
   inspectionMethod: string;
   malwareScanPerformed: boolean;
 };

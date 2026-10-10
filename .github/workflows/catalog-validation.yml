@@ -1,0 +1,41 @@
+name: App Discovery catalog validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "shared/src/catalog.seed.json"
+      - ".github/workflows/catalog-validation.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - "shared/src/catalog.seed.json"
+      - ".github/workflows/catalog-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-catalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install workspace dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Run catalog validation unit tests
+        run: npm --workspace backend run test:catalog
+
+      - name: Validate curated catalog
+        run: npm --workspace backend run validate:catalog

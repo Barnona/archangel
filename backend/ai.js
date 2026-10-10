@@ -1,17 +1,19 @@
 const { analyzeWithGemini, GEMINI_MODELS } = require('./providers/gemini');
 const { analyzeWithBedrock, analyzeDemandOpportunity: analyzeDemandWithBedrock, BEDROCK_MODEL_ID, BEDROCK_REGION } = require('./providers/bedrock');
+const { normalizeConciergeResult } = require('./concierge');
 
 const PROVIDER = String(process.env.AI_PROVIDER || 'gemini').toLowerCase();
 
 async function analyzeAppRequest({ catalog, userRequest }) {
+  let result;
   if (PROVIDER === 'bedrock') {
     try {
-      return await analyzeWithBedrock({ catalog, userRequest });
+      result = await analyzeWithBedrock({ catalog, userRequest });
     } catch (bedrockError) {
       console.warn(`Bedrock App Discovery failed; falling back to Gemini: ${bedrockError.message}`);
       try {
-        const result = await analyzeWithGemini({ catalog, userRequest });
-        return {
+        result = await analyzeWithGemini({ catalog, userRequest });
+        result = {
           ...result,
           fallbackUsed: true,
           fallbackProvider: 'gemini',
@@ -21,19 +23,19 @@ async function analyzeAppRequest({ catalog, userRequest }) {
         throw new Error(`Bedrock and Gemini App Discovery failed: ${bedrockError.message}; ${geminiError.message}`);
       }
     }
+  } else if (PROVIDER === 'gemini') {
+    result = await analyzeWithGemini({ catalog, userRequest });
+  } else {
+    throw new Error(`Unsupported AI_PROVIDER: ${PROVIDER}. Use gemini or bedrock.`);
   }
 
-  if (PROVIDER === 'gemini') {
-    return analyzeWithGemini({ catalog, userRequest });
-  }
-
-  throw new Error(`Unsupported AI_PROVIDER: ${PROVIDER}. Use gemini or bedrock.`);
+  return normalizeConciergeResult(result, catalog, userRequest);
 }
 
 async function analyzeDemandOpportunity({ opportunity }) {
   if (PROVIDER === 'bedrock') return analyzeDemandWithBedrock({ opportunity });
   return {
-    opportunity: opportunity.recentRequests > 0 ? 'emerging' : 'emerging',
+    opportunity: 'emerging',
     summary: 'Deterministic demand signals are available; AI reasoning is currently configured for Bedrock.',
     reasons: [],
     recommendation: 'Configure AI_PROVIDER=bedrock to enable model-based opportunity interpretation.',

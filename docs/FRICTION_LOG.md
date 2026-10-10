@@ -42,6 +42,7 @@ A core design principle is:
 # 2. Friction log
 
 | Timestamp / period | Area | Expected | What actually happened | Friction | Evidence | How it was solved | Time taken to solve |
+| 2026-10-10  (IST) | App Discovery / Focused result-card styling | Focused search results should use the established light-red selection style | Result card switched to a solid black background with white text | New visual treatment conflicted with the preferred light/red design and reduced consistency with the rest of the interface | User-provided emulator screenshot of focused HBO Max result | Restored pale-red focused background, red border, dark text and light icon/badge surfaces; runtime verification remains pending | 5 minutes |
 | 2026-10-10 10:27 AM (IST) | App Discovery / Visual result cards | Search results should be scannable on a TV from a viewing distance, with clear app identity, platform support, monetization and match rationale | Existing result cards were text-heavy and displayed a stale hard-coded catalog snapshot date | Dense text hierarchy and a date that could misrepresent catalog freshness | User-provided emulator screenshots and Discover screen review | Added category symbols, separated platform/monetization badges, stronger app identity, source-check status, match rationale, open-profile hint and black/white focus styling; replaced hard-coded snapshot date with curated-catalog wording | 20 minutes |
 | 2026-10-10 10:27 AM (IST) | Home screen / TV focus contrast | A focused tile should have a clear selected state and readable text | Focused tile text turned white while the tile background remained pale red, making the label hard to read | Focused foreground and background colours were changed independently and lost contrast | User-provided emulator screenshot showing white text on pale-red selected tile | Changed the focused tile background and border to black and retained white title/subtitle text; rebuild and emulator verification still required | 5 minutes |
 |---|---|---|---|---|---|---|---|
@@ -243,4 +244,4 @@ This log is intended to document not only bugs but also **product-discovery fric
 
 ## Last updated
 
-**2026-10-10 — App Discovery visual result-card update**
+**2026-10-10 — App Discovery focus-style correction**

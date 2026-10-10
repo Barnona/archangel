@@ -157,12 +157,23 @@ export default function SideloadSentinelScreen({ onBack }: Props) {
             <Text style={styles.metaName}>{inspection.fileName}</Text>
             <Text style={styles.metaLine}>Package: {inspection.packageName}</Text>
             <Text style={styles.metaLine}>Version: {inspection.versionName} (code {inspection.versionCode})</Text>
-            <Text style={styles.metaLine}>Min SDK: {inspection.minSdk}  •  Target SDK: {inspection.targetSdk}</Text>\n            <Text style={styles.metaLine}>Device: Android {inspection.deviceRelease} (API {inspection.deviceApi})</Text>
+            <Text style={styles.metaLine}>Min SDK: {inspection.minSdk}  •  Target SDK: {inspection.targetSdk}</Text>
+            <Text style={styles.metaLine}>Device: Android {inspection.deviceRelease} (API {inspection.deviceApi})</Text>
             <Text style={styles.metaLine}>Size: {inspection.sizeMb.toFixed(2)} MB  •  Requested permissions: {inspection.requestedPermissionCount}</Text>
-            <Text style={styles.metaLine}>File SHA-256: {inspection.fileSha256}</Text>\n            <Text style={styles.metaLine}>Signer certificate SHA-256: {inspection.signerCertificateSha256.length ? inspection.signerCertificateSha256.join('\\n') : 'No signer certificate extracted'}</Text>\n            <Text style={styles.metaLine}>Signer status: {inspection.signatureStatus.replace(/_/g, ' ')}</Text>\n            <Text style={styles.metaNote}>Cryptographic APK signature verification: NOT PERFORMED</Text>
+            <Text style={styles.metaLine}>File SHA-256: {inspection.fileSha256}</Text>
+            <Text style={styles.metaLine}>Signer certificate SHA-256: {inspection.signerCertificateSha256.length ? inspection.signerCertificateSha256.join('\\n') : 'No signer certificate extracted'}</Text>
+            <Text style={styles.metaLine}>Signer status: {inspection.signatureStatus.replace(/_/g, ' ')}</Text>
+            <Text style={styles.metaNote}>Cryptographic APK signature verification: NOT PERFORMED</Text>
           </View>
         ) : null}
-        {requestedPermissions.length > 0 ? (\n          <View style={styles.permissionCard}>\n            <Text style={styles.section}>DECLARED PERMISSIONS ({requestedPermissions.length})</Text>\n            {requestedPermissions.map(permission => (\n              <Text key={permission} style={styles.permissionLine}>{permission}</Text>\n            ))}\n          </View>\n        ) : null}\n        <Text style={styles.label}>OR ENTER METADATA MANUALLY</Text>
+        {requestedPermissions.length > 0 ? (
+          <View style={styles.permissionCard}>\n            <Text style={styles.section}>DECLARED PERMISSIONS ({requestedPermissions.length})</Text>
+            {requestedPermissions.map(permission => (
+              <Text key={permission} style={styles.permissionLine}>{permission}</Text>
+            ))}
+          </View>
+        ) : null}
+        <Text style={styles.label}>OR ENTER METADATA MANUALLY</Text>
         <Text style={styles.label}>PACKAGE IDENTIFIER</Text>
         <TextInput value={packageId} onChangeText={setPackageId} placeholder="com.example.app" placeholderTextColor={colors.muted} autoCapitalize="none" style={styles.input} />
         <View style={styles.row}>
@@ -233,7 +244,9 @@ const styles = StyleSheet.create({
   apkName: { color: colors.text, fontSize: 17, fontWeight: '900' },
   apkSize: { color: colors.muted, fontSize: 14, marginTop: 4 },
   apkAction: { color: colors.red, fontSize: 12, fontWeight: '900', marginTop: 8 },
-  inspectionCard: { marginTop: 18, padding: 18, borderRadius: 10, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.bg },\n  permissionCard: { marginTop: 16, padding: 16, borderRadius: 10, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.bg },\n  permissionLine: { color: colors.text, fontSize: 13, lineHeight: 20, marginBottom: 5 },
+  inspectionCard: { marginTop: 18, padding: 18, borderRadius: 10, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.bg },
+  permissionCard: { marginTop: 16, padding: 16, borderRadius: 10, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.bg },
+  permissionLine: { color: colors.text, fontSize: 13, lineHeight: 20, marginBottom: 5 },
   metaName: { color: colors.text, fontSize: 18, fontWeight: '900', marginBottom: 8 },
   metaLine: { color: colors.muted, fontSize: 15, lineHeight: 23 },
   metaNote: { color: colors.warning, fontSize: 13, fontWeight: '900', marginTop: 10 },

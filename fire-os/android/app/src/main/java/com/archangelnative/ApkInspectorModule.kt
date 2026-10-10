@@ -130,6 +130,8 @@ class ApkInspectorModule(private val context: ReactApplicationContext) :
       putString("versionCode", versionCode)
       putInt("minSdk", appInfo.minSdkVersion)
       putInt("targetSdk", appInfo.targetSdkVersion)
+      putInt("deviceApi", Build.VERSION.SDK_INT)
+      putString("deviceRelease", Build.VERSION.RELEASE ?: "Unknown")
       putDouble("sizeMb", file.length().toDouble() / (1024.0 * 1024.0))
       putInt("requestedPermissionCount", permissions.size)
       putArray("requestedPermissions", permissionArray)

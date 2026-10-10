@@ -24,7 +24,7 @@ export default function FocusableTile({ title, subtitle, icon = '◈', onPress, 
 
 const styles = StyleSheet.create({
   tile: { width: 350, height: 170, marginRight: 20, marginBottom: 20, padding: 24, borderRadius: 14, backgroundColor: colors.panel, borderWidth: 2, borderColor: colors.line, justifyContent: 'center' },
-  tileFocused: { borderColor: colors.red, backgroundColor: colors.panel2, transform: [{ scale: 1.025 }] },
+  tileFocused: { borderColor: '#171717', backgroundColor: '#171717', transform: [{ scale: 1.025 }] },
   focusedText: { color: '#FFFFFF' },
   icon: { color: colors.red, fontSize: 28, fontWeight: '900', marginBottom: 8 },
   title: { color: colors.text, fontSize: 30, fontWeight: '800' },

@@ -25,7 +25,7 @@ export default function PulseScreen() {
   const run = async () => {
     setRunning(true); setError('');
     const start = Date.now();
-    try { setLatency(Date.now() - start); const response = await api.pulse(); setLatency(Date.now() - start); setData(response); }
+    try { const response = await api.pulse(); setLatency(Date.now() - start); setData(response); }
     catch (e) { setLatency(Date.now() - start); setData(null); setError(e instanceof Error ? e.message : 'Pulse check failed.'); }
     finally { setRunning(false); }
   };

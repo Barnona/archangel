@@ -10,16 +10,21 @@ export type ApkInspection = {
   deviceApi: number;
   deviceRelease: string;
   sizeMb: number;
+  sizeBytes: number;
   requestedPermissionCount: number;
   requestedPermissions: string[];
   fileSha256: string;
   signerCertificateSha256: string[];
-  signatureStatus: string;
+  signatureStatus: 'CERTIFICATE_EXTRACTED_NOT_VERIFIED' | 'SIGNER_CERTIFICATE_UNAVAILABLE' | string;
+  compatibilityWarnings: string[];
   inspectionMethod: string;
+  integrityStatus: string;
+  cryptographicSignatureVerified: boolean;
   malwareScanPerformed: boolean;
+  securityScanStatus: 'NOT_SCANNED' | string;
 };
 
-export type LocalApk = { fileName: string; sizeMb: number };
+export type LocalApk = { fileName: string; sizeMb: number; sizeBytes?: number };
 
 type ApkInspectorNative = {
   listApks(): Promise<LocalApk[]>;

@@ -1,4 +1,14 @@
 const INTENT_TYPES = new Set(['SPECIFIC_APP', 'CAPABILITY', 'CONTENT', 'MISSING_APP', 'AMBIGUOUS']);
+const GENERIC_REQUEST_TERMS = new Set([
+  'app', 'application', 'apps', 'applications', 'movie', 'movies', 'music',
+  'video', 'videos', 'show', 'shows', 'streaming', 'stream', 'games', 'gaming',
+  'sports', 'news', 'something', 'some', 'anything', 'content', 'tv'
+]);
+
+function isGenericAppRequest(value) {
+  const words = String(value || '').toLowerCase().split(/[^a-z0-9+]+/).filter(Boolean);
+  return words.length === 0 || words.length > 4 || words.some(word => GENERIC_REQUEST_TERMS.has(word));
+}
 
 function normalizeConciergeResult(result, catalog, userRequest) {
   const fireOsApps = catalog.filter(app => app.platforms?.fireOs);
@@ -12,20 +22,20 @@ function normalizeConciergeResult(result, catalog, userRequest) {
     ? normalized.exactMatch
     : null;
 
+  if (isGenericAppRequest(normalized.requestedApp)) normalized.requestedApp = '';
+
   if (normalized.exactMatch) {
     normalized.requestedApp = byId.get(normalized.exactMatch).name;
     normalized.intentType = 'SPECIFIC_APP';
   } else if (normalized.requestedApp) {
     normalized.intentType = 'MISSING_APP';
-  } else if (!INTENT_TYPES.has(normalized.intentType)) {
+  } else if (!INTENT_TYPES.has(normalized.intentType) || normalized.intentType === 'SPECIFIC_APP') {
     const intentText = `${userRequest || ''} ${normalized.understoodIntent}`.toLowerCase();
     normalized.intentType = /\b(ambiguous|unclear|which app)\b/.test(intentText)
       ? 'AMBIGUOUS'
       : /\b(watch|listen|play|find|show|stream|content|movie|music|game|sport)\b/.test(intentText)
         ? 'CONTENT'
         : 'CAPABILITY';
-  } else if (normalized.intentType === 'SPECIFIC_APP') {
-    normalized.intentType = 'AMBIGUOUS';
   }
 
   const alternatives = Array.isArray(normalized.alternatives) ? normalized.alternatives : [];
@@ -43,8 +53,7 @@ function normalizeConciergeResult(result, catalog, userRequest) {
 
   if (normalized.intentType === 'MISSING_APP') normalized.exactMatch = null;
   if (normalized.intentType !== 'MISSING_APP' && !normalized.exactMatch) normalized.requestedApp = '';
-
   return normalized;
 }
 
-module.exports = { normalizeConciergeResult };
+module.exports = { normalizeConciergeResult, isGenericAppRequest };

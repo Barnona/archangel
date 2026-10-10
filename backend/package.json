@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test:smoke": "node smoke-test.js"
+    "test:smoke": "node smoke-test.js",
+    "test:catalog": "node --test catalog-validation.test.js",
+    "validate:catalog": "node catalog-validation.js"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.900.0",

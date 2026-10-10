@@ -1,7 +1,6 @@
 package com.archangelnative
 
 import org.junit.After
-import org.junit.Assert.assertDoesNotThrow
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -68,7 +67,7 @@ class ApkContainerValidatorTest {
   fun acceptsZipContainerWithNonEmptyManifestForAndroidParsingStage() {
     val file = tempFile("container-only.apk")
     writeZip(file, mapOf("AndroidManifest.xml" to "placeholder manifest bytes".toByteArray()))
-    assertDoesNotThrow { ApkContainerValidator.validate(file) }
+    ApkContainerValidator.validate(file)
   }
 
   private fun writeZip(file: File, entries: Map<String, ByteArray>) {

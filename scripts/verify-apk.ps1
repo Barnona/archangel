@@ -7,13 +7,13 @@ param(
 $ErrorActionPreference = "Stop"
 
 if (-not (Test-Path -LiteralPath $ApkPath -PathType Leaf)) {
-  Write-Error "APK file not found: $ApkPath"
+  [Console]::Error.WriteLine("APK file not found: $ApkPath")
   exit 2
 }
 
 $resolvedPath = (Resolve-Path -LiteralPath $ApkPath).Path
 if ([IO.Path]::GetExtension($resolvedPath) -ine ".apk") {
-  Write-Error "Expected a file with the .apk extension. No file was inspected."
+  [Console]::Error.WriteLine("Expected a file with the .apk extension. No file was inspected.")
   exit 2
 }
 
@@ -43,14 +43,14 @@ if (-not $apksignerPath) {
 }
 
 if (-not $apksignerPath) {
-  Write-Error "Android SDK apksigner was not found. Install Android SDK Build Tools or add apksigner to PATH."
+  [Console]::Error.WriteLine("Android SDK apksigner was not found. Install Android SDK Build Tools or add apksigner to PATH.")
   exit 3
 }
 
 $actualHash = (Get-FileHash -LiteralPath $resolvedPath -Algorithm SHA256).Hash.ToUpperInvariant()
 $expected = if ([string]::IsNullOrWhiteSpace($ExpectedSha256)) { $null } else { $ExpectedSha256.Trim().ToUpperInvariant() }
 if ($expected -and $expected -notmatch "^[A-F0-9]{64}$") {
-  Write-Error "ExpectedSha256 must be exactly 64 hexadecimal characters."
+  [Console]::Error.WriteLine("ExpectedSha256 must be exactly 64 hexadecimal characters.")
   exit 2
 }
 

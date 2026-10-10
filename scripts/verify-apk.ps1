@@ -12,6 +12,10 @@ if (-not (Test-Path -LiteralPath $ApkPath -PathType Leaf)) {
 }
 
 $resolvedPath = (Resolve-Path -LiteralPath $ApkPath).Path
+if ((Get-Item -LiteralPath $resolvedPath).Length -le 0) {
+  [Console]::Error.WriteLine("APK file is empty (0 bytes).")
+  exit 2
+}
 if ([IO.Path]::GetExtension($resolvedPath) -ine ".apk") {
   [Console]::Error.WriteLine("Expected a file with the .apk extension. No file was inspected.")
   exit 2

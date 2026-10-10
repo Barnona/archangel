@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { colors } from '../theme/theme';
+import { ApkInspection, pickAndInspectApk } from '../lib/apkInspector';
 
 type Props = { onBack: () => void };
 
@@ -61,6 +62,9 @@ export default function SideloadSentinelScreen({ onBack }: Props) {
   const [sizeMb, setSizeMb] = useState('');
   const [ran, setRan] = useState(false);
   const [backFocused, setBackFocused] = useState(false);
+  const [inspection, setInspection] = useState<ApkInspection | null>(null);
+  const [inspectionError, setInspectionError] = useState('');
+  const [inspecting, setInspecting] = useState(false);
   const findings = useMemo(() => ran ? evaluatePackage(packageId, minSdk, targetSdk, sizeMb) : [], [ran, packageId, minSdk, targetSdk, sizeMb]);
   const cautionCount = findings.filter(f => f.level !== 'INFO').length;
 
@@ -71,6 +75,44 @@ export default function SideloadSentinelScreen({ onBack }: Props) {
       <Text style={styles.intro}>A preliminary metadata review for Android package compatibility. No APK is uploaded, installed, or executed.</Text>
 
       <View style={styles.form}>
+        <Text style={styles.section}>APK FILE INSPECTION</Text>
+        <Text style={styles.findingDetail}>Choose an APK from local storage. ARCHANGEL reads its Android manifest metadata on-device; the file is not uploaded, installed, or executed.</Text>
+        <Pressable
+          onPress={async () => {
+            setInspecting(true);
+            setInspectionError('');
+            try {
+              const result = await pickAndInspectApk();
+              setInspection(result);
+              setPackageId(result.packageName);
+              setMinSdk(String(result.minSdk));
+              setTargetSdk(String(result.targetSdk));
+              setSizeMb(result.sizeMb.toFixed(2));
+              setRan(true);
+            } catch (error) {
+              const message = error instanceof Error ? error.message : String(error);
+              if (!message.toLowerCase().includes('cancel')) setInspectionError(message);
+            } finally {
+              setInspecting(false);
+            }
+          }}
+          style={({ focused, pressed }) => [styles.button, (focused || pressed) && styles.buttonFocused]}
+        >
+          <Text style={styles.buttonText}>{inspecting ? 'INSPECTING APK…' : '▣  SELECT APK & INSPECT'}</Text>
+        </Pressable>
+        {inspectionError ? <Text style={styles.errorText}>{inspectionError}</Text> : null}
+        {inspection ? (
+          <View style={styles.inspectionCard}>
+            <Text style={styles.section}>EXTRACTED METADATA</Text>
+            <Text style={styles.metaName}>{inspection.fileName}</Text>
+            <Text style={styles.metaLine}>Package: {inspection.packageName}</Text>
+            <Text style={styles.metaLine}>Version: {inspection.versionName} (code {inspection.versionCode})</Text>
+            <Text style={styles.metaLine}>Min SDK: {inspection.minSdk}  •  Target SDK: {inspection.targetSdk}</Text>
+            <Text style={styles.metaLine}>Size: {inspection.sizeMb.toFixed(2)} MB  •  Requested permissions: {inspection.requestedPermissionCount}</Text>
+            <Text style={styles.metaNote}>Signature verification: NOT PERFORMED</Text>
+          </View>
+        ) : null}
+        <Text style={styles.label}>OR ENTER METADATA MANUALLY</Text>
         <Text style={styles.label}>PACKAGE IDENTIFIER</Text>
         <TextInput value={packageId} onChangeText={setPackageId} placeholder="com.example.app" placeholderTextColor={colors.muted} autoCapitalize="none" style={styles.input} />
         <View style={styles.row}>
@@ -132,6 +174,11 @@ const styles = StyleSheet.create({
   buttonFocused: { backgroundColor: '#171717', borderColor: '#171717', borderWidth: 2 },
   buttonText: { color: '#FFFFFF', fontWeight: '900', fontSize: 16, letterSpacing: 1 },
   results: { marginTop: 26 },
+  inspectionCard: { marginTop: 18, padding: 18, borderRadius: 10, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.bg },
+  metaName: { color: colors.text, fontSize: 18, fontWeight: '900', marginBottom: 8 },
+  metaLine: { color: colors.muted, fontSize: 15, lineHeight: 23 },
+  metaNote: { color: colors.warning, fontSize: 13, fontWeight: '900', marginTop: 10 },
+  errorText: { color: colors.red, fontSize: 15, marginTop: 10 },
   section: { color: colors.red, fontSize: 15, fontWeight: '900', letterSpacing: 2, marginBottom: 12 },
   resultSummary: { color: colors.text, fontSize: 18, marginBottom: 12 },
   finding: { backgroundColor: colors.panel, borderWidth: 1, borderColor: colors.line, borderRadius: 10, padding: 16, marginBottom: 10 },

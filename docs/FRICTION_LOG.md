@@ -88,7 +88,7 @@ A core design principle is:
 | 2026-10-10  (IST) | App Discovery / Focused result-card styling | Focused search results should use the established light-red selection style | Result card switched to a solid black background with white text | New visual treatment conflicted with the preferred light/red design and reduced consistency with the rest of the interface | ![Error Evidence](./Evidence-Screenshot/Evidence_UIConflict.png) | Restored pale-red focused background, red border, dark text and light icon/badge surfaces; runtime verification remains pending | 5 minutes |
 | 2026-10-10 12:34 PM (IST) | Sideload Sentinel / APK selection on Android TV | The “SELECT APK & INSPECT” action should open a local file browser so a user can choose an APK and inspect its manifest metadata | The Android 12 TV emulator displayed “You don't have an app that can do this.” Queries for both `ACTION_OPEN_DOCUMENT` and `ACTION_GET_CONTENT` returned no activities; the emulator had no document-picker provider | The picker intent depended on a system document provider that was absent from this emulator. Changing the MIME type did not help. Direct access to shared Downloads would also introduce scoped-storage constraints | ADB output: `No activities found` for both picker actions; `/sdcard/Download/archangel-test.apk` was successfully staged for testing | Replaced the external picker dependency with a TV-friendly in-app APK browser backed by ARCHANGEL's app-specific Downloads/import folder. Added local APK listing and manifest inspection through Android `PackageManager`, filename/size display, refresh, and remote-selectable rows. No broad storage permission, installation, upload, or execution is required. User confirmed the flow is working | 30 minutes |
 | 2026-10-10 2:56 PM (IST) | Sideload Sentinel / Completion validation | Users should be able to browse local APKs, review package metadata and declared permissions, see compatibility warnings and understand which security checks were actually performed | Initial unit-test compilation failed because `assertDoesNotThrow` was unavailable in the Kotlin/JUnit test setup | Gradle output: `Unresolved reference 'assertDoesNotThrow'` in `ApkContainerValidatorTest.kt` | ![Evidence](./Evidence-Screenshot/Evidence_SideloadSentinelComplete.png) | Updated Sentinel permission explanations and separated APK signature verification, publisher trust and malware-scan status; hardened APK/ZIP container validation, documented malformed-input regression cases, and added a PowerShell `apksigner` verification helper | 50 minutes |
-
+| 2026-10-10 6:15 PM (IST) | Concierge AI | Gemini and Bedrock should provide one predictable response contract to the Fire TV client; the assistant must never invent app IDs or treat generic content needs as missing applications. | The Bedrock provider returned a looser shape. The frontend type also omitted intent/provider/fallback metadata, and provider-independent response validation was not centralized. |  |  | Added `backend/concierge.js` to normalize intent, named-app requests, exact matches, alternatives, and confidence values against Fire OS catalog entries. Added regression tests for exact matches, missing apps, invalid IDs, duplicate/off-platform alternatives, malformed model fields, and generic content requests. |
 
 ---
 
@@ -230,76 +230,6 @@ Next planned increments:
 
 1. **Amazon Appstore application catalog API**
 2. **Amazon subscription / entitlement integration**, including official discovery of ad-free subscription options where exposed
-
----
-
-# 6. Friction log operating rule
-
-Every significant friction from this point onward should record:
-
-`Timestamp → Expected → Actual → Friction → Evidence → Root cause → Solution → Time taken`
-
-This log is intended to document not only bugs but also **product-discovery friction**: situations where the original assumptions about Fire TV, Amazon APIs, TV navigation, or user behaviour proved incorrect.
-
----
-
-
-
----
-
-# 7. Sideload Sentinel hardening — 2026-10-10
-
-| Field | Details |
-|---|---|
-| Timestamp | 2026-10-10 (IST) |
-| Expected | Sentinel should reject malformed inputs, explain compatibility and declared-permission findings, identify exactly what its security checks do, and provide a real signature-verification path. |
-| Actual before this change | The app extracted package metadata and a SHA-256 digest, but signer fingerprints were only extracted—not proof of a valid APK signature. Permissions were mostly raw names; invalid ZIPs had generic errors; the UI could be misread as a security verdict. |
-| Friction | Metadata inspection, hashing, signing integrity, publisher trust, compatibility, and malware scanning are separate things, but the prototype did not make all of those boundaries equally explicit. |
-| Evidence | `fire-os/android/app/src/main/java/com/archangelnative/ApkInspectorModule.kt`, `fire-os/src/lib/apkInspector.ts`, `fire-os/src/screens/SideloadSentinelScreen.tsx`, `scripts/verify-apk.ps1`, `docs/SIDELOAD_SENTINEL.md` |
-| Root cause | Android `PackageManager` archive metadata exposes package/certificate information but is not a substitute for explicitly running the SDK signature verifier. A file SHA-256 is only a fingerprint unless compared with a separately trusted expected digest. |
-| Solution | Added ZIP/manifest validation, clear empty/unreadable/oversized-file errors, explicit signature/integrity/malware scan status fields, SDK compatibility warnings, permission rationale labels, a Windows PowerShell wrapper around Android SDK `apksigner verify --verbose --print-certs`, optional trusted-hash comparison, a malformed-input validation matrix, and CI build/signature checks. |
-| Result | Completed directly on `main`. Added APK container validation and malformed-input unit tests, local APK browsing and metadata inspection, SHA-256 and signer-certificate display, permission explanations, compatibility warnings, explicit boundaries for signature verification/publisher trust/malware scanning, and the `scripts/verify-apk.ps1` helper for `apksigner` verification and optional trusted-hash comparison. User confirmed `app:testDebugUnitTest app:assembleDebug` completed successfully after replacing the unsupported `assertDoesNotThrow` assertion. The user's earlier `apksigner` run also verified the debug APK's v2 signature. These checks do not constitute malware scanning or publisher trust verification. |
-| Time taken | Not measured. |
-
-### Regression cases to execute
-
-1. Valid signed APK and known trusted hash.
-2. Non-APK extension, random text renamed to `.apk`, empty file, ZIP without `AndroidManifest.xml`, invalid manifest, and truncated/corrupted APK.
-3. Signature tampering and expected-SHA-256 mismatch with the desktop verifier.
-4. Unreadable/missing file, compatibility warning display, empty permission list, and sensitive declared permissions.
-5. Re-launch app after inspection; verify no installation, upload, or APK execution occurs.
-
-
----
-
-# 8. App Discovery catalog validation — 2026-10-10
-
-| Field | Details |
-|---|---|
-| Timestamp | 2026-10-10 (IST) |
-| Expected | Catalog records should be structurally consistent, alternative links should resolve, and stale verification dates should be visible rather than silently treated as fresh. |
-| Actual before this change | The curated catalog was consumed directly by discovery and detail routes; there was no standalone validation command or regression suite for catalog schema and cross-record references. |
-| Friction | A malformed record or broken alternative ID could quietly degrade discovery, while old verification dates could be mistaken for current evidence. |
-| Evidence | `shared/src/catalog.seed.json`, `backend/catalog-validation.js`, `backend/catalog-validation.test.js` |
-| Root cause | Catalog ingestion was deliberately a curated static cache, but the data contract was not enforced by a repeatable validator. |
-| Solution | Added a validator for required fields, ID format/uniqueness, platform and monetization values, ad-level values, verification dates, alternative references, and verification age. Stale verification is a warning; structural/data-integrity errors fail validation. Exposed validation diagnostics through `GET /catalog/status`, surfaced catalog validation errors/warnings in Pulse health, extended API smoke assertions, added Node test cases and npm scripts `test:catalog` and `validate:catalog`, added a dedicated GitHub Actions workflow, and updated App Discovery result cards to show verification age and flag records needing review. |
-| Result | Implemented directly on `main`. The current 10-record catalog was statically inspected and had no duplicate IDs, malformed required fields, or broken alternative references. The catalog was statically inspected and had no duplicate IDs, malformed required fields, or broken alternative references. The user ran `npm --workspace backend run test:catalog` successfully (7 passed, 0 failed) and `npm --workspace backend run validate:catalog` successfully (10 records, 0 errors, 0 warnings; 10 Fire OS, 0 Vega, 10 marked verified, 0 stale). The updated Fire OS UI and API smoke integration still require a local build/smoke run. |
-| Time taken | Not measured. |
-
-
-
----
-
-# 9. ARCHANGEL Concierge integration — 2026-10-10
-
-| Field | Details |
-|---|---|
-| Timestamp | 2026-10-10 (IST) |
-| Expected | Gemini and Bedrock should provide one predictable response contract to the Fire TV client; the assistant must never invent app IDs or treat generic content needs as missing applications. |
-| Current implementation gap | The Gemini provider included intent classification and catalog filtering, but the Bedrock provider returned a looser shape. The frontend type also omitted intent/provider/fallback metadata, and provider-independent response validation was not centralized. |
-| Solution started | Added `backend/concierge.js` to normalize intent, named-app requests, exact matches, alternatives, and confidence values against Fire OS catalog entries. Added regression tests for exact matches, missing apps, invalid IDs, duplicate/off-platform alternatives, malformed model fields, and generic content requests. Added `test:concierge`, typed the frontend API response, and wired Concierge tests into the existing GitHub Actions workflow. |
-| Status | Changes are committed directly to `main`. Local test execution, the full backend smoke suite, Fire TV TypeScript/Android build, and emulator interaction checks are still required; this phase is not marked complete yet. |
-| Time taken | Not measured. |
 
 ### Concierge acceptance checks
 

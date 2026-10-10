@@ -357,11 +357,13 @@ function pulseStatus() {
     {
       id: 'ai',
       label: 'AI INTELLIGENCE',
-      status: ai.provider === 'bedrock' ? 'degraded' : 'healthy',
-      summary: `Provider configured: ${ai.provider}.`,
+      status: ['bedrock', 'gemini'].includes(ai.provider) ? 'healthy' : 'attention',
+      summary: `Provider configuration detected: ${ai.provider}.`,
       detail: ai.provider === 'bedrock'
-        ? `Bedrock primary: ${ai.bedrock.modelId} • Gemini fallback retained`
-        : `Gemini primary: ${ai.gemini.primaryModel} • fallback: ${ai.gemini.fallbackModel}`,
+        ? `Bedrock primary: ${ai.bedrock.modelId} • Gemini fallback retained • live authorization/inference not tested by this read-only check`
+        : ai.provider === 'gemini'
+          ? `Gemini primary: ${ai.gemini.primaryModel} • fallback: ${ai.gemini.fallbackModel} • live inference not tested by this read-only check`
+          : 'Unsupported AI provider configuration.'
     },
   ];
 

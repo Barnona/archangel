@@ -100,7 +100,6 @@ export default function SideloadSentinelScreen({ onBack }: Props) {
 
       <View style={styles.form}>
         <Text style={styles.section}>APK FILE INSPECTION</Text>
-        <Text style={styles.findingDetail}>Choose an APK from ARCHANGEL’s private import folder. The inspector checks basic ZIP structure, reads Android manifest metadata, and calculates SHA-256 locally.</Text>
         <Pressable
           onPress={async () => {
             setInspecting(true);

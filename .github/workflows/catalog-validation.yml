@@ -42,3 +42,6 @@ jobs:
 
       - name: Run Concierge contract tests
         run: npm --workspace backend run test:concierge
+
+      - name: Test Bedrock model configuration (no AWS credentials required)
+        run: npm --workspace backend run test:bedrock-config

@@ -44,6 +44,7 @@ class ApkInspectorModule(private val context: ReactApplicationContext) :
         result.pushMap(Arguments.createMap().apply {
           putString("fileName", file.name)
           putDouble("sizeMb", file.length().toDouble() / (1024.0 * 1024.0))
+          putDouble("sizeBytes", file.length().toDouble())
         })
       }
       promise.resolve(result)
@@ -57,17 +58,24 @@ class ApkInspectorModule(private val context: ReactApplicationContext) :
     try {
       if (fileName.isBlank() || fileName.contains("/") || fileName.contains("\\") ||
         fileName == "." || fileName == ".." || !fileName.endsWith(".apk", true)) {
-        throw IllegalArgumentException("Select a valid APK filename.")
+        throw IllegalArgumentException("Select a valid APK filename from ARCHANGEL's import folder.")
       }
       val root = importDirectory()
       val file = File(root, fileName).canonicalFile
       if (file.parentFile != root || !file.isFile || !file.canRead()) {
-        throw IllegalArgumentException("APK not found or not readable in ARCHANGEL's import folder.")
+        throw IllegalArgumentException("APK not found or not readable in ARCHANGEL's import folder. Copy it to Android/data/com.archangelnative/files/Download and refresh.")
       }
-      if (file.length() <= 0L) throw IllegalArgumentException("This file is empty.")
+      if (file.length() <= 0L) throw IllegalArgumentException("This file is empty (0 bytes). Select a complete APK file.")
+      if (file.length() > MAX_APK_BYTES) {
+        throw IllegalArgumentException("This APK exceeds the ${MAX_APK_BYTES / (1024L * 1024L)} MB inspection limit. Use Android SDK tools on a development computer for large packages.")
+      }
       promise.resolve(inspectFile(file))
     } catch (error: Exception) {
-      promise.reject("APK_INSPECTION_FAILED", error.message ?: "Could not inspect this APK.", error)
+      val message = when (error) {
+        is SecurityException -> "Android denied access to this file. Copy it into ARCHANGEL's own APK import folder and try again."
+        else -> error.message ?: "Could not inspect this APK."
+      }
+      promise.reject("APK_INSPECTION_FAILED", message, error)
     }
   }
 
@@ -84,27 +92,27 @@ class ApkInspectorModule(private val context: ReactApplicationContext) :
     return digest.digest().joinToString("") { "%02X".format(it) }
   }
 
-  private fun certificateSha256(bytes: ByteArray): String {
-    return MessageDigest.getInstance("SHA-256").digest(bytes)
-      .joinToString("") { "%02X".format(it) }
-  }
+  private fun certificateSha256(bytes: ByteArray): String =
+    MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02X".format(it) }
 
   private fun inspectFile(file: File): WritableMap {
+    ApkContainerValidator.validate(file)
     val flags = if (Build.VERSION.SDK_INT >= 28) {
       PackageManager.GET_PERMISSIONS or PackageManager.GET_SIGNING_CERTIFICATES
     } else {
       @Suppress("DEPRECATION")
       PackageManager.GET_PERMISSIONS or PackageManager.GET_SIGNATURES
     }
-    val packageInfo: PackageInfo = if (Build.VERSION.SDK_INT >= 33) {
-      context.packageManager.getPackageArchiveInfo(
-        file.absolutePath,
-        PackageManager.PackageInfoFlags.of(flags.toLong())
-      )
-    } else {
-      @Suppress("DEPRECATION")
-      context.packageManager.getPackageArchiveInfo(file.absolutePath, flags)
-    } ?: throw IllegalArgumentException("Android could not parse this APK manifest. The file may be corrupt, incomplete, or not an APK.")
+    val packageInfo: PackageInfo = try {
+      if (Build.VERSION.SDK_INT >= 33) {
+        context.packageManager.getPackageArchiveInfo(file.absolutePath, PackageManager.PackageInfoFlags.of(flags.toLong()))
+      } else {
+        @Suppress("DEPRECATION")
+        context.packageManager.getPackageArchiveInfo(file.absolutePath, flags)
+      }
+    } catch (error: Exception) {
+      throw IllegalArgumentException("Android could not read this APK's manifest. The APK may use an unsupported format or be corrupted.")
+    } ?: throw IllegalArgumentException("Android could not parse this APK manifest. The file may be corrupt, incomplete, or an unsupported APK format.")
 
     val appInfo = packageInfo.applicationInfo
       ?: throw IllegalArgumentException("The APK does not contain readable application metadata.")
@@ -120,8 +128,16 @@ class ApkInspectorModule(private val context: ReactApplicationContext) :
 
     val permissionArray = Arguments.createArray()
     permissions.sorted().forEach { permissionArray.pushString(it) }
+    val certificateFingerprints = certBytes.map { certificateSha256(it) }.distinct()
     val certificateArray = Arguments.createArray()
-    certBytes.map { certificateSha256(it) }.distinct().forEach { certificateArray.pushString(it) }
+    certificateFingerprints.forEach { certificateArray.pushString(it) }
+    val warnings = mutableListOf<String>()
+    if (appInfo.minSdkVersion > Build.VERSION.SDK_INT) warnings.add("Requires Android API ${appInfo.minSdkVersion}; this device exposes API ${Build.VERSION.SDK_INT}.")
+    if (appInfo.targetSdkVersion > Build.VERSION.SDK_INT) warnings.add("Targets API ${appInfo.targetSdkVersion}, newer than this device API ${Build.VERSION.SDK_INT}; compatibility behavior may differ.")
+    if (permissions.isEmpty()) warnings.add("No requested permissions were exposed by the parsed manifest; this does not imply the package is safe.")
+    if (certificateFingerprints.isEmpty()) warnings.add("No signer certificate could be extracted. Verify with Android SDK apksigner before trusting this package.")
+    val warningArray = Arguments.createArray()
+    warnings.forEach { warningArray.pushString(it) }
 
     return Arguments.createMap().apply {
       putString("fileName", file.name)
@@ -133,19 +149,25 @@ class ApkInspectorModule(private val context: ReactApplicationContext) :
       putInt("deviceApi", Build.VERSION.SDK_INT)
       putString("deviceRelease", Build.VERSION.RELEASE ?: "Unknown")
       putDouble("sizeMb", file.length().toDouble() / (1024.0 * 1024.0))
+      putDouble("sizeBytes", file.length().toDouble())
       putInt("requestedPermissionCount", permissions.size)
       putArray("requestedPermissions", permissionArray)
       putString("fileSha256", sha256(file))
       putArray("signerCertificateSha256", certificateArray)
-      putString("signatureStatus", if (certificateArray.size() > 0) "CERTIFICATE_PRESENT_NOT_CRYPTOGRAPHICALLY_VERIFIED" else "NO_SIGNER_CERTIFICATE_EXTRACTED")
-      putString("inspectionMethod", "Android PackageManager archive metadata")
+      putString("signatureStatus", if (certificateFingerprints.isNotEmpty()) "CERTIFICATE_EXTRACTED_NOT_VERIFIED" else "SIGNER_CERTIFICATE_UNAVAILABLE")
+      putArray("compatibilityWarnings", warningArray)
+      putString("inspectionMethod", "Android PackageManager metadata + ZIP container checks + SHA-256")
+      putString("integrityStatus", "HASH_COMPUTED_NO_KNOWN_GOOD_REFERENCE")
+      putBoolean("cryptographicSignatureVerified", false)
       putBoolean("malwareScanPerformed", false)
+      putString("securityScanStatus", "NOT_SCANNED")
     }
   }
+
+  companion object { private const val MAX_APK_BYTES = 1024L * 1024L * 1024L }
 }
 
 class ApkInspectorPackage : ReactPackage {
-  override fun createNativeModules(context: ReactApplicationContext): List<NativeModule> =
-    listOf(ApkInspectorModule(context))
+  override fun createNativeModules(context: ReactApplicationContext): List<NativeModule> = listOf(ApkInspectorModule(context))
   override fun createViewManagers(context: ReactApplicationContext): List<ViewManager<*, *>> = emptyList()
 }

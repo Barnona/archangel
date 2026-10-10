@@ -257,7 +257,7 @@ This log is intended to document not only bugs but also **product-discovery fric
 | Evidence | `fire-os/android/app/src/main/java/com/archangelnative/ApkInspectorModule.kt`, `fire-os/src/lib/apkInspector.ts`, `fire-os/src/screens/SideloadSentinelScreen.tsx`, `scripts/verify-apk.ps1`, `docs/SIDELOAD_SENTINEL.md` |
 | Root cause | Android `PackageManager` archive metadata exposes package/certificate information but is not a substitute for explicitly running the SDK signature verifier. A file SHA-256 is only a fingerprint unless compared with a separately trusted expected digest. |
 | Solution | Added ZIP/manifest validation, clear empty/unreadable/oversized-file errors, explicit signature/integrity/malware scan status fields, SDK compatibility warnings, permission rationale labels, a Windows PowerShell wrapper around Android SDK `apksigner verify --verbose --print-certs`, optional trusted-hash comparison, a malformed-input validation matrix, and CI build/signature checks. |
-| Result | Code and documentation changes are committed on `feat/sideload-sentinel-hardening`. Emulator validation and CI result confirmation remain pending; this entry does not claim those tests have passed. |
+| Result | Code and documentation changes are committed directly on `main`. Permission descriptions and separate signature/publisher/malware states are now visible in the inspection UI. CI build/test and emulator regression validation remain pending; this entry does not claim those tests have passed. |
 | Time taken | Not measured. |
 
 ### Regression cases to execute
@@ -270,4 +270,4 @@ This log is intended to document not only bugs but also **product-discovery fric
 
 ## Last updated
 
-**2026-10-10 — Sideload Sentinel hardening + local APK browser; emulator validation pending**
+**2026-10-10 — Sideload Sentinel permission/security UI hardening on main; CI and emulator validation pending**

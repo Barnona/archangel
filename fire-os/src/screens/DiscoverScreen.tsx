@@ -7,6 +7,18 @@ import { colors } from '../theme/theme';
 type Props = { onOpen: (id: string) => void; onRequest?: (name: string) => void };
 const categories = ['All', 'Streaming', 'Music', 'Games', 'Utility'];
 
+const categoryIcon = (category: string) => {
+  switch (category.toLowerCase()) {
+    case 'streaming': return '▶';
+    case 'music': return '♫';
+    case 'games': return '🎮';
+    case 'utility': return '⚙';
+    default: return '◈';
+  }
+};
+
+const monetizationLabel = (items: string[]) => items.map(value => value.replace('-', ' ')).join('  ·  ').toUpperCase();
+
 export default function DiscoverScreen({ onOpen, onRequest }: Props) {
   const [results, setResults] = useState<DiscoveryResult[]>([]);
   const [query, setQuery] = useState('');
@@ -19,6 +31,7 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
   const [searchFocused, setSearchFocused] = useState(false);
   const [askFocused, setAskFocused] = useState(false);
   const [requestFocused, setRequestFocused] = useState(false);
+  const [focusedAppId, setFocusedAppId] = useState<string | null>(null);
   const [aiResult, setAiResult] = useState<{
     intentType: 'SPECIFIC_APP' | 'CAPABILITY' | 'CONTENT' | 'MISSING_APP' | 'AMBIGUOUS';
     requestedApp: string;
@@ -173,7 +186,7 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
 
       <View style={styles.resultBar}>
         <Text style={styles.resultCount}>{loading ? 'ANALYZING CATALOG...' : `${results.length} RESULT${results.length === 1 ? '' : 'S'} • RANKED`}</Text>
-        <Text style={styles.snapshot}>SOURCE SNAPSHOT • 2026-10-01</Text>
+        <Text style={styles.snapshot}>CURATED CATALOG • CHECK EACH APP PROFILE</Text>
       </View>
 
       {loading ? <ActivityIndicator size="large" color={colors.red} style={styles.loader} /> : null}
@@ -182,21 +195,27 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
       {!loading && !error && results.map((result) => {
         const app = result.app;
         return (
-          <Pressable key={app.id} onPress={() => onOpen(app.id)} style={({ focused }) => [styles.card, focused && styles.cardFocused]}>
+          <Pressable key={app.id} onPress={() => onOpen(app.id)} onFocus={() => setFocusedAppId(app.id)} onBlur={() => setFocusedAppId(current => current === app.id ? null : current)} style={[styles.card, focusedAppId === app.id && styles.cardFocused]}>
             <View style={styles.cardTop}>
-              <View style={styles.nameWrap}>
-                <Text style={styles.appName}>{app.name}</Text>
-                {app.verified ? <Text style={styles.verified}>SOURCE CHECKED</Text> : null}
+              <View style={styles.appIdentity}>
+                <View style={[styles.appIcon, focusedAppId === app.id && styles.appIconFocused]}><Text style={[styles.appIconText, focusedAppId === app.id && styles.focusedText]}>{categoryIcon(app.category)}</Text></View>
+                <View style={styles.nameWrap}>
+                  <Text style={[styles.appName, focusedAppId === app.id && styles.focusedText]}>{app.name}</Text>
+                  {app.verified ? <Text style={[styles.verified, focusedAppId === app.id && styles.focusedMuted]}>✓ SOURCE CHECKED</Text> : null}
+                </View>
               </View>
-              <Text style={styles.category}>{app.category}</Text>
+              <Text style={[styles.category, focusedAppId === app.id && styles.focusedText]}>{app.category.toUpperCase()}</Text>
             </View>
-            <Text style={styles.description} numberOfLines={2}>{app.description}</Text>
-            <Text style={styles.meta}>
-              {app.platforms.fireOs ? 'Fire OS ✓' : 'Fire OS —'}   {app.platforms.vega ? 'Vega ✓' : 'Vega ?'}   •   {app.monetization.join(', ')}
-            </Text>
-            <View style={styles.reasonBox}>
-              <Text style={styles.reasonLabel}>ⓘ  WHY THIS RESULT</Text>
-              <Text style={styles.reason}>{result.reasons.join('  •  ')}</Text>
+            <Text style={[styles.description, focusedAppId === app.id && styles.focusedMuted]} numberOfLines={2}>{app.description}</Text>
+            <View style={styles.badges}>
+              <View style={[styles.platformBadge, app.platforms.fireOs && styles.badgePositive, focusedAppId === app.id && styles.badgeFocused]}><Text style={[styles.badgeText, app.platforms.fireOs && styles.badgePositiveText, focusedAppId === app.id && styles.focusedText]}>{app.platforms.fireOs ? '✓ FIRE OS' : '— FIRE OS'}</Text></View>
+              <View style={[styles.platformBadge, app.platforms.vega && styles.badgePositive, focusedAppId === app.id && styles.badgeFocused]}><Text style={[styles.badgeText, app.platforms.vega && styles.badgePositiveText, focusedAppId === app.id && styles.focusedText]}>{app.platforms.vega ? '✓ VEGA' : '? VEGA'}</Text></View>
+              <View style={[styles.platformBadge, focusedAppId === app.id && styles.badgeFocused]}><Text style={[styles.badgeText, focusedAppId === app.id && styles.focusedText]}>{monetizationLabel(app.monetization)}</Text></View>
+            </View>
+            <View style={[styles.reasonBox, focusedAppId === app.id && styles.reasonBoxFocused]}>
+              <Text style={[styles.reasonLabel, focusedAppId === app.id && styles.focusedText]}>ⓘ  WHY THIS RESULT</Text>
+              <Text style={[styles.reason, focusedAppId === app.id && styles.focusedMuted]}>{result.reasons.join('  •  ')}</Text>
+              <Text style={[styles.openHint, focusedAppId === app.id && styles.focusedText]}>↗  OPEN APP PROFILE</Text>
             </View>
           </Pressable>
         );
@@ -258,7 +277,11 @@ const styles = StyleSheet.create({
   snapshot:{color:'#777777',fontSize:10,letterSpacing:1},
   loader:{marginTop:35},
   card:{width:760,backgroundColor:colors.panel,borderRadius:10,borderWidth:2,borderColor:colors.line,padding:16,marginBottom:12},
-  cardFocused:{borderColor:colors.red,backgroundColor:colors.panel2,transform:[{scale:1.015}]},
+  cardFocused:{borderColor:'#171717',backgroundColor:'#171717',transform:[{scale:1.015}]},
+  focusedText:{color:'#FFFFFF'}, focusedMuted:{color:'#E0E0E0'},
+  appIdentity:{flexDirection:'row',alignItems:'center',flex:1},
+  appIcon:{width:46,height:46,borderRadius:10,backgroundColor:'#FDECEC',alignItems:'center',justifyContent:'center',marginRight:12}, appIconFocused:{backgroundColor:'#333333'}, appIconText:{color:colors.red,fontSize:23,fontWeight:'900'},
+  badges:{flexDirection:'row',flexWrap:'wrap',alignItems:'center',marginTop:11}, platformBadge:{paddingHorizontal:9,paddingVertical:5,borderRadius:6,backgroundColor:'#F0F0F1',marginRight:7,marginBottom:4}, badgePositive:{backgroundColor:'#E8F5EC'}, badgeFocused:{backgroundColor:'#333333'}, badgeText:{color:colors.muted,fontSize:10,fontWeight:'900',letterSpacing:0.5}, badgePositiveText:{color:colors.success}, reasonBoxFocused:{borderTopColor:'#444444'}, openHint:{color:colors.red,fontSize:10,fontWeight:'900',letterSpacing:1,marginTop:8},
   cardTop:{flexDirection:'row',alignItems:'center',justifyContent:'space-between'},
   nameWrap:{flexDirection:'row',alignItems:'center',flex:1},
   appName:{color:colors.text,fontSize:21,fontWeight:'800'},

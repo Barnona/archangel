@@ -47,6 +47,22 @@ export interface CatalogStatus {
   vega: number;
   categories: string[];
   coverage: number;
+  validation?: {
+    valid: boolean;
+    checkedAt: string;
+    totalRecords: number;
+    errorCount: number;
+    warningCount: number;
+    summary: {
+      fireOsRecords: number;
+      vegaRecords: number;
+      verifiedRecords: number;
+      staleVerifiedRecords: number;
+      categories: string[];
+    };
+    errors: Array<{ code: string; recordId: string | null; message: string }>;
+    warnings: Array<{ code: string; recordId: string | null; message: string }>;
+  };
   amazonAppstoreApi: {
     status: 'not_available' | 'available';
     mode: string;

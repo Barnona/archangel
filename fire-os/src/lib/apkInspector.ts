@@ -13,13 +13,24 @@ export type ApkInspection = {
   signatureVerified: boolean;
 };
 
+export type LocalApk = { fileName: string; sizeMb: number };
+
 type ApkInspectorNative = {
-  pickAndInspect(): Promise<ApkInspection>;
+  listApks(): Promise<LocalApk[]>;
+  inspectLocalApk(fileName: string): Promise<ApkInspection>;
 };
 
-export async function pickAndInspectApk(): Promise<ApkInspection> {
+function nativeInspector(): ApkInspectorNative {
   if (Platform.OS !== 'android' || !NativeModules.ApkInspector) {
     throw new Error('APK inspection is available in the Android/Fire OS build only.');
   }
-  return (NativeModules.ApkInspector as ApkInspectorNative).pickAndInspect();
+  return NativeModules.ApkInspector as ApkInspectorNative;
+}
+
+export function listLocalApks(): Promise<LocalApk[]> {
+  return nativeInspector().listApks();
+}
+
+export function inspectLocalApk(fileName: string): Promise<ApkInspection> {
+  return nativeInspector().inspectLocalApk(fileName);
 }

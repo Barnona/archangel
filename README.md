@@ -491,7 +491,7 @@ Diagnostics and ad intelligence will therefore be implemented around capabilitie
     Apps    Ads   Demand   Health  APK   Compatibility
 ```
 
-**Next development phase: validate Sideload Sentinel on the Android TV emulator, then expand package inspection only where supported by actual package metadata or authorized tooling.**
+**Next development phase: build and validate the visual App Discovery cards on the Android TV emulator, correct any layout or remote-focus regressions, then validate Sideload Sentinel before expanding package inspection.**
 
 ---
 

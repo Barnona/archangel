@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { normalizeConciergeResult } = require('./concierge');
+const { normalizeConciergeResult, isGenericAppRequest } = require('./concierge');
 
 const catalog = [
   { id: 'prime-video', name: 'Prime Video', platforms: { fireOs: true } },
@@ -24,7 +24,7 @@ test('turns an unknown named app into a missing-app result', () => {
 test('does not accept an unknown exact-match ID', () => {
   const result = normalizeConciergeResult({ intentType: 'SPECIFIC_APP', exactMatch: 'invented-id', alternatives: [] }, catalog, 'some app');
   assert.equal(result.exactMatch, null);
-  assert.equal(result.intentType, 'AMBIGUOUS');
+  assert.equal(result.intentType, 'CONTENT');
 });
 
 test('filters alternatives to unique Fire OS catalog IDs', () => {
@@ -48,4 +48,12 @@ test('supplies safe defaults for malformed model fields', () => {
 test('preserves a valid model intent classification', () => {
   const result = normalizeConciergeResult({ intentType: 'CAPABILITY', alternatives: [] }, catalog, 'I need something for fitness');
   assert.equal(result.intentType, 'CAPABILITY');
+});
+
+test('generic content requests are not mislabeled as missing applications', () => {
+  assert.equal(isGenericAppRequest('some movies'), true);
+  assert.equal(isGenericAppRequest('something for gaming'), true);
+  const result = normalizeConciergeResult({ requestedApp: 'some movies', alternatives: [] }, catalog, 'some movies');
+  assert.equal(result.requestedApp, '');
+  assert.notEqual(result.intentType, 'MISSING_APP');
 });

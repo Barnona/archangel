@@ -6,7 +6,7 @@ ARCHANGEL is a Fire TV intelligence and discovery application that connects view
 
 The project is being developed for the **Amazon Developer Build, Ship, Shape — Fire TV track**.
 
-> **Status:** Working prototype — App Discovery finalized; AdLens, Pulse, and Sideload Sentinel are the next development modules.
+> **Status:** Working prototype — App Discovery is finalized. Sideload Sentinel now has hardened local APK inspection, explicit verification boundaries, an Android SDK signature-verification helper, and CI regression checks. Emulator/device validation remains a separate required step.
 
 ---
 
@@ -18,7 +18,7 @@ ARCHANGEL is designed as an intelligence layer rather than a replacement for Fir
 - **App Request Network** — converts missing-app requests into aggregated developer-demand signals.
 - **AdLens** — planned monetization/ad-experience intelligence; it will not claim system-wide ad-blocking privileges.
 - **Pulse** — planned Fire TV experience diagnostics.
-- **Sideload Sentinel** — planned APK/package readiness and compatibility analysis for legitimate development/testing.
+- **Sideload Sentinel** — local APK metadata and compatibility inspection, SHA-256 calculation, signer-certificate fingerprints, permission rationale, and a separate Android SDK `apksigner` verification workflow. It does not claim to scan for malware.
 - **ARCHANGEL Concierge** — the AI layer that interprets natural-language requests and connects them to the verified catalog.
 
 ---
@@ -460,7 +460,7 @@ curl http://localhost:4000/requests/demand
 | Demand aggregation | Working |
 | AdLens | Implemented; runtime regression testing ongoing |
 | Pulse | Implemented; 10 backend smoke checks pass |
-| Sideload Sentinel | Initial metadata-review screen implemented; emulator validation pending |
+| Sideload Sentinel | Hardened APK/ZIP checks, metadata + SHA-256, permission rationale, explicit unverified/not-scanned states, desktop `apksigner` helper and CI build/signature checks; emulator matrix pending |
 | Concierge integration | Planned |
 | Vega OS client | Not started |
 
@@ -491,7 +491,7 @@ Diagnostics and ad intelligence will therefore be implemented around capabilitie
     Apps    Ads   Demand   Health  APK   Compatibility
 ```
 
-**Next development phase: build and validate the visual App Discovery cards on the Android TV emulator, correct any layout or remote-focus regressions, then validate Sideload Sentinel before expanding package inspection.**
+**Next development phase: run the Sideload Sentinel emulator validation matrix in [docs/SIDELOAD_SENTINEL.md](docs/SIDELOAD_SENTINEL.md), including malformed, truncated, empty, unsigned/tampered, and non-APK inputs; record observed outcomes before treating the module as device-validated.**
 
 ---
 

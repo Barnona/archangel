@@ -22,7 +22,7 @@ test('turns an unknown named app into a missing-app result', () => {
 });
 
 test('does not accept an unknown exact-match ID', () => {
-  const result = normalizeConciergeResult({ intentType: 'SPECIFIC_APP', exactMatch: 'invented-id', alternatives: [] }, catalog, 'some app');
+  const result = normalizeConciergeResult({ intentType: 'SPECIFIC_APP', exactMatch: 'invented-id', alternatives: [] }, catalog, 'watch some movies');
   assert.equal(result.exactMatch, null);
   assert.equal(result.intentType, 'CONTENT');
 });

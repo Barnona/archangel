@@ -6,6 +6,7 @@ const path = require('path');
 const crypto = require('crypto');
 require('dotenv').config();
 const { analyzeAppRequest, analyzeDemandOpportunity, aiStatus } = require('./ai');
+const { validateCatalog } = require('./catalog-validation');
 
 const PORT = Number(process.env.PORT || 4000);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -319,9 +320,10 @@ function pulseStatus() {
   const ai = aiStatus();
 
   const catalogAgeDays = Math.max(0, Math.floor((Date.now() - Date.parse(CATALOG_LAST_UPDATED)) / 86400000));
-  const catalogStatus = catalog.length === 0
+  const catalogValidation = validateCatalog(catalog);
+  const catalogStatus = !catalogValidation.valid
     ? 'attention'
-    : catalogAgeDays > 30
+    : catalogAgeDays > 30 || catalogValidation.warningCount > 0
       ? 'degraded'
       : 'healthy';
 
@@ -338,7 +340,7 @@ function pulseStatus() {
       label: 'CATALOG INTEGRITY',
       status: catalogStatus,
       summary: catalog.length ? `${fireOsApps.length} Fire OS records available.` : 'Catalog is empty.',
-      detail: `Source ${CATALOG_SOURCE} • last updated ${CATALOG_LAST_UPDATED} • ${catalogAgeDays} day(s) old • ${catalog.filter(a => a.verified).length} verified`,
+      detail: `Source ${CATALOG_SOURCE} • last updated ${CATALOG_LAST_UPDATED} • ${catalogAgeDays} day(s) old • ${catalog.filter(a => a.verified).length} verified • validation ${catalogValidation.errorCount} error(s), ${catalogValidation.warningCount} warning(s)`,
     },
     {
       id: 'requests',
@@ -398,11 +400,13 @@ app.get('/pulse', (_req, res) => {
 app.get('/catalog/status', (_req, res) => {
   const catalog = readJson(CATALOG_PATH, []);
   const stats = catalogStats(catalog);
+  const validation = validateCatalog(catalog);
   res.json({
     catalogVersion: CATALOG_VERSION,
     source: CATALOG_SOURCE,
     lastUpdated: CATALOG_LAST_UPDATED,
     ...stats,
+    validation,
     amazonAppstoreApi: {
       status: 'not_available',
       mode: 'feature-request-ready',

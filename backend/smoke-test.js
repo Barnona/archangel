@@ -78,7 +78,7 @@ async function main() {
     assert.ok(Number.isFinite(pulse.metrics.requestCount));
     const catalogCheck = pulse.checks.find(item => item.id === 'catalog');
     assert.ok(catalogCheck, 'missing catalog Pulse check');
-    assert.match(catalogCheck.detail, /validation \\d+ error\\(s\\), \\d+ warning\\(s\\)/);
+    assert.match(catalogCheck.detail, /validation \d+ error\(s\), \d+ warning\(s\)/);
   });
 
   await check('Pulse distinguishes configured AI provider from live model availability', async () => {

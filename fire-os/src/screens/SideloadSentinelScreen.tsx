@@ -7,6 +7,29 @@ type Props = { onBack: () => void };
 
 type Finding = { level: 'CHECK' | 'CAUTION' | 'INFO'; title: string; detail: string };
 
+function permissionDetails(permission: string): { label: string; detail: string } {
+  const rules: Array<[RegExp, string, string]> = [
+    [/^android\.permission\.INTERNET$/, 'Network access', 'Can open network connections. Check that network use matches the app\'s purpose.'],
+    [/CAMERA$/, 'Camera', 'Can request camera access where the OS grants it. Confirm that camera use is expected.'],
+    [/RECORD_AUDIO$/, 'Microphone', 'Can request microphone access. Check whether recording or voice features are expected.'],
+    [/(ACCESS_FINE_LOCATION|ACCESS_COARSE_LOCATION|ACCESS_BACKGROUND_LOCATION)$/, 'Location', 'Can request precise, approximate, or background location access. Check the minimum location scope needed.'],
+    [/(READ_CONTACTS|WRITE_CONTACTS|GET_ACCOUNTS)$/, 'Contacts / accounts', 'May expose contact or account data if the OS grants access. Check why the app needs this.'],
+    [/(READ_SMS|RECEIVE_SMS|SEND_SMS|READ_CALL_LOG|WRITE_CALL_LOG|PROCESS_OUTGOING_CALLS)$/, 'Messages / call records', 'Sensitive communications permission. Confirm the publisher and intended feature before proceeding.'],
+    [/(READ_PHONE_STATE|READ_PHONE_NUMBERS|CALL_PHONE)$/, 'Phone state / calls', 'Can access phone state or initiate calls where supported and permitted. Usually unrelated to media apps.'],
+    [/(READ_EXTERNAL_STORAGE|WRITE_EXTERNAL_STORAGE|MANAGE_EXTERNAL_STORAGE)$/, 'File access', 'May broaden access to files. Check the target OS behavior and whether scoped access would suffice.'],
+    [/REQUEST_INSTALL_PACKAGES$/, 'Install packages', 'Can request permission to initiate package installation flows; it does not bypass Android install confirmation or policy.'],
+    [/SYSTEM_ALERT_WINDOW$/, 'Display over other apps', 'May allow windows to appear over other apps after special access is granted. Review the use case carefully.'],
+    [/QUERY_ALL_PACKAGES$/, 'Discover installed apps', 'Can query broad installed-app information. Check whether this scope is genuinely needed.'],
+    [/BIND_ACCESSIBILITY_SERVICE$/, 'Accessibility service', 'An accessibility service can observe or act on UI when enabled by the user. Treat an unexpected declaration as a high-priority review item.'],
+    [/(BLUETOOTH|NEARBY_WIFI_DEVICES|ACCESS_WIFI_STATE|CHANGE_WIFI_STATE)$/, 'Nearby devices / network state', 'Can access nearby-device or network-state features depending on the exact permission and OS version.'],
+    [/(POST_NOTIFICATIONS|RECEIVE_BOOT_COMPLETED|WAKE_LOCK)$/, 'Notifications / background activity', 'May enable notifications or background behavior. Check that this matches the app\'s expected function.'],
+  ];
+  const match = rules.find(([pattern]) => pattern.test(permission));
+  return match
+    ? { label: match[1], detail: match[2] }
+    : { label: 'Other declared permission', detail: 'Review the Android permission documentation and the app feature that requires this permission.' };
+}
+
 function evaluatePackage(packageId: string, minSdk: string, targetSdk: string, sizeMb: string): Finding[] {
   const findings: Finding[] = [];
   const id = packageId.trim();
@@ -46,7 +69,7 @@ function evaluatePackage(packageId: string, minSdk: string, targetSdk: string, s
     findings.push({ level: 'INFO', title: 'Package size recorded', detail: `${size} MB reported; no integrity or malware scan has been performed.` });
   }
 
-  findings.push({ level: 'CHECK', title: 'Verify source and signature separately', detail: 'Use a trusted publisher/source and verify the package signature with an appropriate development tool. This screen does not inspect APK bytes.' });
+  findings.push({ level: 'CHECK', title: 'Verify source and signature separately', detail: 'Use a trusted source and verify signing schemes with Android SDK apksigner. The on-device inspection reports the APK hash and extracted certificate, but intentionally does not report a signature as verified.' });
   return findings;
 }
 
@@ -70,16 +93,17 @@ export default function SideloadSentinelScreen({ onBack }: Props) {
   const requestedPermissions = inspection?.requestedPermissions ?? [];
   const findings = useMemo(() => ran ? evaluatePackage(packageId, minSdk, targetSdk, sizeMb) : [], [ran, packageId, minSdk, targetSdk, sizeMb]);
   const cautionCount = findings.filter(f => f.level !== 'INFO').length;
+  const declaredPermissionCount = requestedPermissions.length;
 
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.content} scrollsChildToFocus showsVerticalScrollIndicator={false}>
       <Text style={styles.eyebrow}>PACKAGE READINESS • SENTINEL</Text>
       <Text style={styles.title}>Sideload Sentinel</Text>
-      <Text style={styles.intro}>A preliminary metadata review for Android package compatibility. No APK is uploaded, installed, or executed.</Text>
+      <Text style={styles.intro}>A local APK metadata and compatibility review. It hashes file bytes and extracts declared permissions; it does not install, execute, or upload the APK.</Text>
 
       <View style={styles.form}>
         <Text style={styles.section}>APK FILE INSPECTION</Text>
-        <Text style={styles.findingDetail}>Choose an APK from local storage. ARCHANGEL reads its Android manifest metadata on-device; the file is not uploaded, installed, or executed.</Text>
+        <Text style={styles.findingDetail}>Inspect an APK from ARCHANGEL's private import folder. The app checks the ZIP container, reads manifest metadata, and calculates SHA-256 locally. It does not install, execute, upload, or scan the APK for malware.</Text>
         <Pressable
           onPress={async () => {
             setInspecting(true);
@@ -164,14 +188,29 @@ export default function SideloadSentinelScreen({ onBack }: Props) {
             <Text style={styles.metaLine}>File SHA-256: {inspection.fileSha256}</Text>
             <Text style={styles.metaLine}>Signer certificate SHA-256: {inspection.signerCertificateSha256.length ? inspection.signerCertificateSha256.join('\\n') : 'No signer certificate extracted'}</Text>
             <Text style={styles.metaLine}>Signer status: {inspection.signatureStatus.replace(/_/g, ' ')}</Text>
-            <Text style={styles.metaNote}>Cryptographic APK signature verification: NOT PERFORMED</Text>
+            <Text style={styles.metaNote}>SIGNATURE: {inspection.signatureStatus.replace(/_/g, ' ')}</Text>
+            <Text style={styles.metaNote}>INTEGRITY: SHA-256 computed; no trusted reference hash was supplied.</Text>
+            <Text style={styles.metaNote}>MALWARE SCAN: NOT PERFORMED. A file hash and signer certificate do not establish that an APK is safe.</Text>
+            {inspection.compatibilityWarnings.map((warning, index) => (
+              <Text key={index} style={styles.warningLine}>⚠ {warning}</Text>
+            ))}
+            <Text style={styles.findingDetail}>For cryptographic signing-scheme verification, run the repository's scripts/verify-apk.ps1 with Android SDK Build Tools on a development PC. A signer certificate fingerprint is an identity clue, not proof that the signature is valid or the publisher is trusted.</Text>
           </View>
         ) : null}
         {requestedPermissions.length > 0 ? (
-          <View style={styles.permissionCard}>\n            <Text style={styles.section}>DECLARED PERMISSIONS ({requestedPermissions.length})</Text>
-            {requestedPermissions.map(permission => (
-              <Text key={permission} style={styles.permissionLine}>{permission}</Text>
-            ))}
+          <View style={styles.permissionCard}>
+            <Text style={styles.section}>DECLARED PERMISSIONS ({declaredPermissionCount})</Text>
+            <Text style={styles.findingDetail}>These are requested in the manifest, not proof that the permissions are granted or currently being used.</Text>
+            {requestedPermissions.map(permission => {
+              const info = permissionDetails(permission);
+              return (
+                <View key={permission} style={styles.permissionItem}>
+                  <Text style={styles.permissionLabel}>{info.label}</Text>
+                  <Text style={styles.permissionLine}>{permission}</Text>
+                  <Text style={styles.findingDetail}>{info.detail}</Text>
+                </View>
+              );
+            })}
           </View>
         ) : null}
         <Text style={styles.label}>OR ENTER METADATA MANUALLY</Text>
@@ -212,7 +251,7 @@ export default function SideloadSentinelScreen({ onBack }: Props) {
 
       <View style={styles.boundary}>
         <Text style={styles.section}>SCOPE & LIMITATIONS</Text>
-        <Text style={styles.boundaryText}>This tool reads manifest metadata, calculates a file SHA-256 hash, and displays signer-certificate fingerprints exposed by Android. It does not cryptographically validate the APK signing scheme, confirm publisher identity, scan for malware, install or execute packages, bypass platform security, or guarantee Fire OS compatibility. Only inspect packages you are authorized to analyze.</Text>
+        <Text style={styles.boundaryText}>This tool validates basic APK/ZIP structure, reads Android manifest metadata, calculates the file SHA-256, and displays signer-certificate fingerprints exposed by Android. The computed hash only identifies the bytes inspected; without a trusted reference hash it does not prove integrity against an expected release. The in-app screen does not perform cryptographic signing-scheme verification or malware scanning, confirm publisher identity, install or execute packages, bypass platform security, or guarantee Fire OS compatibility. Use scripts/verify-apk.ps1 with Android SDK Build Tools to verify the signature separately. Only inspect packages you are authorized to analyze.</Text>
       </View>
       <Pressable onPress={onBack} onFocus={() => setBackFocused(true)} onBlur={() => setBackFocused(false)} style={[styles.backButton, backFocused && styles.backButtonFocused]}>
         <Text style={[styles.backText, backFocused && styles.backTextFocused]}>← BACK TO HOME</Text>
@@ -247,7 +286,10 @@ const styles = StyleSheet.create({
   apkAction: { color: colors.red, fontSize: 12, fontWeight: '900', marginTop: 8 },
   inspectionCard: { marginTop: 18, padding: 18, borderRadius: 10, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.bg },
   permissionCard: { marginTop: 16, padding: 16, borderRadius: 10, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.bg },
-  permissionLine: { color: colors.text, fontSize: 13, lineHeight: 20, marginBottom: 5 },
+  permissionItem: { paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.line },
+  permissionLabel: { color: colors.text, fontSize: 14, fontWeight: '900', marginBottom: 3 },
+  permissionLine: { color: colors.muted, fontSize: 12, lineHeight: 18, marginBottom: 4 },
+  warningLine: { color: colors.warning, fontSize: 14, lineHeight: 21, marginTop: 8 },
   metaName: { color: colors.text, fontSize: 18, fontWeight: '900', marginBottom: 8 },
   metaLine: { color: colors.muted, fontSize: 15, lineHeight: 23 },
   metaNote: { color: colors.warning, fontSize: 13, fontWeight: '900', marginTop: 10 },

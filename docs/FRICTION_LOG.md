@@ -91,6 +91,7 @@ A core design principle is:
 | 2026-10-10 6:15 PM (IST) | Concierge AI | Gemini and Bedrock should provide one predictable response contract to the Fire TV client; the assistant must never invent app IDs or treat generic content needs as missing applications. | The Bedrock provider returned a looser shape. The frontend type also omitted intent/provider/fallback metadata, and provider-independent response validation was not centralized. |  |  | Added `backend/concierge.js` to normalize intent, named-app requests, exact matches, alternatives, and confidence values against Fire OS catalog entries. Added regression tests for exact matches, missing apps, invalid IDs, duplicate/off-platform alternatives, malformed model fields, and generic content requests. |
 
 ---
+| 2026-10-10 (IST) | Concierge AI / App Discovery | Concierge should return consistent, catalog-grounded results and classify requests reliably across Bedrock/Gemini providers | Provider response shapes were not normalized centrally; invalid app IDs and generic content requests needed explicit guardrails | Inconsistent provider contracts could lead to brittle UI behaviour or misleading missing-app results | `backend/ai.js`, `backend/concierge.js`, `backend/concierge.test.js`, `fire-os/src/lib/api.ts` | Added provider-independent response normalization, Fire OS catalog ID validation, intent classification, alternative filtering, a typed API contract, regression tests, and CI execution. User reports all tests passed. | Not measured |
 
 # 3. Important friction patterns
 
@@ -243,4 +244,4 @@ Next planned increments:
 
 ## Last updated
 
-**2026-10-10 — Concierge contract integration started; regression and emulator verification pending**
+**2026-10-10 — Concierge contract tests and integration checks reported passing; live Fire TV interaction/build verification should still be confirmed if not included in the test run**

@@ -269,6 +269,24 @@ This log is intended to document not only bugs but also **product-discovery fric
 4. Unreadable/missing file, compatibility warning display, empty permission list, and sensitive declared permissions.
 5. Re-launch app after inspection; verify no installation, upload, or APK execution occurs.
 
+
+---
+
+# 8. App Discovery catalog validation — 2026-10-10
+
+| Field | Details |
+|---|---|
+| Timestamp | 2026-10-10 (IST) |
+| Expected | Catalog records should be structurally consistent, alternative links should resolve, and stale verification dates should be visible rather than silently treated as fresh. |
+| Actual before this change | The curated catalog was consumed directly by discovery and detail routes; there was no standalone validation command or regression suite for catalog schema and cross-record references. |
+| Friction | A malformed record or broken alternative ID could quietly degrade discovery, while old verification dates could be mistaken for current evidence. |
+| Evidence | `shared/src/catalog.seed.json`, `backend/catalog-validation.js`, `backend/catalog-validation.test.js` |
+| Root cause | Catalog ingestion was deliberately a curated static cache, but the data contract was not enforced by a repeatable validator. |
+| Solution | Added a validator for required fields, ID format/uniqueness, platform and monetization values, ad-level values, verification dates, alternative references, and verification age. Stale verification is a warning; structural/data-integrity errors fail validation. Added Node test cases and npm scripts `test:catalog` and `validate:catalog`. |
+| Result | Implemented directly on `main`. The current 10-record catalog was statically inspected and had no duplicate IDs, malformed required fields, or broken alternative references. The new automated tests and command have not yet been run in the user's local environment. |
+| Time taken | Not measured. |
+
+
 ## Last updated
 
-**2026-10-10 — Sideload Sentinel implementation and local Android build/unit-test validation completed on main; malware scanning and publisher trust remain out of scope**
+**2026-10-10 — Catalog validation tooling added; local test execution pending**

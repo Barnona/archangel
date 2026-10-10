@@ -60,6 +60,7 @@ export default function SideloadSentinelScreen({ onBack }: Props) {
   const [targetSdk, setTargetSdk] = useState('');
   const [sizeMb, setSizeMb] = useState('');
   const [ran, setRan] = useState(false);
+  const [backFocused, setBackFocused] = useState(false);
   const findings = useMemo(() => ran ? evaluatePackage(packageId, minSdk, targetSdk, sizeMb) : [], [ran, packageId, minSdk, targetSdk, sizeMb]);
   const cautionCount = findings.filter(f => f.level !== 'INFO').length;
 
@@ -109,8 +110,8 @@ export default function SideloadSentinelScreen({ onBack }: Props) {
         <Text style={styles.section}>SCOPE & LIMITATIONS</Text>
         <Text style={styles.boundaryText}>This is a metadata checklist, not a malware scanner or a guarantee that an APK will install. It does not bypass platform security, install packages, verify signatures, or access private Fire TV APIs. Only analyze packages you are authorized to inspect.</Text>
       </View>
-      <Pressable onPress={onBack} style={({ focused, pressed }) => [styles.backButton, (focused || pressed) && styles.buttonFocused]}>
-        <Text style={styles.backText}>← BACK TO HOME</Text>
+      <Pressable onPress={onBack} onFocus={() => setBackFocused(true)} onBlur={() => setBackFocused(false)} style={[styles.backButton, backFocused && styles.backButtonFocused]}>
+        <Text style={[styles.backText, backFocused && styles.backTextFocused]}>← BACK TO HOME</Text>
       </Pressable>
     </ScrollView>
   );
@@ -144,4 +145,6 @@ const styles = StyleSheet.create({
   boundaryText: { color: colors.muted, fontSize: 16, lineHeight: 24 },
   backButton: { alignSelf: 'flex-start', marginTop: 22, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 8, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.panel },
   backText: { color: colors.text, fontSize: 15, fontWeight: '800' },
+  backButtonFocused: { backgroundColor: '#171717', borderColor: '#171717', borderWidth: 2 },
+  backTextFocused: { color: '#FFFFFF' },
 });

@@ -249,10 +249,6 @@ export default function SideloadSentinelScreen({ onBack }: Props) {
         </View>
       ) : null}
 
-      <View style={styles.boundary}>
-        <Text style={styles.section}>SCOPE & LIMITATIONS</Text>
-        <Text style={styles.boundaryText}>This tool validates basic APK/ZIP structure, reads manifest metadata, calculates the file SHA-256, and displays signer-certificate fingerprints exposed by Android. A hash is only a fingerprint unless compared with an independently trusted reference. The app does not cryptographically verify the APK signing scheme, check publisher trust, scan for malware, install or execute packages, bypass platform security, or guarantee Fire OS compatibility. Use scripts/verify-apk.ps1 with Android SDK Build Tools for separate signature verification. Only inspect packages you are authorized to analyze.</Text>
-      </View>
       <Pressable onPress={onBack} onFocus={() => setBackFocused(true)} onBlur={() => setBackFocused(false)} style={[styles.backButton, backFocused && styles.backButtonFocused]}>
         <Text style={[styles.backText, backFocused && styles.backTextFocused]}>← BACK TO HOME</Text>
       </Pressable>
@@ -304,8 +300,6 @@ const styles = StyleSheet.create({
   check: { color: colors.red },
   findingTitle: { color: colors.text, fontSize: 18, fontWeight: '800' },
   findingDetail: { color: colors.muted, fontSize: 15, lineHeight: 22, marginTop: 5 },
-  boundary: { marginTop: 22, padding: 20, backgroundColor: colors.panel2, borderRadius: 12, borderWidth: 1, borderColor: colors.line },
-  boundaryText: { color: colors.muted, fontSize: 16, lineHeight: 24 },
   backButton: { alignSelf: 'flex-start', marginTop: 22, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 8, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.panel },
   backText: { color: colors.text, fontSize: 15, fontWeight: '800' },
   backButtonFocused: { backgroundColor: '#171717', borderColor: '#171717', borderWidth: 2 },

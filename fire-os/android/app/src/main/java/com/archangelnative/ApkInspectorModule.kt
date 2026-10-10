@@ -32,7 +32,7 @@ class ApkInspectorModule(private val context: ReactApplicationContext) :
 
   @ReactMethod
   fun pickAndInspect(promise: Promise) {
-    val activity = currentActivity
+    val activity = getCurrentActivity()
     if (activity == null) {
       promise.reject("NO_ACTIVITY", "No active Android screen is available.")
       return

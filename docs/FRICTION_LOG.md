@@ -287,6 +287,30 @@ This log is intended to document not only bugs but also **product-discovery fric
 | Time taken | Not measured. |
 
 
+
+---
+
+# 9. ARCHANGEL Concierge integration — 2026-10-10
+
+| Field | Details |
+|---|---|
+| Timestamp | 2026-10-10 (IST) |
+| Expected | Gemini and Bedrock should provide one predictable response contract to the Fire TV client; the assistant must never invent app IDs or treat generic content needs as missing applications. |
+| Current implementation gap | The Gemini provider included intent classification and catalog filtering, but the Bedrock provider returned a looser shape. The frontend type also omitted intent/provider/fallback metadata, and provider-independent response validation was not centralized. |
+| Solution started | Added `backend/concierge.js` to normalize intent, named-app requests, exact matches, alternatives, and confidence values against Fire OS catalog entries. Added regression tests for exact matches, missing apps, invalid IDs, duplicate/off-platform alternatives, malformed model fields, and generic content requests. Added `test:concierge`, typed the frontend API response, and wired Concierge tests into the existing GitHub Actions workflow. |
+| Status | Changes are committed directly to `main`. Local test execution, the full backend smoke suite, Fire TV TypeScript/Android build, and emulator interaction checks are still required; this phase is not marked complete yet. |
+| Time taken | Not measured. |
+
+### Concierge acceptance checks
+
+1. Known app request resolves to an exact Fire OS catalog ID.
+2. Named app absent from the catalog becomes `MISSING_APP` and can enter Request Network.
+3. Generic needs such as “some movies” or “something for gaming” do not become missing-app requests.
+4. Alternatives contain only unique, valid Fire OS catalog IDs.
+5. Provider failure returns a controlled API error without fabricating a result.
+6. Intent badge, alternatives, exact-match action, and request action work through TV D-pad focus.
+
+
 ## Last updated
 
-**2026-10-10 — Catalog validator confirmed locally; API/Pulse integration and verification-age UI added, full app build/smoke run pending**
+**2026-10-10 — Concierge contract integration started; regression and emulator verification pending**

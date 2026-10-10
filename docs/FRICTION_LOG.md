@@ -42,6 +42,7 @@ A core design principle is:
 # 2. Friction log
 
 | Timestamp / period | Area | Expected | What actually happened | Friction | Evidence | How it was solved | Time taken to solve |
+| 2026-10-10 10:27 AM (IST) | Home screen / TV focus contrast | A focused tile should have a clear selected state and readable text | Focused tile text turned white while the tile background remained pale red, making the label hard to read | Focused foreground and background colours were changed independently and lost contrast | User-provided emulator screenshot showing white text on pale-red selected tile | Changed the focused tile background and border to black and retained white title/subtitle text; rebuild and emulator verification still required | 5 minutes |
 |---|---|---|---|---|---|---|---|
 | 2026-09-28 7:23 AM (IST) | Android/React Native TV setup | Fire TV React Native project should build on Windows | Native Android/TV project required additional configuration and compatibility work | Fire TV/TV React Native setup is more constrained than ordinary Android React Native | | Generated a standard RN Android project, adapted it for `react-native-tvos`, added TV manifest declarations, banner, launcher configuration and Fire TV-specific setup | 25 minutes |
 | 2026-09-28 7:25 PM (IST) | Android emulator | `adb` and `emulator` commands should be available | ADB was available but `emulator` was initially not on PATH | Android SDK command-line tools were only partially available from PowerShell | `emulator: The term 'emulator' is not recognized as a name of a cmdlet, function, script file, or executable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.` | Corrected Android SDK/emulator PATH configuration and created/started an Android 12 API 31 x86_64 AVD | 10 minutes |
@@ -241,4 +242,4 @@ This log is intended to document not only bugs but also **product-discovery fric
 
 ## Last updated
 
-**2026-10-10 — Backend integration smoke tests and stabilization**
+**2026-10-10 — Home focus contrast correction after integration stabilization**

@@ -16,7 +16,6 @@ import com.facebook.react.uimanager.ViewManager
 import java.io.File
 import java.io.FileInputStream
 import java.security.MessageDigest
-import java.util.zip.ZipFile
 
 class ApkInspectorModule(private val context: ReactApplicationContext) :
   ReactContextBaseJavaModule(context) {
@@ -96,24 +95,8 @@ class ApkInspectorModule(private val context: ReactApplicationContext) :
   private fun certificateSha256(bytes: ByteArray): String =
     MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02X".format(it) }
 
-  private fun validateZipContainer(file: File) {
-    try {
-      ZipFile(file).use { zip ->
-        val manifest = zip.getEntry("AndroidManifest.xml")
-          ?: throw IllegalArgumentException("This ZIP archive has no AndroidManifest.xml; it is not a complete APK package.")
-        if (manifest.isDirectory || manifest.size == 0L) {
-          throw IllegalArgumentException("AndroidManifest.xml is empty or malformed.")
-        }
-      }
-    } catch (error: IllegalArgumentException) {
-      throw error
-    } catch (error: Exception) {
-      throw IllegalArgumentException("The file is not a readable APK/ZIP archive. It may be corrupted, incomplete, encrypted, or a different file type.")
-    }
-  }
-
   private fun inspectFile(file: File): WritableMap {
-    validateZipContainer(file)
+    ApkContainerValidator.validate(file)
     val flags = if (Build.VERSION.SDK_INT >= 28) {
       PackageManager.GET_PERMISSIONS or PackageManager.GET_SIGNING_CERTIFICATES
     } else {

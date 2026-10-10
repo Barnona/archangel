@@ -1,4 +1,4 @@
-name: App Discovery catalog validation
+name: App Discovery catalog and Concierge validation
 
 on:
   push:
@@ -18,7 +18,7 @@ permissions:
   contents: read
 
 jobs:
-  validate-catalog:
+  validate:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -39,3 +39,6 @@ jobs:
 
       - name: Validate curated catalog
         run: npm --workspace backend run validate:catalog
+
+      - name: Run Concierge contract tests
+        run: npm --workspace backend run test:concierge

@@ -30,6 +30,9 @@ async function main() {
     assert.equal(typeof catalog.source, 'string');
     assert.ok(Array.isArray(catalog.categories));
     assert.ok(catalog.amazonAppstoreApi);
+    assert.equal(catalog.validation?.valid, true, 'catalog validation should pass');
+    assert.equal(catalog.validation?.errorCount, 0);
+    assert.ok(Number.isFinite(catalog.validation?.warningCount));
   });
 
   const categories = await get('/apps/categories');
@@ -73,6 +76,9 @@ async function main() {
     for (const id of ['api', 'catalog', 'requests', 'adlens', 'ai']) assert.ok(ids.includes(id), `missing Pulse check: ${id}`);
     assert.ok(Number.isFinite(pulse.metrics.catalogRecords));
     assert.ok(Number.isFinite(pulse.metrics.requestCount));
+    const catalogCheck = pulse.checks.find(item => item.id === 'catalog');
+    assert.ok(catalogCheck, 'missing catalog Pulse check');
+    assert.match(catalogCheck.detail, /validation \\d+ error\\(s\\), \\d+ warning\\(s\\)/);
   });
 
   await check('Pulse distinguishes configured AI provider from live model availability', async () => {

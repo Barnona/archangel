@@ -242,6 +242,32 @@ This log is intended to document not only bugs but also **product-discovery fric
 
 ---
 
+
+
+---
+
+# 7. Sideload Sentinel hardening — 2026-10-10
+
+| Field | Details |
+|---|---|
+| Timestamp | 2026-10-10 (IST) |
+| Expected | Sentinel should reject malformed inputs, explain compatibility and declared-permission findings, identify exactly what its security checks do, and provide a real signature-verification path. |
+| Actual before this change | The app extracted package metadata and a SHA-256 digest, but signer fingerprints were only extracted—not proof of a valid APK signature. Permissions were mostly raw names; invalid ZIPs had generic errors; the UI could be misread as a security verdict. |
+| Friction | Metadata inspection, hashing, signing integrity, publisher trust, compatibility, and malware scanning are separate things, but the prototype did not make all of those boundaries equally explicit. |
+| Evidence | `fire-os/android/app/src/main/java/com/archangelnative/ApkInspectorModule.kt`, `fire-os/src/lib/apkInspector.ts`, `fire-os/src/screens/SideloadSentinelScreen.tsx`, `scripts/verify-apk.ps1`, `docs/SIDELOAD_SENTINEL.md` |
+| Root cause | Android `PackageManager` archive metadata exposes package/certificate information but is not a substitute for explicitly running the SDK signature verifier. A file SHA-256 is only a fingerprint unless compared with a separately trusted expected digest. |
+| Solution | Added ZIP/manifest validation, clear empty/unreadable/oversized-file errors, explicit signature/integrity/malware scan status fields, SDK compatibility warnings, permission rationale labels, a Windows PowerShell wrapper around Android SDK `apksigner verify --verbose --print-certs`, optional trusted-hash comparison, a malformed-input validation matrix, and CI build/signature checks. |
+| Result | Code and documentation changes are committed on `feat/sideload-sentinel-hardening`. Emulator validation and CI result confirmation remain pending; this entry does not claim those tests have passed. |
+| Time taken | Not measured. |
+
+### Regression cases to execute
+
+1. Valid signed APK and known trusted hash.
+2. Non-APK extension, random text renamed to `.apk`, empty file, ZIP without `AndroidManifest.xml`, invalid manifest, and truncated/corrupted APK.
+3. Signature tampering and expected-SHA-256 mismatch with the desktop verifier.
+4. Unreadable/missing file, compatibility warning display, empty permission list, and sensitive declared permissions.
+5. Re-launch app after inspection; verify no installation, upload, or APK execution occurs.
+
 ## Last updated
 
-**2026-10-10 — Sideload Sentinel local APK browser working; App Discovery focus-style correction**
+**2026-10-10 — Sideload Sentinel hardening + local APK browser; emulator validation pending**

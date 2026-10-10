@@ -7,6 +7,8 @@ export type ApkInspection = {
   versionCode: string;
   minSdk: number;
   targetSdk: number;
+  deviceApi: number;
+  deviceRelease: string;
   sizeMb: number;
   requestedPermissionCount: number;
   requestedPermissions: string[];

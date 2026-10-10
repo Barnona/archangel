@@ -67,7 +67,8 @@ export default function SideloadSentinelScreen({ onBack }: Props) {
   const [inspecting, setInspecting] = useState(false);
   const [availableApks, setAvailableApks] = useState<LocalApk[]>([]);
   const [showApkBrowser, setShowApkBrowser] = useState(false);
-  const requestedPermissions = inspection?.requestedPermissions ?? [];\n  const findings = useMemo(() => ran ? evaluatePackage(packageId, minSdk, targetSdk, sizeMb) : [], [ran, packageId, minSdk, targetSdk, sizeMb]);
+  const requestedPermissions = inspection?.requestedPermissions ?? [];
+  const findings = useMemo(() => ran ? evaluatePackage(packageId, minSdk, targetSdk, sizeMb) : [], [ran, packageId, minSdk, targetSdk, sizeMb]);
   const cautionCount = findings.filter(f => f.level !== 'INFO').length;
 
   return (

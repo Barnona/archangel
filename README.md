@@ -458,9 +458,9 @@ curl http://localhost:4000/requests/demand
 | App alternatives | Working |
 | Missing App requests | Working |
 | Demand aggregation | Working |
-| AdLens | Next |
-| Pulse | Planned |
-| Sideload Sentinel | Planned |
+| AdLens | Implemented; runtime regression testing ongoing |
+| Pulse | Implemented; 10 backend smoke checks pass |
+| Sideload Sentinel | Initial metadata-review screen implemented; emulator validation pending |
 | Concierge integration | Planned |
 | Vega OS client | Not started |
 
@@ -491,7 +491,7 @@ Diagnostics and ad intelligence will therefore be implemented around capabilitie
     Apps    Ads   Demand   Health  APK   Compatibility
 ```
 
-**Next development phase: AdLens.**
+**Next development phase: validate Sideload Sentinel on the Android TV emulator, then expand package inspection only where supported by actual package metadata or authorized tooling.**
 
 ---
 

@@ -1,7 +1,7 @@
 const { BedrockRuntimeClient, ConverseCommand } = require('@aws-sdk/client-bedrock-runtime');
 
 const BEDROCK_REGION = process.env.AWS_REGION || 'us-east-1';
-const BEDROCK_MODEL_ID = process.env.BEDROCK_MODEL_ID || 'amazon.nova-lite-v1:0';
+const BEDROCK_MODEL_ID = process.env.BEDROCK_MODEL_ID || 'amazon.nova-2-lite-v1:0';
 const client = new BedrockRuntimeClient({ region: BEDROCK_REGION });
 
 function compactApp(app) {

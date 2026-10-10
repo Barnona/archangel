@@ -45,7 +45,7 @@ class ApkInspectorModule(private val context: ReactApplicationContext) :
     try {
       val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
         addCategory(Intent.CATEGORY_OPENABLE)
-        type = "application/vnd.android.package-archive"
+        type = "*/*" // Android TV document providers may not advertise an APK-specific MIME type.
       }
       activity.startActivityForResult(intent, requestCode)
     } catch (error: Exception) {

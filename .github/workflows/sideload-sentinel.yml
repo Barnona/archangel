@@ -52,7 +52,7 @@ jobs:
       - name: Build Android/Fire TV debug APK
         run: |
           chmod +x fire-os/android/gradlew
-          fire-os/android/gradlew --no-daemon -p fire-os/android app:assembleDebug
+          fire-os/android/gradlew --no-daemon -p fire-os/android app:testDebugUnitTest app:assembleDebug
 
       - name: Verify build artifact signature with Android SDK apksigner
         shell: bash

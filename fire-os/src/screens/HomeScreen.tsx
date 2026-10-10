@@ -24,8 +24,8 @@ export default function HomeScreen({ navigate }: Props) {
         <FocusableTile title="Fix My TV" icon="⌁" subtitle="Pulse network & experience check" onPress={() => navigate('Pulse')} />
         <FocusableTile title="Request an App" icon="＋" subtitle="Tell developers what is missing" onPress={() => navigate('Request')} />
         <FocusableTile title="Profile" icon="⚙" subtitle="Preferences & privacy" onPress={() => navigate('Profile')} />
+        <FocusableTile title="Sideload Sentinel" icon="⬡" subtitle="Package metadata readiness review" onPress={() => navigate('Sentinel')} />
       </View>
-      <FocusableTile title="Sideload Sentinel" icon="⬡" subtitle="Package metadata readiness review" onPress={() => navigate("Sentinel")} />
       <Text style={styles.footer}>DISCOVER • DIAGNOSE • REQUEST • IMPROVE</Text>
     </ScrollView>
   );

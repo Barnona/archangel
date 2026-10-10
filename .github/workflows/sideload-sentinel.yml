@@ -41,7 +41,13 @@ jobs:
           node-version: "20"
 
       - name: Install Android SDK components
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
+        with:
+          # Avoid the removed legacy "tools" SDK package.
+          packages: platform-tools
+
+      - name: Install project Android platform and Build Tools
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0" "ndk;27.1.12297006"
 
       - name: Install root workspaces
         run: npm ci
@@ -98,8 +104,16 @@ jobs:
       - name: Test signature tampering is rejected
         shell: bash
         run: |
-          cp "$APK_PATH" "$RUNNER_TEMP/tampered.apk"
-          printf "tamper" >> "$RUNNER_TEMP/tampered.apk"
+          python3 - "$APK_PATH" "$RUNNER_TEMP/tampered.apk" <<'PY'
+          import pathlib
+          import sys
+          source = pathlib.Path(sys.argv[1]).read_bytes()
+          if len(source) < 256:
+              raise SystemExit("APK fixture is too small to tamper safely")
+          changed = bytearray(source)
+          changed[128] ^= 0x01
+          pathlib.Path(sys.argv[2]).write_bytes(changed)
+          PY
           set +e
           pwsh -NoProfile -File scripts/verify-apk.ps1 -ApkPath "$RUNNER_TEMP/tampered.apk"
           STATUS=$?

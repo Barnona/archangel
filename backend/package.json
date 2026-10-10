@@ -7,7 +7,8 @@
     "start": "node server.js",
     "test:smoke": "node smoke-test.js",
     "test:catalog": "node --test catalog-validation.test.js",
-    "validate:catalog": "node catalog-validation.js"
+    "validate:catalog": "node catalog-validation.js",
+    "test:concierge": "node --test concierge.test.js"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.900.0",

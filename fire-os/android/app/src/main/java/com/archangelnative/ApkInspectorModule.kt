@@ -104,11 +104,13 @@ class ApkInspectorModule(private val context: ReactApplicationContext) :
       val appInfo = packageInfo.applicationInfo
         ?: throw IllegalArgumentException("The APK does not contain readable application metadata.")
       val sizeBytes = reportedSize ?: tempFile.length()
+      @Suppress("DEPRECATION")
+      val versionCode = if (Build.VERSION.SDK_INT >= 28) packageInfo.longVersionCode.toString() else packageInfo.versionCode.toString()
       return Arguments.createMap().apply {
         putString("fileName", displayName)
         putString("packageName", packageInfo.packageName ?: "")
         putString("versionName", packageInfo.versionName ?: "Unknown")
-        putString("versionCode", if (Build.VERSION.SDK_INT >= 28) packageInfo.longVersionCode.toString() else @Suppress("DEPRECATION") packageInfo.versionCode.toString())
+        putString("versionCode", versionCode)
         putInt("minSdk", appInfo.minSdkVersion)
         putInt("targetSdk", appInfo.targetSdkVersion)
         putDouble("sizeMb", sizeBytes.toDouble() / (1024.0 * 1024.0))

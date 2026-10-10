@@ -9,8 +9,12 @@ export type ApkInspection = {
   targetSdk: number;
   sizeMb: number;
   requestedPermissionCount: number;
+  requestedPermissions: string[];
+  fileSha256: string;
+  signerCertificateSha256: string[];
+  signatureStatus: string;
   inspectionMethod: string;
-  signatureVerified: boolean;
+  malwareScanPerformed: boolean;
 };
 
 export type LocalApk = { fileName: string; sizeMb: number };

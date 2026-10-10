@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { colors } from '../theme/theme';
-import { ApkInspection, pickAndInspectApk } from '../lib/apkInspector';
+import { ApkInspection, LocalApk, inspectLocalApk, listLocalApks } from '../lib/apkInspector';
 
 type Props = { onBack: () => void };
 
@@ -65,6 +65,8 @@ export default function SideloadSentinelScreen({ onBack }: Props) {
   const [inspection, setInspection] = useState<ApkInspection | null>(null);
   const [inspectionError, setInspectionError] = useState('');
   const [inspecting, setInspecting] = useState(false);
+  const [availableApks, setAvailableApks] = useState<LocalApk[]>([]);
+  const [showApkBrowser, setShowApkBrowser] = useState(false);
   const findings = useMemo(() => ran ? evaluatePackage(packageId, minSdk, targetSdk, sizeMb) : [], [ran, packageId, minSdk, targetSdk, sizeMb]);
   const cautionCount = findings.filter(f => f.level !== 'INFO').length;
 
@@ -82,24 +84,72 @@ export default function SideloadSentinelScreen({ onBack }: Props) {
             setInspecting(true);
             setInspectionError('');
             try {
-              const result = await pickAndInspectApk();
-              setInspection(result);
-              setPackageId(result.packageName);
-              setMinSdk(String(result.minSdk));
-              setTargetSdk(String(result.targetSdk));
-              setSizeMb(result.sizeMb.toFixed(2));
-              setRan(true);
+              const files = await listLocalApks();
+              setAvailableApks(files);
+              setShowApkBrowser(true);
+              if (files.length === 0) {
+                setInspectionError("No APKs found in ARCHANGEL's import folder. Copy an APK into Android/data/com.archangelnative/files/Download, then refresh this list.");
+              }
             } catch (error) {
-              const message = error instanceof Error ? error.message : String(error);
-              if (!message.toLowerCase().includes('cancel')) setInspectionError(message);
+              setInspectionError(error instanceof Error ? error.message : String(error));
             } finally {
               setInspecting(false);
             }
           }}
           style={({ focused, pressed }) => [styles.button, (focused || pressed) && styles.buttonFocused]}
         >
-          <Text style={styles.buttonText}>{inspecting ? 'INSPECTING APK…' : '▣  SELECT APK & INSPECT'}</Text>
+          <Text style={styles.buttonText}>{inspecting ? 'LOADING APK LIST…' : '▣  BROWSE IMPORTED APKs'}</Text>
         </Pressable>
+        {showApkBrowser ? (
+          <View style={styles.apkBrowser}>
+            <Text style={styles.section}>LOCAL APK IMPORTS</Text>
+            <Text style={styles.findingDetail}>For this TV emulator, ARCHANGEL browses its own import folder. APKs are inspected locally and are not installed or uploaded.</Text>
+            <Pressable
+              onPress={async () => {
+                setInspecting(true);
+                setInspectionError('');
+                try {
+                  setAvailableApks(await listLocalApks());
+                } catch (error) {
+                  setInspectionError(error instanceof Error ? error.message : String(error));
+                } finally {
+                  setInspecting(false);
+                }
+              }}
+              style={({ focused, pressed }) => [styles.refreshButton, (focused || pressed) && styles.refreshButtonFocused]}
+            >
+              <Text style={styles.refreshText}>↻ REFRESH APK LIST</Text>
+            </Pressable>
+            {availableApks.map((apk) => (
+              <Pressable
+                key={apk.fileName}
+                onPress={async () => {
+                  setInspecting(true);
+                  setInspectionError('');
+                  try {
+                    const result = await inspectLocalApk(apk.fileName);
+                    setInspection(result);
+                    setPackageId(result.packageName);
+                    setMinSdk(String(result.minSdk));
+                    setTargetSdk(String(result.targetSdk));
+                    setSizeMb(result.sizeMb.toFixed(2));
+                    setRan(true);
+                    setShowApkBrowser(false);
+                  } catch (error) {
+                    setInspectionError(error instanceof Error ? error.message : String(error));
+                  } finally {
+                    setInspecting(false);
+                  }
+                }}
+                style={({ focused, pressed }) => [styles.apkRow, (focused || pressed) && styles.apkRowFocused]}
+              >
+                <Text style={styles.apkName}>{apk.fileName}</Text>
+                <Text style={styles.apkSize}>{apk.sizeMb.toFixed(2)} MB</Text>
+                <Text style={styles.apkAction}>SELECT TO INSPECT →</Text>
+              </Pressable>
+            ))}
+          </View>
+        ) : null}
         {inspectionError ? <Text style={styles.errorText}>{inspectionError}</Text> : null}
         {inspection ? (
           <View style={styles.inspectionCard}>
@@ -174,6 +224,15 @@ const styles = StyleSheet.create({
   buttonFocused: { backgroundColor: '#171717', borderColor: '#171717', borderWidth: 2 },
   buttonText: { color: '#FFFFFF', fontWeight: '900', fontSize: 16, letterSpacing: 1 },
   results: { marginTop: 26 },
+  apkBrowser: { marginTop: 16, padding: 16, borderRadius: 10, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.bg },
+  refreshButton: { alignSelf: 'flex-start', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 8, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.panel, marginBottom: 12 },
+  refreshButtonFocused: { borderColor: colors.red, backgroundColor: colors.paleRed },
+  refreshText: { color: colors.text, fontSize: 14, fontWeight: '900' },
+  apkRow: { padding: 14, marginBottom: 8, borderRadius: 8, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.panel },
+  apkRowFocused: { borderColor: colors.red, backgroundColor: colors.paleRed },
+  apkName: { color: colors.text, fontSize: 17, fontWeight: '900' },
+  apkSize: { color: colors.muted, fontSize: 14, marginTop: 4 },
+  apkAction: { color: colors.red, fontSize: 12, fontWeight: '900', marginTop: 8 },
   inspectionCard: { marginTop: 18, padding: 18, borderRadius: 10, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.bg },
   metaName: { color: colors.text, fontSize: 18, fontWeight: '900', marginBottom: 8 },
   metaLine: { color: colors.muted, fontSize: 15, lineHeight: 23 },

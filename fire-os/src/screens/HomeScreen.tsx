@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import FocusableTile from '../components/FocusableTile';
 import { colors } from '../theme/theme';
 
-type Screen = 'Discover' | 'Pulse' | 'AdLens' | 'Request' | 'Profile';
+type Screen = 'Discover' | 'Pulse' | 'AdLens' | 'Request' | 'Profile' | 'Sentinel';
 type Props = { navigate: (screen: Screen) => void };
 
 export default function HomeScreen({ navigate }: Props) {
@@ -25,6 +25,7 @@ export default function HomeScreen({ navigate }: Props) {
         <FocusableTile title="Request an App" icon="＋" subtitle="Tell developers what is missing" onPress={() => navigate('Request')} />
         <FocusableTile title="Profile" icon="⚙" subtitle="Preferences & privacy" onPress={() => navigate('Profile')} />
       </View>
+      <FocusableTile title="Sideload Sentinel" icon="⬡" subtitle="Package metadata readiness review" onPress={() => navigate("Sentinel")} />
       <Text style={styles.footer}>DISCOVER • DIAGNOSE • REQUEST • IMPROVE</Text>
     </ScrollView>
   );

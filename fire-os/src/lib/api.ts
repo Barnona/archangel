@@ -1,6 +1,23 @@
 import { API_BASE } from '../config';
 import type { PulseStatus, AdLensSummary, AdLensProfile, SubscriptionIntelligence, AdLensHistory, AppProfile, AlternativeResult, CatalogStatus, DemandEntry, AppRequest, DiscoveryResult } from '../../../shared/src/types';
 
+export type ConciergeIntentType = 'SPECIFIC_APP' | 'CAPABILITY' | 'CONTENT' | 'MISSING_APP' | 'AMBIGUOUS';
+export interface ConciergeResult {
+  intentType: ConciergeIntentType;
+  requestedApp: string;
+  understoodIntent: string;
+  exactMatch: string | null;
+  alternatives: { appId: string; reason: string; confidence: number }[];
+  message: string;
+  modelId?: string;
+  provider?: string;
+  fallbackUsed?: boolean;
+  fallbackProvider?: string;
+  catalogCount: number;
+  catalogSource: string;
+  generatedAt: string;
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
     headers: { 'Content-Type': 'application/json' },
@@ -33,17 +50,7 @@ export const api = {
   },
   app: (id: string) => request<AppProfile & { alternativeProfiles: AlternativeResult[] }>(`/apps/${id}`),
   aiDiscover: (requestText: string) =>
-    request<{
-      requestedApp: string;
-      understoodIntent: string;
-      exactMatch: string | null;
-      alternatives: { appId: string; reason: string; confidence: number }[];
-      message: string;
-      modelId?: string;
-      catalogCount: number;
-      catalogSource: string;
-      generatedAt: string;
-    }>('/ai/app-discovery', {
+    request<ConciergeResult>('/ai/app-discovery', {
       method: 'POST',
       body: JSON.stringify({ request: requestText }),
     }),

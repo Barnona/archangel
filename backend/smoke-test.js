@@ -75,6 +75,13 @@ async function main() {
     assert.ok(Number.isFinite(pulse.metrics.requestCount));
   });
 
+  await check('Pulse distinguishes configured AI provider from live model availability', async () => {
+    const ai = pulse.checks.find(item => item.id === 'ai');
+    assert.ok(ai, 'missing AI Pulse check');
+    assert.ok(['healthy', 'attention'].includes(ai.status));
+    assert.match(ai.detail, /live authorization\/inference not tested|live inference not tested|Unsupported AI provider configuration/);
+  });
+
   const demand = await get('/requests/demand');
   await check('demand endpoint returns aggregate arrays', async () => {
     assert.ok(Array.isArray(demand.items));

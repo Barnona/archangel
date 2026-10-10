@@ -19,6 +19,22 @@ const categoryIcon = (category: string) => {
 
 const monetizationLabel = (items: string[]) => items.map(value => value.replace('-', ' ')).join('  ·  ').toUpperCase();
 
+const verificationLabel = (verified: boolean, lastVerified: string | null) => {
+  if (!verified) return { label: 'UNVERIFIED SOURCE', stale: false };
+  if (!lastVerified || !/^\\d{4}-\\d{2}-\\d{2}$/.test(lastVerified)) {
+    return { label: 'VERIFIED • DATE UNKNOWN', stale: false };
+  }
+  const verifiedAt = Date.parse(`${lastVerified}T00:00:00.000Z`);
+  if (!Number.isFinite(verifiedAt) || new Date(verifiedAt).toISOString().slice(0, 10) !== lastVerified) {
+    return { label: 'VERIFIED • INVALID DATE', stale: true };
+  }
+  const today = new Date();
+  const todayUtc = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+  const ageDays = Math.max(0, Math.floor((todayUtc - verifiedAt) / 86400000));
+  if (ageDays > 30) return { label: `REVIEW DUE • ${ageDays} DAYS`, stale: true };
+  return { label: `SOURCE CHECKED • ${ageDays}D AGO`, stale: false };
+};
+
 export default function DiscoverScreen({ onOpen, onRequest }: Props) {
   const [results, setResults] = useState<DiscoveryResult[]>([]);
   const [query, setQuery] = useState('');
@@ -186,7 +202,7 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
 
       <View style={styles.resultBar}>
         <Text style={styles.resultCount}>{loading ? 'ANALYZING CATALOG...' : `${results.length} RESULT${results.length === 1 ? '' : 'S'} • RANKED`}</Text>
-        <Text style={styles.snapshot}>CURATED CATALOG • CHECK EACH APP PROFILE</Text>
+        <Text style={styles.snapshot}>CURATED DATA • VERIFICATION AGE SHOWN</Text>
       </View>
 
       {loading ? <ActivityIndicator size="large" color={colors.red} style={styles.loader} /> : null}
@@ -201,7 +217,7 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
                 <View style={[styles.appIcon, focusedAppId === app.id && styles.appIconFocused]}><Text style={[styles.appIconText, focusedAppId === app.id && styles.focusedText]}>{categoryIcon(app.category)}</Text></View>
                 <View style={styles.nameWrap}>
                   <Text style={[styles.appName, focusedAppId === app.id && styles.focusedText]}>{app.name}</Text>
-                  {app.verified ? <Text style={[styles.verified, focusedAppId === app.id && styles.focusedMuted]}>✓ SOURCE CHECKED</Text> : null}
+                  <Text style={[styles.verified, verificationLabel(app.verified, app.lastVerified).stale && styles.verificationStale, focusedAppId === app.id && styles.focusedMuted]}>{verificationLabel(app.verified, app.lastVerified).stale ? '!' : app.verified ? '✓' : '?'} {verificationLabel(app.verified, app.lastVerified).label}</Text>
                 </View>
               </View>
               <Text style={[styles.category, focusedAppId === app.id && styles.focusedText]}>{app.category.toUpperCase()}</Text>
@@ -285,7 +301,7 @@ const styles = StyleSheet.create({
   cardTop:{flexDirection:'row',alignItems:'center',justifyContent:'space-between'},
   nameWrap:{flexDirection:'row',alignItems:'center',flex:1},
   appName:{color:colors.text,fontSize:21,fontWeight:'800'},
-  verified:{color:colors.success,fontSize:9,fontWeight:'900',letterSpacing:1,marginLeft:10},
+  verified:{color:colors.success,fontSize:9,fontWeight:'900',letterSpacing:1,marginLeft:10}, verificationStale:{color:'#B4232B'},
   category:{color:colors.red,fontSize:13,fontWeight:'700'},
   description:{color:colors.muted,fontSize:14,lineHeight:20,marginTop:6},
   meta:{color:'#555555',fontSize:12,marginTop:9},

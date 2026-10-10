@@ -8,8 +8,9 @@ import RequestScreen from './screens/RequestScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import AdLensScreen from './screens/AdLensScreen';
 import AdLensDetailScreen from './screens/AdLensDetailScreen';
+import SideloadSentinelScreen from './screens/SideloadSentinelScreen';
 
-type Screen = 'Home' | 'Discover' | 'Details' | 'Pulse' | 'AdLens' | 'AdLensDetail' | 'Request' | 'Profile';
+type Screen = 'Home' | 'Discover' | 'Details' | 'Pulse' | 'AdLens' | 'AdLensDetail' | 'Request' | 'Profile' | 'Sentinel';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('Home');
@@ -32,12 +33,13 @@ export default function App() {
 
   const openRequest = (name = '', source: 'manual' | 'missing-app-discovery' = 'manual') => { setRequestedName(name); setRequestSource(source); setScreen('Request'); };
 
-  if (screen === 'Home') return <HomeScreen navigate={setScreen as (s: 'Discover'|'Pulse'|'Request'|'Profile') => void} />;
+  if (screen === 'Home') return <HomeScreen navigate={setScreen as (s: 'Discover'|'Pulse'|'Request'|'Profile'|'Sentinel') => void} />;
   if (screen === 'Discover') return <DiscoverScreen onOpen={openApp} onRequest={(name) => openRequest(name, 'missing-app-discovery')} />;
   if (screen === 'AdLens') return <AdLensScreen onOpenApp={(id) => { setAdLensAppId(id); setScreen('AdLensDetail'); }} />;
   if (screen === 'AdLensDetail' && adLensAppId) return <AdLensDetailScreen id={adLensAppId} onBack={() => setScreen('AdLens')} />;
   if (screen === 'Details' && selectedApp) return <AppDetailsScreen id={selectedApp} onBack={() => setScreen('Discover')} onOpen={openApp} />;
   if (screen === 'Pulse') return <PulseScreen />;
+  if (screen === 'Sentinel') return <SideloadSentinelScreen onBack={() => setScreen('Home')} />;
   if (screen === 'Request') return <RequestScreen initialName={requestedName} source={requestSource} />;
   return <ProfileScreen />;
 }

@@ -186,9 +186,9 @@ export default function SideloadSentinelScreen({ onBack }: Props) {
             <Text style={styles.metaLine}>Device: Android {inspection.deviceRelease} (API {inspection.deviceApi})</Text>
             <Text style={styles.metaLine}>Size: {inspection.sizeMb.toFixed(2)} MB  •  Requested permissions: {inspection.requestedPermissionCount}</Text>
             <Text style={styles.metaLine}>File SHA-256: {inspection.fileSha256}</Text>
-            <Text style={styles.metaLine}>Signer certificate SHA-256: {inspection.signerCertificateSha256.length ? inspection.signerCertificateSha256.join('\\n') : 'No signer certificate extracted'}</Text>
-            <Text style={styles.metaLine}>Signer status: {inspection.signatureStatus.replace(/_/g, ' ')}</Text>
-            <Text style={styles.metaNote}>SIGNATURE: {inspection.signatureStatus.replace(/_/g, ' ')}</Text>
+            <Text style={styles.metaLine}>Signer certificate SHA-256: {inspection.signerCertificateSha256.length ? inspection.signerCertificateSha256.join('\n') : 'No signer certificate extracted'}</Text>
+            <Text style={styles.metaLine}>Signer certificate data: {inspection.signatureStatus.replace(/_/g, ' ')}</Text>
+            <Text style={styles.metaNote}>APK SIGNATURE VALIDATION: NOT PERFORMED IN APP</Text>
             <Text style={styles.metaNote}>INTEGRITY: SHA-256 computed; no trusted reference hash was supplied.</Text>
             <Text style={styles.metaNote}>MALWARE SCAN: NOT PERFORMED. A file hash and signer certificate do not establish that an APK is safe.</Text>
             {inspection.compatibilityWarnings.map((warning, index) => (
@@ -197,7 +197,7 @@ export default function SideloadSentinelScreen({ onBack }: Props) {
             <Text style={styles.findingDetail}>For cryptographic signing-scheme verification, run the repository's scripts/verify-apk.ps1 with Android SDK Build Tools on a development PC. A signer certificate fingerprint is an identity clue, not proof that the signature is valid or the publisher is trusted.</Text>
           </View>
         ) : null}
-        {requestedPermissions.length > 0 ? (
+        {inspection ? (
           <View style={styles.permissionCard}>
             <Text style={styles.section}>DECLARED PERMISSIONS ({declaredPermissionCount})</Text>
             <Text style={styles.findingDetail}>These are requested in the manifest, not proof that the permissions are granted or currently being used.</Text>
@@ -211,6 +211,9 @@ export default function SideloadSentinelScreen({ onBack }: Props) {
                 </View>
               );
             })}
+            {requestedPermissions.length === 0 ? (
+              <Text style={styles.findingDetail}>No requested permissions were exposed by the parsed manifest; this does not mean the APK is safe.</Text>
+            ) : null}
           </View>
         ) : null}
         <Text style={styles.label}>OR ENTER METADATA MANUALLY</Text>

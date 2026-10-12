@@ -247,3 +247,13 @@ Next planned increments:
 ## Last updated
 
 **2026-10-10 — Concierge contract tests and integration checks reported passing; live Fire TV interaction/build verification should still be confirmed if not included in the test run**
+
+
+## Concierge integration UI pass — 2026-10-12
+
+- Reviewed the Fire OS Discover screen request path: Ask ARCHANGEL calls `POST /ai/app-discovery`; exact matches and alternatives open catalog profiles; missing-app results can route to Request Network with the `missing-app-discovery` source.
+- Hardened the remote-friendly UI: empty/too-short requests now show an explicit prompt, repeated submissions are disabled while a request is in flight, and stale result content is cleared before a new request starts.
+- Added catalog source/count and available provider/model/fallback metadata to the result panel so the demo distinguishes curated catalog context from the model path.
+- Fixed the verification-date regular expression so valid ISO dates are actually recognized and age-based review labels can be calculated.
+- Commit: `99b836f5f42684587d037fbbf18e8fbf458d0b9a` on `main`.
+- **Still requires local verification:** pull latest `main`, run the Fire OS TypeScript/build checks, install the APK, and exercise D-pad navigation plus known-app, missing-app, generic-content, and provider-failure cases. Live inference depends on whichever provider is configured and its credentials.

@@ -21,7 +21,7 @@ const monetizationLabel = (items: string[]) => items.map(value => value.replace(
 
 const verificationLabel = (verified: boolean, lastVerified: string | null) => {
   if (!verified) return { label: 'UNVERIFIED SOURCE', stale: false };
-  if (!lastVerified || !/^\\d{4}-\\d{2}-\\d{2}$/.test(lastVerified)) {
+  if (!lastVerified || !/^\d{4}-\d{2}-\d{2}$/.test(lastVerified)) {
     return { label: 'VERIFIED • DATE UNKNOWN', stale: false };
   }
   const verifiedAt = Date.parse(`${lastVerified}T00:00:00.000Z`);
@@ -73,11 +73,19 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
   useEffect(() => { load(); }, [category]);
 
   const askArchangel = async () => {
-    if (!query.trim()) return;
+    const requestText = query.trim();
+    if (requestText.length < 2) {
+      setAiResult(null);
+      setAiError('Enter at least two characters describing an app or what you want to watch, play, or do.');
+      setAiOpen(true);
+      return;
+    }
     setAiLoading(true);
     setAiError('');
+    setAiResult(null);
+    setAiOpen(true);
     try {
-      const result = await api.aiDiscover(query.trim());
+      const result = await api.aiDiscover(requestText);
       setAiResult(result);
       setAiOpen(true);
     } catch (e) {
@@ -120,7 +128,7 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
       </View>
 
       <View style={styles.aiRow}>
-        <Pressable onPress={askArchangel} onFocus={() => setAskFocused(true)} onBlur={() => setAskFocused(false)} style={[styles.aiButton, askFocused && styles.focusButton]}>
+        <Pressable disabled={aiLoading} onPress={askArchangel} onFocus={() => setAskFocused(true)} onBlur={() => setAskFocused(false)} style={[styles.aiButton, askFocused && styles.focusButton, aiLoading && styles.aiButtonDisabled]}>
           <Text style={styles.searchButtonText}>{aiLoading ? '◌  THINKING...' : '✦  ASK ARCHANGEL'}</Text>
         </Pressable>
       </View>
@@ -144,6 +152,7 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
               </View>
               <Text style={styles.aiIntent}>{aiResult.understoodIntent}</Text>
               <Text style={styles.aiMessage}>{aiResult.message}</Text>
+              <Text style={styles.aiMeta}>SOURCE: {aiResult.catalogSource}  ·  CATALOG: {aiResult.catalogCount} APPS{aiResult.provider ? `  ·  PROVIDER: ${aiResult.provider.toUpperCase()}` : ''}{aiResult.modelId ? `  ·  MODEL: ${aiResult.modelId}` : ''}{aiResult.fallbackUsed ? `  ·  FALLBACK: ${(aiResult.fallbackProvider || 'USED').toUpperCase()}` : ''}</Text>
               <Text style={styles.reasonLabel}>◉  CATALOG DECISION</Text>
               {aiResult.exactMatch ? (
                 <>
@@ -257,7 +266,7 @@ const styles = StyleSheet.create({
   searchRow:{flexDirection:'row',alignItems:'center'},
   search:{width:500,height:50,borderRadius:9,backgroundColor:colors.panel,borderWidth:2,borderColor:colors.line,color:colors.text,fontSize:18,paddingHorizontal:16},
   aiRow:{flexDirection:'row',alignItems:'center',marginTop:8,marginBottom:2},
-  aiButton:{height:48,paddingHorizontal:20,borderRadius:9,backgroundColor:colors.red,alignItems:'center',justifyContent:'center'},
+  aiButton:{height:48,paddingHorizontal:20,borderRadius:9,backgroundColor:colors.red,alignItems:'center',justifyContent:'center'}, aiButtonDisabled:{opacity:0.65},
   searchButton:{marginLeft:8,height:50,paddingHorizontal:21,borderRadius:9,backgroundColor:colors.red,alignItems:'center',justifyContent:'center'},
   searchButtonText:{color:'#fff',fontSize:12,fontWeight:'900',letterSpacing:1},
   clearButton:{marginLeft:8,height:50,paddingHorizontal:16,borderRadius:9,borderWidth:1,borderColor:colors.line,backgroundColor:colors.panel,alignItems:'center',justifyContent:'center'},
@@ -272,7 +281,7 @@ const styles = StyleSheet.create({
   intentBadge:{alignSelf:'flex-start',marginTop:12,paddingHorizontal:9,paddingVertical:4,borderRadius:6,backgroundColor:colors.paleRed},
   intentBadgeText:{color:colors.red,fontSize:9,fontWeight:'900',letterSpacing:1},
   aiIntent:{color:colors.text,fontSize:16,fontWeight:'700',marginTop:7},
-  aiMessage:{color:colors.muted,fontSize:14,lineHeight:20,marginTop:5,marginBottom:12},
+  aiMessage:{color:colors.muted,fontSize:14,lineHeight:20,marginTop:5,marginBottom:8}, aiMeta:{color:colors.muted,fontSize:9,lineHeight:14,letterSpacing:0.4,marginBottom:12},
   aiExact:{alignSelf:'flex-start',marginTop:10,backgroundColor:colors.red,paddingHorizontal:16,paddingVertical:10,borderRadius:8},
   aiExactText:{color:'#fff',fontSize:11,fontWeight:'900',letterSpacing:1},
   aiRequest:{alignSelf:'flex-start',marginTop:10,backgroundColor:colors.red,paddingHorizontal:16,paddingVertical:10,borderRadius:8},

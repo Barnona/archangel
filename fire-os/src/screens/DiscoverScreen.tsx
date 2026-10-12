@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   aiExact:{alignSelf:'flex-start',marginTop:10,backgroundColor:colors.red,paddingHorizontal:16,paddingVertical:10,borderRadius:8},
   aiExactText:{color:'#fff',fontSize:11,fontWeight:'900',letterSpacing:1},
   aiRequest:{alignSelf:'flex-start',marginTop:10,backgroundColor:colors.red,paddingHorizontal:16,paddingVertical:10,borderRadius:8},
-  aiResultFocused:{backgroundColor:colors.panel,borderRadius:8,borderWidth:1,borderColor:colors.red,paddingHorizontal:10},
+  aiResultFocused:{backgroundColor:'#FFFFFF',borderRadius:8,borderWidth:2,borderColor:colors.red,paddingHorizontal:10},
   aiAlternatives:{marginTop:12},
   aiAlternative:{paddingTop:10,paddingBottom:10,borderTopWidth:1,borderTopColor:colors.line},
   aiAlternativeRow:{flexDirection:'row',alignItems:'center',justifyContent:'space-between'},

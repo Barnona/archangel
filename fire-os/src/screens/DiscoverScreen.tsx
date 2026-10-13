@@ -158,7 +158,7 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
                 <>
                   <Text style={styles.reason}>Exact catalog match found.</Text>
                   <Pressable onPress={() => onOpen(aiResult.exactMatch!)} style={({ focused }) => [styles.aiExact, focused && styles.aiResultFocused]}>
-                    <Text style={styles.aiExactText}>OPEN {aiResult.exactMatch.toUpperCase()}</Text>
+                    <Text style={[styles.aiExactText, focused && styles.aiResultFocusedText]}>OPEN {aiResult.exactMatch.toUpperCase()}</Text>
                   </Pressable>
                 </>
               ) : (
@@ -286,6 +286,7 @@ const styles = StyleSheet.create({
   aiExactText:{color:'#fff',fontSize:11,fontWeight:'900',letterSpacing:1},
   aiRequest:{alignSelf:'flex-start',marginTop:10,backgroundColor:colors.red,paddingHorizontal:16,paddingVertical:10,borderRadius:8},
   aiResultFocused:{backgroundColor:'#FFFFFF',borderRadius:8,borderWidth:2,borderColor:colors.red,paddingHorizontal:10},
+  aiResultFocusedText:{color:colors.red},
   aiAlternatives:{marginTop:12},
   aiAlternative:{paddingTop:10,paddingBottom:10,borderTopWidth:1,borderTopColor:colors.line},
   aiAlternativeRow:{flexDirection:'row',alignItems:'center',justifyContent:'space-between'},

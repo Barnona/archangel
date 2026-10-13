@@ -257,3 +257,12 @@ Next planned increments:
 - Fixed the verification-date regular expression so valid ISO dates are actually recognized and age-based review labels can be calculated.
 - Commit: `99b836f5f42684587d037fbbf18e8fbf458d0b9a` on `main`.
 - **Still requires local verification:** pull latest `main`, run the Fire OS TypeScript/build checks, install the APK, and exercise D-pad navigation plus known-app, missing-app, generic-content, and provider-failure cases. Live inference depends on whichever provider is configured and its credentials.
+
+
+## AdLens timeline / focus-navigation increment — 2026-10-13
+
+- Reworked historical monetization snapshots into individual focusable timeline cards with snapshot ordering, timestamp, monetization/ad-level state, subscription model, evidence status, and catalog version.
+- Converted recorded signal changes into focusable change cards with clear previous/current values and an explicit note that a catalog signal change is not proof of a real-world app change.
+- Added explicit D-pad focus state and high-contrast red text on white focused cards to avoid the focus-contrast issues seen elsewhere in the TV UI.
+- Commit: `5302cc472a9acaaba523102b1d09c590a1b85f07` on `main`.
+- Validation pending: pull latest `main`, run Fire OS typecheck/build, then use the emulator to navigate through AdLens profile history with the D-pad. No new historical data is fabricated; cards display stored snapshots only.

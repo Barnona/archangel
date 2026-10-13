@@ -142,3 +142,11 @@ Next planned increments:
 ## Last updated
 
 **2026-10-10 — Concierge contract tests and integration checks reported passing; live Fire TV interaction/build verification should still be confirmed if not included in the test run**
+
+
+## AdLens profile focus contrast — 2026-10-13
+
+- Replaced the AdLens profile-card focus style callback with explicit `onFocus` / `onBlur` state, matching the more reliable TV navigation pattern used elsewhere.
+- Focused profile cards now use a white background, red border and red app title, with dark supporting text for readability.
+- Commit: `52594971783ed1c7e9674e4097f3c30aa246cf2c` on `main`.
+- Validation pending: build and navigate profile cards using the emulator D-pad. Remaining product roadmap focus is the full Fire TV integration pass across Home, Discovery/Concierge, Sentinel, Pulse, AdLens and Request Network.

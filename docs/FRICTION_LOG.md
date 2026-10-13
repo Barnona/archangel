@@ -158,3 +158,12 @@ Next planned increments:
 - Added app-level preference state and a shared light/dark palette entry point. The current dark-mode styling is explicitly visible on Profile; existing module styles are largely created at module load, so a full app-wide dynamic theme/font-scale pass still needs implementation and verification before these settings can be described as global.
 - Commits on `main`: `7f64aa3002c25ad5cd46cf5b6f4b166718a3b2d7`, `832c61766c90bbab35f3ad2d077369ada7144a94`, `4f0e24c181f992f3aa556d7cd22dc9b8b1121807`, `c73ca9c8690f78d007c4704499a2d900abca15e8`.
 - Validation pending: run TypeScript/build, then test Profile selection and persistence expectations. Preferences currently live in app state and reset when the app process restarts; persistence has not yet been implemented.
+
+
+## Profile redesign — preferences removed — 2026-10-13
+
+- Removed both requested preference selectors (light/dark mode and text size); Profile is now an informational control-centre page rather than a settings screen.
+- Removed the unused app-level preference state and dynamic theme mutation entry point, restoring the existing fixed light/red visual system.
+- Replaced the previous Profile page with a viewer overview, module summaries, and explicit privacy/data-boundary messaging.
+- Commits on `main`: `75e9c4c5060fc9d9ea55a8531554e484f8c3430f`, `3e667beeb9a6f20bc7d06df97cd43c4b07bcefbe`, `fcfca6b4bd92b1846933e9b3741d5365102982f7`.
+- Validation pending: build and check Profile layout/D-pad scrolling in the Android TV emulator. Full integration pass remains pending.

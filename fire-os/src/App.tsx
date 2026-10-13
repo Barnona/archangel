@@ -34,12 +34,12 @@ export default function App() {
   const openRequest = (name = '', source: 'manual' | 'missing-app-discovery' = 'manual') => { setRequestedName(name); setRequestSource(source); setScreen('Request'); };
 
   if (screen === 'Home') return <HomeScreen navigate={setScreen as (s: 'Discover'|'Pulse'|'Request'|'Profile'|'Sentinel') => void} />;
-  if (screen === 'Discover') return <DiscoverScreen key={mode} onOpen={openApp} onRequest={(name) => openRequest(name, 'missing-app-discovery')} />;
-  if (screen === 'AdLens') return <AdLensScreen key={mode} onOpenApp={(id) => { setAdLensAppId(id); setScreen('AdLensDetail'); }} />;
-  if (screen === 'AdLensDetail' && adLensAppId) return <AdLensDetailScreen key={mode} id={adLensAppId} onBack={() => setScreen('AdLens')} />;
-  if (screen === 'Details' && selectedApp) return <AppDetailsScreen key={mode} id={selectedApp} onBack={() => setScreen('Discover')} onOpen={openApp} />;
-  if (screen === 'Pulse') return <PulseScreen key={mode} />;
-  if (screen === 'Sentinel') return <SideloadSentinelScreen key={mode} onBack={() => setScreen('Home')} />;
-  if (screen === 'Request') return <RequestScreen key={mode} initialName={requestedName} source={requestSource} />;
+  if (screen === 'Discover') return <DiscoverScreen onOpen={openApp} onRequest={(name) => openRequest(name, 'missing-app-discovery')} />;
+  if (screen === 'AdLens') return <AdLensScreen onOpenApp={(id) => { setAdLensAppId(id); setScreen('AdLensDetail'); }} />;
+  if (screen === 'AdLensDetail' && adLensAppId) return <AdLensDetailScreen id={adLensAppId} onBack={() => setScreen('AdLens')} />;
+  if (screen === 'Details' && selectedApp) return <AppDetailsScreen id={selectedApp} onBack={() => setScreen('Discover')} onOpen={openApp} />;
+  if (screen === 'Pulse') return <PulseScreen />;
+  if (screen === 'Sentinel') return <SideloadSentinelScreen onBack={() => setScreen('Home')} />;
+  if (screen === 'Request') return <RequestScreen initialName={requestedName} source={requestSource} />;
   return <ProfileScreen />;
 }

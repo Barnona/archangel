@@ -8,6 +8,7 @@ type Detail = AdLensProfile & { category: string; description: string };
 
 export default function AdLensDetailScreen({ id, onBack }: { id: string; onBack: () => void }) {
   const [backFocused, setBackFocused] = useState(false);
+  const [focusedHistoryItem, setFocusedHistoryItem] = useState<string | null>(null);
   const [data, setData] = useState<Detail | null>(null);
   const [error, setError] = useState('');
   const [history, setHistory] = useState<AdLensHistory | null>(null);
@@ -82,21 +83,37 @@ export default function AdLensDetailScreen({ id, onBack }: { id: string; onBack:
         {history?.snapshots.length === 1 ? (
           <Text style={styles.body}>Initial baseline captured from the current ARCHANGEL catalog. No earlier state is being claimed.</Text>
         ) : null}
-        {history?.snapshots.slice().reverse().map(snapshot => (
-          <View key={snapshot.id} style={styles.historyRow}>
-            <Text style={styles.meta}>{snapshot.capturedAt}</Text>
-            <Text style={styles.historyTitle}>{snapshot.adLevel.toUpperCase()} • {snapshot.subscriptionModel.toUpperCase()}</Text>
-            <Text style={styles.body}>{snapshot.monetization.join(' • ')}</Text>
-          </View>
-        ))}
+        {history?.snapshots.slice().reverse().map((snapshot, index) => {
+          const itemKey = `snapshot-${snapshot.id}`;
+          const focused = focusedHistoryItem === itemKey;
+          return (
+            <Pressable key={snapshot.id} onFocus={() => setFocusedHistoryItem(itemKey)} onBlur={() => setFocusedHistoryItem(current => current === itemKey ? null : current)} style={[styles.timelineCard, focused && styles.timelineCardFocused]}>
+              <View style={styles.timelineHead}>
+                <Text style={[styles.timelineIndex, focused && styles.timelineFocusedText]}>SNAPSHOT {history.snapshots.length - index}</Text>
+                <Text style={[styles.timelineDate, focused && styles.timelineFocusedText]}>{snapshot.capturedAt}</Text>
+              </View>
+              <Text style={[styles.historyTitle, focused && styles.timelineFocusedText]}>{snapshot.adLevel.toUpperCase()} • {snapshot.subscriptionModel.toUpperCase()}</Text>
+              <Text style={[styles.body, focused && styles.timelineFocusedMuted]}>{snapshot.monetization.join(' • ')}</Text>
+              <Text style={[styles.timelineEvidence, focused && styles.timelineFocusedText]}>EVIDENCE: {snapshot.evidence.status.replace(/_/g, ' ')} • CATALOG {snapshot.catalogVersion}</Text>
+            </Pressable>
+          );
+        })}
         {history?.changes.length ? (
           <View style={styles.changeBox}>
             <Text style={styles.meta}>RECORDED DATA SIGNAL CHANGES</Text>
-            {history.changes.slice().reverse().map((change, index) => (
-              <Text key={`${change.field}-${index}`} style={styles.body}>
-                {change.field.toUpperCase()} • {change.previous} → {change.current}
-              </Text>
-            ))}
+            {history.changes.slice().reverse().map((change, index) => {
+              const itemKey = `change-${change.field}-${index}`;
+              const focused = focusedHistoryItem === itemKey;
+              return (
+                <Pressable key={itemKey} onFocus={() => setFocusedHistoryItem(itemKey)} onBlur={() => setFocusedHistoryItem(current => current === itemKey ? null : current)} style={[styles.changeEvent, focused && styles.timelineCardFocused]}>
+                  <Text style={[styles.changeField, focused && styles.timelineFocusedText]}>{change.field.replace(/([A-Z])/g, ' $1').toUpperCase()}</Text>
+                  <Text style={[styles.changeValue, focused && styles.timelineFocusedMuted]}>{change.previous}</Text>
+                  <Text style={[styles.changeArrow, focused && styles.timelineFocusedText]}>↓  SIGNAL UPDATED</Text>
+                  <Text style={[styles.changeValue, focused && styles.timelineFocusedMuted]}>{change.current}</Text>
+                  <Text style={[styles.timelineEvidence, focused && styles.timelineFocusedText]}>RECORDED DATA SIGNAL CHANGE — NOT PROOF OF A REAL-WORLD APP CHANGE</Text>
+                </Pressable>
+              );
+            })}
           </View>
         ) : (
           <Text style={styles.body}>No monetization-state change has been observed in the recorded snapshots.</Text>
@@ -142,7 +159,19 @@ const styles = StyleSheet.create({
   meta:{color:'#777777',fontSize:11,letterSpacing:1,marginTop:12},
   historyRow:{borderTopWidth:1,borderTopColor:colors.line,paddingVertical:11,marginTop:10},
   historyTitle:{color:colors.text,fontSize:15,fontWeight:'900',marginTop:4},
+  timelineCard:{backgroundColor:colors.panel2,borderWidth:1,borderColor:colors.line,borderRadius:8,padding:13,marginTop:10},
+  timelineCardFocused:{backgroundColor:'#FFFFFF',borderColor:colors.red,borderWidth:2},
+  timelineHead:{flexDirection:'row',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap'},
+  timelineIndex:{color:colors.red,fontSize:10,fontWeight:'900',letterSpacing:1},
+  timelineDate:{color:colors.muted,fontSize:11,marginTop:3},
+  timelineEvidence:{color:colors.muted,fontSize:10,fontWeight:'800',letterSpacing:0.4,lineHeight:15,marginTop:8},
+  timelineFocusedText:{color:colors.red},
+  timelineFocusedMuted:{color:'#444444'},
   changeBox:{marginTop:10,paddingTop:10,borderTopWidth:1,borderTopColor:colors.line},
+  changeEvent:{backgroundColor:colors.panel2,borderWidth:1,borderColor:colors.line,borderRadius:8,padding:13,marginTop:9},
+  changeField:{color:colors.red,fontSize:11,fontWeight:'900',letterSpacing:1},
+  changeValue:{color:colors.text,fontSize:13,lineHeight:19,marginTop:5},
+  changeArrow:{color:colors.red,fontSize:10,fontWeight:'900',letterSpacing:1,marginTop:7},
   warning:{width:760,backgroundColor:colors.panel2,borderWidth:1,borderColor:colors.line,borderRadius:10,padding:20,marginTop:2},
   button:{marginTop:16,backgroundColor:colors.red,paddingHorizontal:20,paddingVertical:12,borderRadius:8},
   buttonText:{color:'#fff',fontWeight:'900'},

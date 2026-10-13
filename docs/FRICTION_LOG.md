@@ -167,3 +167,11 @@ Next planned increments:
 - Replaced the previous Profile page with a viewer overview, module summaries, and explicit privacy/data-boundary messaging.
 - Commits on `main`: `75e9c4c5060fc9d9ea55a8531554e484f8c3430f`, `3e667beeb9a6f20bc7d06df97cd43c4b07bcefbe`, `fcfca6b4bd92b1846933e9b3741d5365102982f7`.
 - Validation pending: build and check Profile layout/D-pad scrolling in the Android TV emulator. Full integration pass remains pending.
+
+
+## Sentinel render-error hardening — 2026-10-13
+
+- Guarded rendering of signer certificate fingerprints and signature status so incomplete native APK inspection metadata cannot crash the screen.
+- Replaced references to an undefined `colors.paleRed` token in Sentinel focus styles with the established pale-red hex value.
+- Commit: `c03fb8f13ab6b5ddc490e06fcee0b55402250468` on `main`.
+- Root cause is not yet confirmed from a stack trace; this is defensive hardening based on risky render expressions found in the Sentinel screen. Build and emulator validation remain pending.

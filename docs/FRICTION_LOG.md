@@ -141,45 +141,4 @@ Next planned increments:
 
 ## Last updated
 
-**2026-10-10 — Concierge contract tests and integration checks reported passing; live Fire TV interaction/build verification should still be confirmed if not included in the test run**
-
-
-## AdLens profile focus contrast — 2026-10-13
-
-- Replaced the AdLens profile-card focus style callback with explicit `onFocus` / `onBlur` state, matching the more reliable TV navigation pattern used elsewhere.
-- Focused profile cards now use a white background, red border and red app title, with dark supporting text for readability.
-- Commit: `52594971783ed1c7e9674e4097f3c30aa246cf2c` on `main`.
-- Validation pending: build and navigate profile cards using the emulator D-pad. Remaining product roadmap focus is the full Fire TV integration pass across Home, Discovery/Concierge, Sentinel, Pulse, AdLens and Request Network.
-
-
-## Profile preferences — 2026-10-13
-
-- Replaced the informational-only Profile page with D-pad-selectable appearance and text-size controls: Light/Dark and Small/Medium/Large. The screen includes selected states and a text preview; font sizing is applied to Profile content and the preview.
-- Added app-level preference state and a shared light/dark palette entry point. The current dark-mode styling is explicitly visible on Profile; existing module styles are largely created at module load, so a full app-wide dynamic theme/font-scale pass still needs implementation and verification before these settings can be described as global.
-- Commits on `main`: `7f64aa3002c25ad5cd46cf5b6f4b166718a3b2d7`, `832c61766c90bbab35f3ad2d077369ada7144a94`, `4f0e24c181f992f3aa556d7cd22dc9b8b1121807`, `c73ca9c8690f78d007c4704499a2d900abca15e8`.
-- Validation pending: run TypeScript/build, then test Profile selection and persistence expectations. Preferences currently live in app state and reset when the app process restarts; persistence has not yet been implemented.
-
-
-## Profile redesign — preferences removed — 2026-10-13
-
-- Removed both requested preference selectors (light/dark mode and text size); Profile is now an informational control-centre page rather than a settings screen.
-- Removed the unused app-level preference state and dynamic theme mutation entry point, restoring the existing fixed light/red visual system.
-- Replaced the previous Profile page with a viewer overview, module summaries, and explicit privacy/data-boundary messaging.
-- Commits on `main`: `75e9c4c5060fc9d9ea55a8531554e484f8c3430f`, `3e667beeb9a6f20bc7d06df97cd43c4b07bcefbe`, `fcfca6b4bd92b1846933e9b3741d5365102982f7`.
-- Validation pending: build and check Profile layout/D-pad scrolling in the Android TV emulator. Full integration pass remains pending.
-
-
-## Sentinel render-error hardening — 2026-10-13
-
-- Guarded rendering of signer certificate fingerprints and signature status so incomplete native APK inspection metadata cannot crash the screen.
-- Replaced references to an undefined `colors.paleRed` token in Sentinel focus styles with the established pale-red hex value.
-- Commit: `c03fb8f13ab6b5ddc490e06fcee0b55402250468` on `main`.
-- Root cause is not yet confirmed from a stack trace; this is defensive hardening based on risky render expressions found in the Sentinel screen. Build and emulator validation remain pending.
-
-
-## Cross-tab render-error fix — 2026-10-13
-
-- Investigated the shared navigation shell after the user reported render errors across tabs, not only Sentinel.
-- Found stale `key={mode}` props on seven screen routes in `fire-os/src/App.tsx`, even though the earlier preference redesign had removed the `mode` state. This undefined identifier could break TypeScript/Metro bundling and therefore affect navigation to multiple screens.
-- Removed the stale props from all routes. Commit: `1da091a4d635428f09fa80a23af1b6e74a3a632b` on `main`.
-- Validation pending: pull latest main, run Android debug build, and verify every home tab. If any screen still reports a render error, capture the exact red-screen message/stack trace to isolate additional faults.
+**2026-10-13 — Cross-tab render**

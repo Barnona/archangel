@@ -175,3 +175,11 @@ Next planned increments:
 - Replaced references to an undefined `colors.paleRed` token in Sentinel focus styles with the established pale-red hex value.
 - Commit: `c03fb8f13ab6b5ddc490e06fcee0b55402250468` on `main`.
 - Root cause is not yet confirmed from a stack trace; this is defensive hardening based on risky render expressions found in the Sentinel screen. Build and emulator validation remain pending.
+
+
+## Cross-tab render-error fix — 2026-10-13
+
+- Investigated the shared navigation shell after the user reported render errors across tabs, not only Sentinel.
+- Found stale `key={mode}` props on seven screen routes in `fire-os/src/App.tsx`, even though the earlier preference redesign had removed the `mode` state. This undefined identifier could break TypeScript/Metro bundling and therefore affect navigation to multiple screens.
+- Removed the stale props from all routes. Commit: `1da091a4d635428f09fa80a23af1b6e74a3a632b` on `main`.
+- Validation pending: pull latest main, run Android debug build, and verify every home tab. If any screen still reports a render error, capture the exact red-screen message/stack trace to isolate additional faults.

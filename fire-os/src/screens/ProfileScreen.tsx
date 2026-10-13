@@ -19,12 +19,12 @@ export default function ProfileScreen({ fontSize, onFontSizeChange, mode, onMode
   ];
   const scale = fontSize === 'small' ? 0.9 : fontSize === 'large' ? 1.15 : 1;
   return (
-    <ScrollView style={styles.root} contentContainerStyle={styles.content} scrollsChildToFocus>
+    <ScrollView style={[styles.root, mode === 'dark' && styles.darkRoot]} contentContainerStyle={styles.content} scrollsChildToFocus>
       <Text style={[styles.kicker, { fontSize: 13 * scale }]}>⚙  PROFILE / PREFERENCES</Text>
       <Text style={[styles.title, { fontSize: 42 * scale }]}>ARCHANGEL Settings</Text>
       <Text style={[styles.sub, { fontSize: 19 * scale }]}>Personalise readability and appearance for this session.</Text>
 
-      <View style={styles.card}>
+      <View style={[styles.card, mode === 'dark' && styles.darkCard]}>
         <Text style={[styles.rowTitle, { fontSize: 20 * scale }]}>◐  Appearance</Text>
         <Text style={[styles.rowText, { fontSize: 16 * scale }]}>Choose the visual mode.</Text>
         <View style={styles.options}>
@@ -69,6 +69,8 @@ export default function ProfileScreen({ fontSize, onFontSizeChange, mode, onMode
 
 const styles = StyleSheet.create({
   root:{flex:1,backgroundColor:colors.bg},
+  darkRoot:{backgroundColor:'#111111'},
+  darkCard:{backgroundColor:'#1D1D1D',borderColor:'#3A3A3A'},
   content:{padding:64,paddingTop:52,paddingBottom:72},
   kicker:{color:colors.red,letterSpacing:2,fontWeight:'700'},
   title:{color:colors.text,fontWeight:'900',marginTop:6},

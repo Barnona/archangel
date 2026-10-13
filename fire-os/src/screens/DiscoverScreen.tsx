@@ -47,6 +47,7 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
   const [searchFocused, setSearchFocused] = useState(false);
   const [askFocused, setAskFocused] = useState(false);
   const [requestFocused, setRequestFocused] = useState(false);
+  const [exactMatchFocused, setExactMatchFocused] = useState(false);
   const [focusedAppId, setFocusedAppId] = useState<string | null>(null);
   const [aiResult, setAiResult] = useState<{
     intentType: 'SPECIFIC_APP' | 'CAPABILITY' | 'CONTENT' | 'MISSING_APP' | 'AMBIGUOUS';
@@ -157,8 +158,8 @@ export default function DiscoverScreen({ onOpen, onRequest }: Props) {
               {aiResult.exactMatch ? (
                 <>
                   <Text style={styles.reason}>Exact catalog match found.</Text>
-                  <Pressable onPress={() => onOpen(aiResult.exactMatch!)} style={({ focused }) => [styles.aiExact, focused && styles.aiResultFocused]}>
-                    <Text style={[styles.aiExactText, focused && styles.aiResultFocusedText]}>OPEN {aiResult.exactMatch.toUpperCase()}</Text>
+                  <Pressable onPress={() => onOpen(aiResult.exactMatch!)} onFocus={() => setExactMatchFocused(true)} onBlur={() => setExactMatchFocused(false)} style={[styles.aiExact, exactMatchFocused && styles.aiResultFocused]}>
+                    <Text style={[styles.aiExactText, exactMatchFocused && styles.aiResultFocusedText]}>OPEN {aiResult.exactMatch.toUpperCase()}</Text>
                   </Pressable>
                 </>
               ) : (

@@ -92,106 +92,11 @@ A core design principle is:
 | 2026-10-10 (IST) | Concierge AI / App Discovery | Concierge should return consistent, catalog-grounded results and classify requests reliably across Bedrock/Gemini providers | Provider response shapes were not normalized centrally; invalid app IDs and generic content requests needed explicit guardrails | Inconsistent provider contracts could lead to brittle UI behaviour or misleading missing-app results | `backend/ai.js`, `backend/concierge.js`, `backend/concierge.test.js`, `fire-os/src/lib/api.ts` | Added provider-independent response normalization, Fire OS catalog ID validation, intent classification, alternative filtering, a typed API contract, regression tests, and CI execution. User reports all tests passed. | 15 minutes |
 | 2026-10-10 (IST) | Bedrock model upgrade / account onboarding | ARCHANGEL should be ready to use a newer Nova model when Bedrock access is enabled | AWS account verification is pending, so live Bedrock inference cannot yet be tested | Model integration can be prepared now, but model availability, access, latency, cost, and response quality remain unverified until account access is approved | `backend/providers/bedrock.js`, `backend/.env.example`, AWS Nova 2 Lite and Nova 2.5 Sonic model documentation | Changed the default text-based Bedrock model to `amazon.nova-2-lite-v1:0` while retaining `BEDROCK_MODEL_ID` as an override. Nova 2.5 Sonic is documented as a separate future voice integration because it uses bidirectional streaming rather than the current Converse request path. No live Bedrock call was made. | Pending AWS verification |
 | 2026-10-10 (IST) | Bedrock model readiness | Prepare the text Concierge for Nova 2 Lite while AWS account verification is pending | Live Bedrock inference is blocked until AWS verifies/enables the account | Model ID changes can be tested locally, but regional availability, access, latency, quality and cost cannot yet be confirmed | `backend/providers/bedrock.js`, `backend/.env.example`, `backend/bedrock-config.test.js`, GitHub Actions | Defaulted text inference to `amazon.nova-2-lite-v1:0`; preserved environment overrides; added offline tests for default/override config and CI coverage. No AWS request is made by these tests. Nova 2 Sonic remains a separate future bidirectional voice-streaming integration. | Pending AWS verification |
+| 2026-10-12 8:09 AM (IST) | Concierge integration UI pass | Reviewed the Fire OS Discover screen request path: Ask ARCHANGEL calls `POST /ai/app-discovery`. | Added catalog source/count and available provider/model/fallback metadata to the result panel so the demo distinguishes curated catalog context from the model path. | Still requires local verification | | Fixed the verification-date regular expression so valid ISO dates are actually recognized and age-based review labels can be calculated. | 1 days |
 
 ---
 
-# 3. Important friction patterns
-
-## 3.1 TV focus is a first-class engineering problem
-
-Several UI problems came from treating Fire TV/Android TV focus like ordinary touch/mobile interaction.
-
-Repeated issues:
-
-- `Pressable` focus styles did not always render as expected.
-- Focused controls needed explicit state.
-- Focused text and focused background must be designed together.
-- Scroll containers must cooperate with TV focus.
-- Lower controls must remain visible when remote navigation reaches them.
-
-**Decision:**
-
-For important TV controls, prefer explicit:
-
-`onFocus → state → focused style`
-
-and
-
-`onBlur → state → normal style`
-
-rather than assuming mobile-style `Pressable` styling will always be sufficient.
-
----
-
-## 3.2 Backend changes require process lifecycle awareness
-
-The AdLens detail problem demonstrated:
-
-> Code existing in GitHub does not mean the currently running backend process has loaded that code.
-
-Example:
-
-`/adlens/:appId` existed in the repository, but the emulator still received:
-
-`Cannot GET /adlens/prime-video`
-
-The actual resolution was to ensure the backend process was restarted after the route was introduced.
-
-**Decision:**
-
-For every backend route change:
-
-1. Save code.
-2. Restart API process.
-3. Test endpoint directly.
-4. Then test through the Fire TV UI.
-
----
-
-## 3.3 ARCHANGEL must not invent platform capabilities
-
-The catalog problem is a product-level friction rather than just a coding problem.
-
-ARCHANGEL currently does **not** have an official Amazon-wide application catalog API.
-
-Therefore the system uses:
-
-`curated-verified-cache`
-
-and explicitly exposes:
-
-`amazonAppstoreApi.status = not_available`
-
-This led to the documented feature request for the Amazon Appstore Catalog API.
-
-The same principle now applies to subscriptions:
-
-- ARCHANGEL can identify a subscription monetization signal.
-- ARCHANGEL cannot currently claim that the subscription is ad-free.
-- ARCHANGEL cannot claim arbitrary third-party subscription entitlement access.
-- Future Amazon integration must be official and authenticated.
-
----
-
-# 4. Current friction-to-feature evolution
-
-A useful pattern from the project is that several friction points directly produced product improvements.
-
-| Friction | Product/engineering improvement |
-|---|---|
-| Missing Amazon-wide catalog | Official Appstore Catalog API feature request |
-| Missing app discovered by AI | Request Network integration |
-| TV focus styling unreliable | Explicit TV focus-state architecture |
-| Home lower options not visible | Focus-aware scrolling |
-| Ad data incomplete | UNKNOWN signal instead of fabricated rating |
-| Subscription does not imply ad-free | Explicit Subscription Signal |
-| System ads cannot be controlled | Clear AdLens system-ad boundary |
-| Detail route unavailable in running API | Backend route verification/restart workflow |
-| Small static AdLens list | Focusable profiles + detail pages + filters |
-
----
-
-# 5. Current state
+# 3. Current state
 
 ### Completed
 
@@ -234,35 +139,6 @@ Next planned increments:
 1. **Amazon Appstore application catalog API**
 2. **Amazon subscription / entitlement integration**, including official discovery of ad-free subscription options where exposed
 
-### Concierge acceptance checks
-
-1. Known app request resolves to an exact Fire OS catalog ID.
-2. Named app absent from the catalog becomes `MISSING_APP` and can enter Request Network.
-3. Generic needs such as “some movies” or “something for gaming” do not become missing-app requests.
-4. Alternatives contain only unique, valid Fire OS catalog IDs.
-5. Provider failure returns a controlled API error without fabricating a result.
-6. Intent badge, alternatives, exact-match action, and request action work through TV D-pad focus.
-
-
 ## Last updated
 
 **2026-10-10 — Concierge contract tests and integration checks reported passing; live Fire TV interaction/build verification should still be confirmed if not included in the test run**
-
-
-## Concierge integration UI pass — 2026-10-12
-
-- Reviewed the Fire OS Discover screen request path: Ask ARCHANGEL calls `POST /ai/app-discovery`; exact matches and alternatives open catalog profiles; missing-app results can route to Request Network with the `missing-app-discovery` source.
-- Hardened the remote-friendly UI: empty/too-short requests now show an explicit prompt, repeated submissions are disabled while a request is in flight, and stale result content is cleared before a new request starts.
-- Added catalog source/count and available provider/model/fallback metadata to the result panel so the demo distinguishes curated catalog context from the model path.
-- Fixed the verification-date regular expression so valid ISO dates are actually recognized and age-based review labels can be calculated.
-- Commit: `99b836f5f42684587d037fbbf18e8fbf458d0b9a` on `main`.
-- **Still requires local verification:** pull latest `main`, run the Fire OS TypeScript/build checks, install the APK, and exercise D-pad navigation plus known-app, missing-app, generic-content, and provider-failure cases. Live inference depends on whichever provider is configured and its credentials.
-
-
-## AdLens timeline / focus-navigation increment — 2026-10-13
-
-- Reworked historical monetization snapshots into individual focusable timeline cards with snapshot ordering, timestamp, monetization/ad-level state, subscription model, evidence status, and catalog version.
-- Converted recorded signal changes into focusable change cards with clear previous/current values and an explicit note that a catalog signal change is not proof of a real-world app change.
-- Added explicit D-pad focus state and high-contrast red text on white focused cards to avoid the focus-contrast issues seen elsewhere in the TV UI.
-- Commit: `5302cc472a9acaaba523102b1d09c590a1b85f07` on `main`.
-- Validation pending: pull latest `main`, run Fire OS typecheck/build, then use the emulator to navigate through AdLens profile history with the D-pad. No new historical data is fabricated; cards display stored snapshots only.

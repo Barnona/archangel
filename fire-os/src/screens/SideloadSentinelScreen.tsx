@@ -182,8 +182,8 @@ export default function SideloadSentinelScreen({ onBack }: Props) {
             <Text style={styles.metaLine}>Device: Android {inspection.deviceRelease} (API {inspection.deviceApi})</Text>
             <Text style={styles.metaLine}>Size: {inspection.sizeMb.toFixed(2)} MB  •  Requested permissions: {inspection.requestedPermissionCount}</Text>
             <Text style={styles.metaLine}>File SHA-256: {inspection.fileSha256}</Text>
-            <Text style={styles.metaLine}>Signer certificate SHA-256: {inspection.signerCertificateSha256.length ? inspection.signerCertificateSha256.join('\n') : 'No signer certificate extracted'}</Text>
-            <Text style={styles.metaLine}>Signer certificate data: {inspection.signatureStatus.replace(/_/g, ' ')}</Text>
+            <Text style={styles.metaLine}>Signer certificate SHA-256: {Array.isArray(inspection.signerCertificateSha256) && inspection.signerCertificateSha256.length ? inspection.signerCertificateSha256.join('\n') : 'No signer certificate extracted'}</Text>
+            <Text style={styles.metaLine}>Signer certificate data: {String(inspection.signatureStatus ?? 'UNKNOWN').replace(/_/g, ' ')}</Text>
             <Text style={styles.metaNote}>APK SIGNATURE VERIFICATION: NOT PERFORMED IN APP</Text>
             <Text style={styles.metaNote}>PUBLISHER TRUST: NOT CHECKED</Text>
             <Text style={styles.metaNote}>MALWARE SCAN: NOT PERFORMED</Text>
@@ -272,10 +272,10 @@ const styles = StyleSheet.create({
   results: { marginTop: 26 },
   apkBrowser: { marginTop: 16, padding: 16, borderRadius: 10, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.bg },
   refreshButton: { alignSelf: 'flex-start', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 8, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.panel, marginBottom: 12 },
-  refreshButtonFocused: { borderColor: colors.red, backgroundColor: colors.paleRed },
+  refreshButtonFocused: { borderColor: colors.red, backgroundColor: '#FDECEC' },
   refreshText: { color: colors.text, fontSize: 14, fontWeight: '900' },
   apkRow: { padding: 14, marginBottom: 8, borderRadius: 8, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.panel },
-  apkRowFocused: { borderColor: colors.red, backgroundColor: colors.paleRed },
+  apkRowFocused: { borderColor: colors.red, backgroundColor: '#FDECEC' },
   apkName: { color: colors.text, fontSize: 17, fontWeight: '900' },
   apkSize: { color: colors.muted, fontSize: 14, marginTop: 4 },
   apkAction: { color: colors.red, fontSize: 12, fontWeight: '900', marginTop: 8 },

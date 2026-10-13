@@ -150,3 +150,11 @@ Next planned increments:
 - Focused profile cards now use a white background, red border and red app title, with dark supporting text for readability.
 - Commit: `52594971783ed1c7e9674e4097f3c30aa246cf2c` on `main`.
 - Validation pending: build and navigate profile cards using the emulator D-pad. Remaining product roadmap focus is the full Fire TV integration pass across Home, Discovery/Concierge, Sentinel, Pulse, AdLens and Request Network.
+
+
+## Profile preferences — 2026-10-13
+
+- Replaced the informational-only Profile page with D-pad-selectable appearance and text-size controls: Light/Dark and Small/Medium/Large. The screen includes selected states and a text preview; font sizing is applied to Profile content and the preview.
+- Added app-level preference state and a shared light/dark palette entry point. The current dark-mode styling is explicitly visible on Profile; existing module styles are largely created at module load, so a full app-wide dynamic theme/font-scale pass still needs implementation and verification before these settings can be described as global.
+- Commits on `main`: `7f64aa3002c25ad5cd46cf5b6f4b166718a3b2d7`, `832c61766c90bbab35f3ad2d077369ada7144a94`, `4f0e24c181f992f3aa556d7cd22dc9b8b1121807`, `c73ca9c8690f78d007c4704499a2d900abca15e8`.
+- Validation pending: run TypeScript/build, then test Profile selection and persistence expectations. Preferences currently live in app state and reset when the app process restarts; persistence has not yet been implemented.

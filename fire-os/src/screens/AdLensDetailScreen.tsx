@@ -94,7 +94,7 @@ export default function AdLensDetailScreen({ id, onBack }: { id: string; onBack:
               </View>
               <Text style={[styles.historyTitle, focused && styles.timelineFocusedText]}>{snapshot.adLevel.toUpperCase()} • {snapshot.subscriptionModel.toUpperCase()}</Text>
               <Text style={[styles.body, focused && styles.timelineFocusedMuted]}>{snapshot.monetization.join(' • ')}</Text>
-              <Text style={[styles.timelineEvidence, focused && styles.timelineFocusedText]}>EVIDENCE: {snapshot.evidence.status.replace(/_/g, ' ')} • CATALOG {snapshot.catalogVersion}</Text>
+              <Text style={[styles.timelineEvidence, focused && styles.timelineFocusedText]}>EVIDENCE: {String(snapshot.evidence?.status ?? 'UNKNOWN').replace(/_/g, ' ')} • CATALOG {snapshot.catalogVersion}</Text>
             </Pressable>
           );
         })}
@@ -106,7 +106,7 @@ export default function AdLensDetailScreen({ id, onBack }: { id: string; onBack:
               const focused = focusedHistoryItem === itemKey;
               return (
                 <Pressable key={itemKey} onFocus={() => setFocusedHistoryItem(itemKey)} onBlur={() => setFocusedHistoryItem(current => current === itemKey ? null : current)} style={[styles.changeEvent, focused && styles.timelineCardFocused]}>
-                  <Text style={[styles.changeField, focused && styles.timelineFocusedText]}>{change.field.replace(/([A-Z])/g, ' $1').toUpperCase()}</Text>
+                  <Text style={[styles.changeField, focused && styles.timelineFocusedText]}>{String(change.field ?? 'UNKNOWN').replace(/([A-Z])/g, ' $1').toUpperCase()}</Text>
                   <Text style={[styles.changeValue, focused && styles.timelineFocusedMuted]}>{change.previous}</Text>
                   <Text style={[styles.changeArrow, focused && styles.timelineFocusedText]}>↓  SIGNAL UPDATED</Text>
                   <Text style={[styles.changeValue, focused && styles.timelineFocusedMuted]}>{change.current}</Text>

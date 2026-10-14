@@ -124,7 +124,7 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }
     }
-
+}
 
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin

@@ -8,3 +8,8 @@ ios/Pods/
 .DS_Store
 backend/data/requests.json
 .env
+
+# Private Android release signing material
+*.jks
+*.keystore
+*.keystore.*

@@ -72,6 +72,14 @@ def enableProguardInReleaseBuilds = true
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
+def releaseStoreFile = System.getenv("ARCHANGEL_RELEASE_STORE_FILE")
+def releaseStorePassword = System.getenv("ARCHANGEL_RELEASE_STORE_PASSWORD")
+def releaseKeyAlias = System.getenv("ARCHANGEL_RELEASE_KEY_ALIAS")
+def releaseKeyPassword = System.getenv("ARCHANGEL_RELEASE_KEY_PASSWORD")
+def releaseSigningConfigured = [releaseStoreFile, releaseStorePassword, releaseKeyAlias, releaseKeyPassword].every { value ->
+    value != null && !value.trim().isEmpty()
+}
+
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -85,14 +93,6 @@ android {
         versionCode 1
         versionName "1.0"
     }
-    def releaseStoreFile = System.getenv("ARCHANGEL_RELEASE_STORE_FILE")
-    def releaseStorePassword = System.getenv("ARCHANGEL_RELEASE_STORE_PASSWORD")
-    def releaseKeyAlias = System.getenv("ARCHANGEL_RELEASE_KEY_ALIAS")
-    def releaseKeyPassword = System.getenv("ARCHANGEL_RELEASE_KEY_PASSWORD")
-    def releaseSigningConfigured = [releaseStoreFile, releaseStorePassword, releaseKeyAlias, releaseKeyPassword].every { value ->
-        value != null && !value.trim().isEmpty()
-    }
-
     signingConfigs {
         debug {
             storeFile file('debug.keystore')

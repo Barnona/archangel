@@ -85,12 +85,28 @@ android {
         versionCode 1
         versionName "1.0"
     }
+    def releaseStoreFile = System.getenv("ARCHANGEL_RELEASE_STORE_FILE")
+    def releaseStorePassword = System.getenv("ARCHANGEL_RELEASE_STORE_PASSWORD")
+    def releaseKeyAlias = System.getenv("ARCHANGEL_RELEASE_KEY_ALIAS")
+    def releaseKeyPassword = System.getenv("ARCHANGEL_RELEASE_KEY_PASSWORD")
+    def releaseSigningConfigured = [releaseStoreFile, releaseStorePassword, releaseKeyAlias, releaseKeyPassword].every { value ->
+        value != null && !value.trim().isEmpty()
+    }
+
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
             storePassword 'android'
             keyAlias 'androiddebugkey'
             keyPassword 'android'
+        }
+        if (releaseSigningConfigured) {
+            release {
+                storeFile file(releaseStoreFile)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
         }
     }
     buildTypes {
@@ -99,15 +115,16 @@ android {
             manifestPlaceholders = [appDebuggable: "true", allowCleartextTraffic: "true"]
         }
         release {
-            // Replace this debug signing config with a protected release keystore before distribution.
-            signingConfig signingConfigs.debug
+            if (releaseSigningConfigured) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled enableProguardInReleaseBuilds
             shrinkResources true
             manifestPlaceholders = [appDebuggable: "false", allowCleartextTraffic: "false"]
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }
     }
-}
+
 
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
@@ -119,5 +136,25 @@ dependencies {
         implementation("com.facebook.react:hermes-android")
     } else {
         implementation jscFlavor
+    }
+}
+
+
+// Never permit a release artifact to be produced with Android's debug signing key.
+tasks.configureEach { task ->
+    if (task.name in ["assembleRelease", "bundleRelease", "packageRelease"]) {
+        task.doFirst {
+            if (!releaseSigningConfigured) {
+                throw new GradleException(
+                    "Release signing is not configured. Set ARCHANGEL_RELEASE_STORE_FILE, " +
+                    "ARCHANGEL_RELEASE_STORE_PASSWORD, ARCHANGEL_RELEASE_KEY_ALIAS, and " +
+                    "ARCHANGEL_RELEASE_KEY_PASSWORD before building a release artifact. " +
+                    "Do not use the debug keystore for distribution."
+                )
+            }
+            if (!file(releaseStoreFile).isFile()) {
+                throw new GradleException("Release keystore does not exist: " + releaseStoreFile)
+            }
+        }
     }
 }

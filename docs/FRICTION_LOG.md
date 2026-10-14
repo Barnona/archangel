@@ -93,6 +93,7 @@ A core design principle is:
 | 2026-10-10 (IST) | Bedrock model upgrade / account onboarding | ARCHANGEL should be ready to use a newer Nova model when Bedrock access is enabled | AWS account verification is pending, so live Bedrock inference cannot yet be tested | Model integration can be prepared now, but model availability, access, latency, cost, and response quality remain unverified until account access is approved | `backend/providers/bedrock.js`, `backend/.env.example`, AWS Nova 2 Lite and Nova 2.5 Sonic model documentation | Changed the default text-based Bedrock model to `amazon.nova-2-lite-v1:0` while retaining `BEDROCK_MODEL_ID` as an override. Nova 2.5 Sonic is documented as a separate future voice integration because it uses bidirectional streaming rather than the current Converse request path. No live Bedrock call was made. | Pending AWS verification |
 | 2026-10-10 (IST) | Bedrock model readiness | Prepare the text Concierge for Nova 2 Lite while AWS account verification is pending | Live Bedrock inference is blocked until AWS verifies/enables the account | Model ID changes can be tested locally, but regional availability, access, latency, quality and cost cannot yet be confirmed | `backend/providers/bedrock.js`, `backend/.env.example`, `backend/bedrock-config.test.js`, GitHub Actions | Defaulted text inference to `amazon.nova-2-lite-v1:0`; preserved environment overrides; added offline tests for default/override config and CI coverage. No AWS request is made by these tests. Nova 2 Sonic remains a separate future bidirectional voice-streaming integration. | Pending AWS verification |
 | 2026-10-12 8:09 AM (IST) | Concierge integration UI pass | Reviewed the Fire OS Discover screen request path: Ask ARCHANGEL calls `POST /ai/app-discovery`. | Added catalog source/count and available provider/model/fallback metadata to the result panel so the demo distinguishes curated catalog context from the model path. | Still requires local verification | | Fixed the verification-date regular expression so valid ISO dates are actually recognized and age-based review labels can be calculated. | 1 days |
+| 2026-10-14 | Security hardening baseline | Android release builds now enable R8/ProGuard shrinking and obfuscation plus resource shrinking. Debug builds retain their debuggable setting for emulator development. | Backend now removes the Express fingerprint header, sets baseline response security/cache headers, restricts browser CORS to the optional `CORS_ALLOWED_ORIGINS` allowlist, and applies configurable in-process IP rate limiting. | The current release build still uses the debug signing config and must be signed with a protected release keystore before distribution. || Build a release APK and inspect the merged release manifest/R8 output. Rate limiting is process-local and is not sufficient by itself for multi-instance or public production deployments. | 2 hours |
 
 ---
 
@@ -121,19 +122,6 @@ A core design principle is:
 - MIT license
 - Project architecture/documentation
 
-### Active development
-
-**AdLens**
-
-Next planned increments:
-
-1. Historical ad/monetization changes
-2. Better profile filtering and focus navigation
-3. Subscription Intelligence
-4. Historical ad/monetization changes
-5. Better profile filtering and focus navigation
-6. Subscription Intelligence
-
 ### Future platform requests
 
 1. **Amazon Appstore application catalog API**
@@ -141,14 +129,4 @@ Next planned increments:
 
 ## Last updated
 
-**2026-10-13 — Cross-tab render**
-
-
-## Security hardening baseline — 2026-10-14
-
-- Android release builds now enable R8/ProGuard shrinking and obfuscation plus resource shrinking. Debug builds retain their debuggable setting for emulator development; release manifest placeholders set `android:debuggable=false` and disallow cleartext HTTP.
-- Backend now removes the Express fingerprint header, sets baseline response security/cache headers, restricts browser CORS to the optional `CORS_ALLOWED_ORIGINS` allowlist (native requests without Origin remain supported), and applies configurable in-process IP rate limiting (default 120 requests per minute).
-- Commits on `main`: `1e44a711c6e3f4ae45fcc29971e878dcdb08e2c1` (release R8), `e715b63f64b5a9d6687b8d1ee03bfb04fdefed2a` (manifest), `dbf5a056154f7fa722164222824d487a91a8a15b` (API middleware).
-- Not implemented in application code: WAF/DDoS edge protection, VPC/security-group segmentation, management-plane VPN/jump-host restrictions, SIEM/EDR. These require a known cloud/deployment environment and should be configured at the hosting layer, not simulated in Express.
-- No WebView usage was identified in the reviewed Fire OS screen paths; no WebView-specific JavaScript/file-access change was made. No credentials should be embedded in the APK; server-side provider credentials remain deployment secrets. The current release build still uses the debug signing config and must be signed with a protected release keystore before distribution.
-- Validation pending: run debug build and backend smoke tests; build a release APK and inspect the merged release manifest/R8 output. Rate limiting is process-local and is not sufficient by itself for multi-instance or public production deployments.
+**2026-10-14**

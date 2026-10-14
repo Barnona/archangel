@@ -142,3 +142,13 @@ Next planned increments:
 ## Last updated
 
 **2026-10-13 — Cross-tab render**
+
+
+## Security hardening baseline — 2026-10-14
+
+- Android release builds now enable R8/ProGuard shrinking and obfuscation plus resource shrinking. Debug builds retain their debuggable setting for emulator development; release manifest placeholders set `android:debuggable=false` and disallow cleartext HTTP.
+- Backend now removes the Express fingerprint header, sets baseline response security/cache headers, restricts browser CORS to the optional `CORS_ALLOWED_ORIGINS` allowlist (native requests without Origin remain supported), and applies configurable in-process IP rate limiting (default 120 requests per minute).
+- Commits on `main`: `1e44a711c6e3f4ae45fcc29971e878dcdb08e2c1` (release R8), `e715b63f64b5a9d6687b8d1ee03bfb04fdefed2a` (manifest), `dbf5a056154f7fa722164222824d487a91a8a15b` (API middleware).
+- Not implemented in application code: WAF/DDoS edge protection, VPC/security-group segmentation, management-plane VPN/jump-host restrictions, SIEM/EDR. These require a known cloud/deployment environment and should be configured at the hosting layer, not simulated in Express.
+- No WebView usage was identified in the reviewed Fire OS screen paths; no WebView-specific JavaScript/file-access change was made. No credentials should be embedded in the APK; server-side provider credentials remain deployment secrets. The current release build still uses the debug signing config and must be signed with a protected release keystore before distribution.
+- Validation pending: run debug build and backend smoke tests; build a release APK and inspect the merged release manifest/R8 output. Rate limiting is process-local and is not sufficient by itself for multi-instance or public production deployments.

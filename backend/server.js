@@ -20,8 +20,50 @@ const CATALOG_LAST_UPDATED = '2026-10-04';
 const ADLENS_REFRESH_INTERVAL_MS = Math.max(0, Number(process.env.ADLENS_REFRESH_INTERVAL_MS || 86400000));
 
 const app = express();
-app.use(cors());
+// Native Fire TV clients do not send a browser Origin header. Browser origins must be explicitly allowlisted.
+const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '').split(',').map(value => value.trim()).filter(Boolean);
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Origin not allowed by CORS'));
+  },
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  maxAge: 600,
+}));
+app.disable('x-powered-by');
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+});
 app.use(express.json({ limit: '10kb' }));
+
+// Per-process IP rate limit. Multi-instance deployments must also enforce this at the gateway/WAF.
+const RATE_LIMIT_WINDOW_MS = Math.max(1000, Number(process.env.RATE_LIMIT_WINDOW_MS || 60000));
+const RATE_LIMIT_MAX = Math.max(10, Number(process.env.RATE_LIMIT_MAX || 120));
+const rateBuckets = new Map();
+app.use((req, res, next) => {
+  const now = Date.now();
+  const key = req.ip || req.socket.remoteAddress || 'unknown';
+  let bucket = rateBuckets.get(key);
+  if (!bucket || now >= bucket.resetAt) bucket = { count: 0, resetAt: now + RATE_LIMIT_WINDOW_MS };
+  bucket.count += 1;
+  rateBuckets.set(key, bucket);
+  if (rateBuckets.size > 5000) {
+    for (const [ip, value] of rateBuckets) if (now >= value.resetAt) rateBuckets.delete(ip);
+  }
+  res.setHeader('RateLimit-Limit', String(RATE_LIMIT_MAX));
+  res.setHeader('RateLimit-Remaining', String(Math.max(0, RATE_LIMIT_MAX - bucket.count)));
+  res.setHeader('RateLimit-Reset', String(Math.ceil(bucket.resetAt / 1000)));
+  if (bucket.count > RATE_LIMIT_MAX) {
+    res.setHeader('Retry-After', String(Math.max(1, Math.ceil((bucket.resetAt - now) / 1000))));
+    return res.status(429).json({ error: 'RATE_LIMITED', message: 'Too many requests. Retry after the rate-limit window.' });
+  }
+  next();
+});
 
 const readJson = (p, fallback) => {
   try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return fallback; }

@@ -14,7 +14,8 @@
       android:allowBackup="false"
       android:theme="@style/AppTheme"
       android:banner="@drawable/tv_banner"
-      android:usesCleartextTraffic="true"
+      android:usesCleartextTraffic="${allowCleartextTraffic}"
+      android:debuggable="${appDebuggable}"
       android:supportsRtl="true">
       <activity
         android:name=".MainActivity"

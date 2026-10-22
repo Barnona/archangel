@@ -6,7 +6,7 @@ ARCHANGEL is a Fire TV intelligence and discovery application that connects view
 
 The project is being developed for the **Amazon Developer Build, Ship, Shape — Fire TV track**.
 
-> **Status:** Working prototype — App Discovery is finalized. Sideload Sentinel now has hardened local APK inspection, explicit verification boundaries, an Android SDK signature-verification helper, and CI regression checks. Emulator/device validation remains a separate required step.
+> **Status:** Submission-ready prototype candidate — App Discovery and the core modules are implemented. Final submission checks (current smoke tests, emulator regression, and release APK signature verification) must be confirmed against the exact build being submitted. See the [Final Submission Checklist](docs/SUBMISSION_CHECKLIST.md).
 
 ---
 
@@ -450,19 +450,17 @@ curl http://localhost:4000/requests/demand
 
 | Module | Status |
 |---|---|
-| Fire TV shell | Working |
-| Light/red TV UI | Working |
-| App catalog | Working |
-| Standard app search | Working |
-| AI App Discovery | **Finalized** |
-| App alternatives | Working |
-| Missing App requests | Working |
-| Demand aggregation | Working |
-| AdLens | Implemented; runtime regression testing ongoing |
-| Pulse | Implemented; 10 backend smoke checks pass |
-| Sideload Sentinel | Hardened APK/ZIP checks, metadata + SHA-256, permission rationale, explicit unverified/not-scanned states, desktop `apksigner` helper and CI build/signature checks; emulator matrix pending |
-| Concierge integration | Planned |
-| Vega OS client | Not started |
+| Fire TV / Android TV client | Implemented; emulator is the available validation target |
+| Light/red TV UI and D-pad navigation | Implemented |
+| Curated app catalog and standard search | Implemented; catalog is not exhaustive |
+| AI App Discovery / Concierge | Implemented with catalog-grounded response normalization and provider fallback |
+| Alternatives and missing-app detection | Implemented |
+| Request Network and demand aggregation | Implemented |
+| AdLens | Implemented; evidence transparency is limited to available curated/catalog signals |
+| Pulse Diagnostics | Implemented; backend smoke checks have previously passed; rerun before submission |
+| Sideload Sentinel | Implemented for local APK metadata, declared permissions, hashing and signature-verification workflow; not a malware scanner; final emulator regression should be confirmed |
+| Amazon Bedrock provider | Configured, but live inference is blocked by AWS account verification/activation; do not claim it was live-tested |
+| Vega OS client | Not implemented; current target is the Android/Fire TV-compatible client |
 
 ---
 
@@ -491,7 +489,7 @@ Diagnostics and ad intelligence will therefore be implemented around capabilitie
     Apps    Ads   Demand   Health  APK   Compatibility
 ```
 
-**Next development phase: run the Sideload Sentinel emulator validation matrix in [docs/SIDELOAD_SENTINEL.md](docs/SIDELOAD_SENTINEL.md), including malformed, truncated, empty, unsigned/tampered, and non-APK inputs; record observed outcomes before treating the module as device-validated.**
+**Before submission:** follow [docs/SUBMISSION_CHECKLIST.md](docs/SUBMISSION_CHECKLIST.md). Run the Sideload Sentinel validation cases that can be completed reliably on the available emulator, record actual results, and do not claim physical Fire TV validation or malware detection.
 
 ---
 

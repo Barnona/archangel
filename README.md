@@ -6,8 +6,6 @@ ARCHANGEL is a Fire TV intelligence and discovery application that connects view
 
 The project is being developed for the **Amazon Developer Build, Ship, Shape — Fire TV track**.
 
-> **Status:** Submission-ready prototype candidate — App Discovery and the core modules are implemented. Final submission checks (current smoke tests, emulator regression, and release APK signature verification) must be confirmed against the exact build being submitted. See the [Final Submission Checklist](docs/SUBMISSION_CHECKLIST.md).
-
 ---
 
 ## Core idea

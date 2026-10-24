@@ -487,10 +487,6 @@ Diagnostics and ad intelligence will therefore be implemented around capabilitie
     Apps    Ads   Demand   Health  APK   Compatibility
 ```
 
-**Before submission:** follow [docs/SUBMISSION_CHECKLIST.md](docs/SUBMISSION_CHECKLIST.md). Run the Sideload Sentinel validation cases that can be completed reliably on the available emulator, record actual results, and do not claim physical Fire TV validation or malware detection.
-
----
-
 ## License
 
 ARCHANGEL is released under the **MIT License**. See [LICENSE](LICENSE).

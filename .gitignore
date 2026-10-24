@@ -13,3 +13,30 @@ backend/data/requests.json
 *.jks
 *.keystore
 *.keystore.*
+
+# Generated Android and React Native outputs
+**/build/
+**/.gradle/
+**/node_modules/
+*.apk
+*.aab
+
+# Local Android SDK configuration
+local.properties
+
+# Native build caches
+**/.cxx/
+.idea/caches/
+
+# Local release artifacts
+dist/*.apk
+
+# Generated Android build output and IDE caches
+**/build/
+**/.cxx/
+**/.gradle/
+.idea/caches/
+
+# APK/AAB build artifacts
+*.apk
+*.aab

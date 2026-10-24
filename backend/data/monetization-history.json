@@ -1,1 +1,255 @@
-{}
+{
+  "prime-video": [
+    {
+      "id": "0c01d90c-2e1f-49ab-affe-b0957247cc25",
+      "appId": "prime-video",
+      "appName": "Prime Video",
+      "capturedAt": "2026-10-23T03:36:48.821Z",
+      "catalogVersion": "1.0",
+      "monetization": [
+        "subscription"
+      ],
+      "adSignal": "unknown",
+      "adLevel": "unknown",
+      "subscriptionModel": "subscription",
+      "adFreeTierKnown": false,
+      "adFreeTierName": null,
+      "evidence": {
+        "source": "curated-verified-cache",
+        "catalogVersion": "1.0",
+        "lastVerified": "2026-10-04",
+        "verificationMethod": "curated-catalog",
+        "status": "VERIFIED",
+        "confidence": 1
+      }
+    }
+  ],
+  "netflix": [
+    {
+      "id": "d65da867-b4e1-4891-aa6b-5906ca049af3",
+      "appId": "netflix",
+      "appName": "Netflix",
+      "capturedAt": "2026-10-23T03:36:48.824Z",
+      "catalogVersion": "1.0",
+      "monetization": [
+        "subscription"
+      ],
+      "adSignal": "unknown",
+      "adLevel": "unknown",
+      "subscriptionModel": "subscription",
+      "adFreeTierKnown": false,
+      "adFreeTierName": null,
+      "evidence": {
+        "source": "curated-verified-cache",
+        "catalogVersion": "1.0",
+        "lastVerified": "2026-10-04",
+        "verificationMethod": "curated-catalog",
+        "status": "VERIFIED",
+        "confidence": 1
+      }
+    }
+  ],
+  "disney-plus": [
+    {
+      "id": "7297317d-78ee-4538-bdc8-b7bb31b3c736",
+      "appId": "disney-plus",
+      "appName": "Disney+",
+      "capturedAt": "2026-10-23T03:36:48.824Z",
+      "catalogVersion": "1.0",
+      "monetization": [
+        "subscription"
+      ],
+      "adSignal": "unknown",
+      "adLevel": "unknown",
+      "subscriptionModel": "subscription",
+      "adFreeTierKnown": false,
+      "adFreeTierName": null,
+      "evidence": {
+        "source": "curated-verified-cache",
+        "catalogVersion": "1.0",
+        "lastVerified": "2026-10-04",
+        "verificationMethod": "curated-catalog",
+        "status": "VERIFIED",
+        "confidence": 1
+      }
+    }
+  ],
+  "hulu": [
+    {
+      "id": "4a3ad183-10d4-4f2b-9a2e-9b0d3ee654bc",
+      "appId": "hulu",
+      "appName": "Hulu",
+      "capturedAt": "2026-10-23T03:36:48.824Z",
+      "catalogVersion": "1.0",
+      "monetization": [
+        "subscription"
+      ],
+      "adSignal": "unknown",
+      "adLevel": "unknown",
+      "subscriptionModel": "subscription",
+      "adFreeTierKnown": false,
+      "adFreeTierName": null,
+      "evidence": {
+        "source": "curated-verified-cache",
+        "catalogVersion": "1.0",
+        "lastVerified": "2026-10-04",
+        "verificationMethod": "curated-catalog",
+        "status": "VERIFIED",
+        "confidence": 1
+      }
+    }
+  ],
+  "hbo-max": [
+    {
+      "id": "c92766dd-2f26-4dd6-b4e6-24e05985d124",
+      "appId": "hbo-max",
+      "appName": "HBO Max",
+      "capturedAt": "2026-10-23T03:36:48.824Z",
+      "catalogVersion": "1.0",
+      "monetization": [
+        "subscription"
+      ],
+      "adSignal": "unknown",
+      "adLevel": "unknown",
+      "subscriptionModel": "subscription",
+      "adFreeTierKnown": false,
+      "adFreeTierName": null,
+      "evidence": {
+        "source": "curated-verified-cache",
+        "catalogVersion": "1.0",
+        "lastVerified": "2026-10-04",
+        "verificationMethod": "curated-catalog",
+        "status": "VERIFIED",
+        "confidence": 1
+      }
+    }
+  ],
+  "pluto-tv": [
+    {
+      "id": "97ff8265-49f3-4ffc-ac69-bc4c335cd3ef",
+      "appId": "pluto-tv",
+      "appName": "Pluto TV",
+      "capturedAt": "2026-10-23T03:36:48.824Z",
+      "catalogVersion": "1.0",
+      "monetization": [
+        "free",
+        "ad-supported"
+      ],
+      "adSignal": "unknown",
+      "adLevel": "unknown",
+      "subscriptionModel": "unknown",
+      "adFreeTierKnown": false,
+      "adFreeTierName": null,
+      "evidence": {
+        "source": "curated-verified-cache",
+        "catalogVersion": "1.0",
+        "lastVerified": "2026-10-04",
+        "verificationMethod": "curated-catalog",
+        "status": "VERIFIED",
+        "confidence": 1
+      }
+    }
+  ],
+  "tubi": [
+    {
+      "id": "d03da030-11bc-4f0c-984f-48f4173af5d7",
+      "appId": "tubi",
+      "appName": "Tubi",
+      "capturedAt": "2026-10-23T03:36:48.824Z",
+      "catalogVersion": "1.0",
+      "monetization": [
+        "free",
+        "ad-supported"
+      ],
+      "adSignal": "unknown",
+      "adLevel": "unknown",
+      "subscriptionModel": "unknown",
+      "adFreeTierKnown": false,
+      "adFreeTierName": null,
+      "evidence": {
+        "source": "curated-verified-cache",
+        "catalogVersion": "1.0",
+        "lastVerified": "2026-10-04",
+        "verificationMethod": "curated-catalog",
+        "status": "VERIFIED",
+        "confidence": 1
+      }
+    }
+  ],
+  "plex": [
+    {
+      "id": "f1a8f210-fc22-401b-a5c7-a5554e248b2a",
+      "appId": "plex",
+      "appName": "Plex",
+      "capturedAt": "2026-10-23T03:36:48.824Z",
+      "catalogVersion": "1.0",
+      "monetization": [
+        "freemium"
+      ],
+      "adSignal": "unknown",
+      "adLevel": "unknown",
+      "subscriptionModel": "unknown",
+      "adFreeTierKnown": false,
+      "adFreeTierName": null,
+      "evidence": {
+        "source": "curated-verified-cache",
+        "catalogVersion": "1.0",
+        "lastVerified": "2026-10-04",
+        "verificationMethod": "curated-catalog",
+        "status": "VERIFIED",
+        "confidence": 1
+      }
+    }
+  ],
+  "twitch": [
+    {
+      "id": "a7348c22-2869-4e14-ad3f-9b1462dc98b6",
+      "appId": "twitch",
+      "appName": "Twitch",
+      "capturedAt": "2026-10-23T03:36:48.824Z",
+      "catalogVersion": "1.0",
+      "monetization": [
+        "free",
+        "subscription"
+      ],
+      "adSignal": "unknown",
+      "adLevel": "unknown",
+      "subscriptionModel": "subscription",
+      "adFreeTierKnown": false,
+      "adFreeTierName": null,
+      "evidence": {
+        "source": "curated-verified-cache",
+        "catalogVersion": "1.0",
+        "lastVerified": "2026-10-04",
+        "verificationMethod": "curated-catalog",
+        "status": "VERIFIED",
+        "confidence": 1
+      }
+    }
+  ],
+  "mubi": [
+    {
+      "id": "7604e8f9-0d3c-45be-9386-7cc69913a90c",
+      "appId": "mubi",
+      "appName": "MUBI",
+      "capturedAt": "2026-10-23T03:36:48.824Z",
+      "catalogVersion": "1.0",
+      "monetization": [
+        "subscription"
+      ],
+      "adSignal": "unknown",
+      "adLevel": "unknown",
+      "subscriptionModel": "subscription",
+      "adFreeTierKnown": false,
+      "adFreeTierName": null,
+      "evidence": {
+        "source": "curated-verified-cache",
+        "catalogVersion": "1.0",
+        "lastVerified": "2026-10-04",
+        "verificationMethod": "curated-catalog",
+        "status": "VERIFIED",
+        "confidence": 1
+      }
+    }
+  ]
+}
